@@ -1,0 +1,7 @@
+spring.application.name=back
+
+spring.security.user.name=
+spring.security.user.password=
+spring.security.enable:false
+
+spring.docker.compose.enabled=false

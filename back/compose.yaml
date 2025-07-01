@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+
+  app:
+    build: .
+    container_name: spring-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/mydb
+      SPRING_DATASOURCE_USERNAME: myuser
+      SPRING_DATASOURCE_PASSWORD: mypassword
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_DATABASE-PLATFORM: org.hibernate.dialect.MySQLDialect
+
+volumes:
+  dbdata:
