@@ -2,10 +2,14 @@ package com.sterma.back.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.Year;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "elevator")
 public class Elevator {
 
@@ -17,7 +21,7 @@ public class Elevator {
     private String rae;
 
     @NotNull
-    private Year instalationYear;
+    private Integer instalationYear;
 
     @ManyToOne
     private Community community;

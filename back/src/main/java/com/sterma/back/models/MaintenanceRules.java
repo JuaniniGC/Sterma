@@ -1,10 +1,13 @@
 package com.sterma.back.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "maintenance_rules")
 public class MaintenanceRules {
     @Id
@@ -14,14 +17,15 @@ public class MaintenanceRules {
     @Column(nullable = false)
     private String name;
 
-    @NotBlank
     private String description;
 
-    private Integer order;
+    @Column(nullable = false, name = "order_num")
+    private Integer orderNum;
 
-    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private MaintenanceType maintenanceType;
 
-
-
+    public MaintenanceRules() {
+    }
 }

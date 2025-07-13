@@ -1,10 +1,14 @@
 package com.sterma.back.models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.Year;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "technician")
 public class Technician {
 
@@ -13,7 +17,7 @@ public class Technician {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String user;
+    private String username;
 
     @Column(nullable = false)
     private String password;
@@ -25,5 +29,6 @@ public class Technician {
     private String surnames;
 
 
-
+    public Technician() {
+    }
 }

@@ -1,9 +1,13 @@
 package com.sterma.back.models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.antlr.v4.runtime.misc.NotNull;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "common_mistakes")
 public class CommonMistakes {
 
