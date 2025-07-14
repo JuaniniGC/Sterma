@@ -1,10 +1,10 @@
 -- === TECHNICIANS ===
 INSERT INTO technician (id, username, password, name, surnames)
 VALUES
-    (1, 'tecnico1', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MrYVJY52G5YdXZ6kMvT.FQCv/qjAZG2', 'Carlos', 'López García'),
-    (2, 'tecnico2', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MrYVJY52G5YdXZ6kMvT.FQCv/qjAZG2', 'Laura', 'García Martínez'),
-    (3, 'tecnico3', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MrYVJY52G5YdXZ6kMvT.FQCv/qjAZG2', 'Miguel', 'Fernández Ruiz'),
-    (4, 'tecnico4', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MrYVJY52G5YdXZ6kMvT.FQCv/qjAZG2', 'Sofía', 'Rodríguez Pérez');
+    (101, 'tecnico1', '$2a$10$VsE1b6gM3V5zliIyWiGIm.sb/.5q7BdHpYXfamV1bZyNVgSUhwZ0i', 'Carlos', 'López García'),
+    (102, 'tecnico2', '$2a$10$VsE1b6gM3V5zliIyWiGIm.sb/.5q7BdHpYXfamV1bZyNVgSUhwZ0i', 'Laura', 'García Martínez'),
+    (103, 'tecnico3', '$2a$10$VsE1b6gM3V5zliIyWiGIm.sb/.5q7BdHpYXfamV1bZyNVgSUhwZ0i', 'Miguel', 'Fernández Ruiz'),
+    (104, 'tecnico4', '$2a$10$VsE1b6gM3V5zliIyWiGIm.sb/.5q7BdHpYXfamV1bZyNVgSUhwZ0i', 'Sofía', 'Rodríguez Pérez');
 
 -- === COMMUNITIES ===
 INSERT INTO community (id, name, description, CIF, localization, info_community_leader)
@@ -46,17 +46,17 @@ VALUES
 -- === MAINTENANCE REPORTS ===
 INSERT INTO maintenance_report (id, start_date, end_date, commentary, technician_id, elevator_id)
 VALUES
-    (1, '2025-01-15 09:00:00', '2025-01-15 11:30:00', 'Revisión mensual rutinaria - Todo correcto', 1, 1),
-    (2, '2025-01-16 10:00:00', '2025-01-16 12:45:00', 'Lubricación realizada - Se detectó desgaste en rodamientos', 2, 2),
-    (3, '2025-02-10 08:30:00', '2025-02-10 16:00:00', 'Revisión anual completa - Cambiados 3 componentes', 3, 3),
-    (4, '2025-02-12 09:15:00', '2025-02-12 10:30:00', 'Comprobación de seguridad - Sistemas OK', 4, 4),
-    (5, '2025-03-05 11:00:00', '2025-03-05 13:20:00', 'Limpieza general - Cabina en buen estado', 1, 5);
+    (1, '2025-01-15 09:00:00', '2025-01-15 11:30:00', 'Revisión mensual rutinaria - Todo correcto', 101, 1),
+    (2, '2025-01-16 10:00:00', '2025-01-16 12:45:00', 'Lubricación realizada - Se detectó desgaste en rodamientos', 102, 2),
+    (3, '2025-02-10 08:30:00', '2025-02-10 16:00:00', 'Revisión anual completa - Cambiados 3 componentes', 103, 3),
+    (4, '2025-02-12 09:15:00', '2025-02-12 10:30:00', 'Comprobación de seguridad - Sistemas OK', 101, 4),
+    (5, '2025-03-05 11:00:00', '2025-03-05 13:20:00', 'Limpieza general - Cabina en buen estado', 101, 5);
 
 -- === INCIDENT REPORTS ===
 INSERT INTO incident_report (id, start_date, end_date, commentary, technician_id, elevator_id)
 VALUES
-    (1, '2025-01-20 15:30:00', '2025-01-20 17:45:00', 'Panel de control no respondía - Reemplazado módulo principal', 1, 1),
-    (2, '2025-02-03 08:00:00', '2025-02-03 10:30:00', 'Ruidos en motor - Ajustados componentes mecánicos', 2, 2),
-    (3, '2025-02-18 14:15:00', '2025-02-18 15:30:00', 'Puerta atascada - Realineado mecanismo', 3, 3),
-    (4, '2025-03-10 16:45:00', '2025-03-10 18:00:00', 'Botones no funcionaban - Reemplazada placa de control', 4, 4),
-    (5, '2025-03-15 09:30:00', NULL, 'Ascensor detenido entre plantas - Pendiente diagnóstico completo', 1, 5);
+    (1, '2025-01-20 15:30:00', '2025-01-20 17:45:00', 'Panel de control no respondía - Reemplazado módulo principal', 101, 1),
+    (2, '2025-02-03 08:00:00', '2025-02-03 10:30:00', 'Ruidos en motor - Ajustados componentes mecánicos', 102, 2),
+    (3, '2025-02-18 14:15:00', '2025-02-18 15:30:00', 'Puerta atascada - Realineado mecanismo', 103, 3),
+    (4, '2025-03-10 16:45:00', '2025-03-10 18:00:00', 'Botones no funcionaban - Reemplazada placa de control', 104, 4),
+    (5, '2025-03-15 09:30:00', NULL, 'Ascensor detenido entre plantas - Pendiente diagnóstico completo', 101, 5);
