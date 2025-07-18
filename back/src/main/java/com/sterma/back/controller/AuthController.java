@@ -35,7 +35,6 @@ public class AuthController {
         }catch (Exception e){
             return ResponseEntity.status(401).body("Unauthorized: " + e.getMessage());
         }
-
     }
 
 }

@@ -31,7 +31,7 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/h2-console/**", "/community/**").permitAll() // Endpoints públicos
+                        .requestMatchers("/auth/**", "/h2-console/**").permitAll() // Endpoints públicos
                         .anyRequest().authenticated()
                 );
 
