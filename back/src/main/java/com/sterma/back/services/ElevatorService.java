@@ -74,6 +74,9 @@ public class ElevatorService {
     }
 
     private void checkCommunityExists(Long communityId) {
+        if (communityId == null) {
+            throw new IllegalArgumentException("El ID de comunidad no puede ser nulo");
+        }
         if (!communityRepository.existsById(communityId)) {
             throw new NoSuchElementException("Comunidad no encontrada con ID: " + communityId);
         }
@@ -86,6 +89,9 @@ public class ElevatorService {
     }
 
     private void checkElevatorExists(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("El ID de ascensor no puede ser nulo");
+        }
         if (!elevatorRepository.existsById(id)) {
             throw new NoSuchElementException("Ascensor no encontrado con ID: " + id);
         }
