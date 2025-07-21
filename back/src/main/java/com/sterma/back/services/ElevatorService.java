@@ -53,9 +53,13 @@ public class ElevatorService {
 
     @Transactional
     public void delete(Long id) {
+        checkIfElevatorExistById(id);
+        elevatorRepository.deleteById(id);
+    }
+
+    private void checkIfElevatorExistById(Long id){
         if (!elevatorRepository.existsById(id)) {
             throw new RuntimeException("Elevator not found");
         }
-        elevatorRepository.deleteById(id);
     }
 }
