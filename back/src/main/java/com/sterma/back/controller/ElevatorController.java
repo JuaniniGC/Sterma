@@ -52,9 +52,9 @@ public class ElevatorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Elevator elevator) {
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody CreateElevatorRequest updateRequest) {
         try {
-            Elevator updated = elevatorService.update(id, elevator);
+            Elevator updated = elevatorService.update(id, updateRequest);
             return ResponseEntity.ok(updated);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

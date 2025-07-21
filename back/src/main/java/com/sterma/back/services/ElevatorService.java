@@ -36,22 +36,14 @@ public class ElevatorService {
 
     @Transactional
     public Elevator create(CreateElevatorRequest createElevatorRequest) {
-        // Verificar si la comunidad existe
-        if (!communityRepository.existsById(createElevatorRequest.getCommunityId())) {
-            throw new NoSuchElementException("Comunidad no encontrada con ID: " + createElevatorRequest.getCommunityId());
-        }
-
-        // Verificar si el RAE ya está en uso
-        if (elevatorRepository.existsByRae(createElevatorRequest.getRae())) {
-            throw new IllegalStateException("El RAE ya está en uso: " + createElevatorRequest.getRae());
-        }
+        checkCommunityExists(createElevatorRequest.getCommunityId());
+        checkRaeNotUsed(createElevatorRequest.getRae());
 
         Elevator elevator = Elevator.builder()
                 .rae(createElevatorRequest.getRae())
                 .instalationYear(createElevatorRequest.getInstalationYear())
                 .community(communityRepository.getById(createElevatorRequest.getCommunityId()))
                 .build();
-
         return elevatorRepository.save(elevator);
     }
 
@@ -61,28 +53,48 @@ public class ElevatorService {
     }
 
     @Transactional
-    public Elevator update(Long id, Elevator updatedElevator) {
-        Elevator existing = elevatorRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Ascensor no encontrado con ID: " + id));
+    public Elevator update(Long id, CreateElevatorRequest updateRequest) {
+        Elevator existing = getExistingElevator(id);
+        checkCommunityExists(updateRequest.getCommunityId());
 
-        // Verificar si el nuevo RAE (si ha cambiado) ya está en uso
-        if (!existing.getRae().equals(updatedElevator.getRae()) &&
-                elevatorRepository.existsByRae(updatedElevator.getRae())) {
-            throw new IllegalStateException("El RAE ya está en uso: " + updatedElevator.getRae());
+        if (!existing.getRae().equals(updateRequest.getRae())) {
+            checkRaeNotUsed(updateRequest.getRae());
         }
 
-        existing.setRae(updatedElevator.getRae());
-        existing.setInstalationYear(updatedElevator.getInstalationYear());
-        existing.setCommunity(updatedElevator.getCommunity());
-
+        existing.setRae(updateRequest.getRae());
+        existing.setInstalationYear(updateRequest.getInstalationYear());
+        existing.setCommunity(communityRepository.getById(updateRequest.getCommunityId()));
         return elevatorRepository.save(existing);
     }
 
     @Transactional
     public void delete(Long id) {
+        checkElevatorExists(id);
+        elevatorRepository.deleteById(id);
+    }
+
+    private void checkCommunityExists(Long communityId) {
+        if (!communityRepository.existsById(communityId)) {
+            throw new NoSuchElementException("Comunidad no encontrada con ID: " + communityId);
+        }
+    }
+
+    private void checkRaeNotUsed(String rae) {
+        if (elevatorRepository.existsByRae(rae)) {
+            throw new IllegalStateException("El RAE ya está en uso: " + rae);
+        }
+    }
+
+    private void checkElevatorExists(Long id) {
         if (!elevatorRepository.existsById(id)) {
             throw new NoSuchElementException("Ascensor no encontrado con ID: " + id);
         }
-        elevatorRepository.deleteById(id);
     }
+
+    private Elevator getExistingElevator(Long id) {
+        return elevatorRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Ascensor no encontrado con ID: " + id));
+    }
+
+
 }
