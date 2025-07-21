@@ -3,6 +3,8 @@ package com.sterma.back.services;
 import com.sterma.back.models.Community;
 import com.sterma.back.models.Technician;
 import com.sterma.back.repositories.CommunityRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,8 +18,8 @@ public class CommunityService {
         this.communityRepository = communityRepository;
     }
 
-    public List<Community> listAll(){
-        return communityRepository.findAll();
+    public Page<Community> listAll(Pageable pageable){
+        return communityRepository.findAll(pageable);
     }
 
 

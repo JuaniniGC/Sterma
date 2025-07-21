@@ -7,6 +7,8 @@ import com.sterma.back.repositories.CommunityRepository;
 import com.sterma.back.repositories.ElevatorRepository;
 import com.sterma.back.services.CommunityService;
 import com.sterma.back.services.ElevatorService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,8 +31,8 @@ public class CommunityController {
     }
 
     @GetMapping
-    public List<Community> getAll(){
-        return communityService.listAll();
+    public Page<Community> getAll(Pageable pageable){
+        return communityService.listAll(pageable);
     }
 
     @GetMapping("/{id}/elevator")

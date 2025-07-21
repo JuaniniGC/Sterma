@@ -10,4 +10,6 @@ import java.util.List;
 public interface ElevatorRepository  extends JpaRepository<Elevator, Long> {
 
     List<Elevator> findByCommunityId(Long communityId);
+
+    boolean existsByRae(String rae);
 }
