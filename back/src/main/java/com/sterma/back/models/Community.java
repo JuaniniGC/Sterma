@@ -1,5 +1,6 @@
 package com.sterma.back.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,6 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "community")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Community {
 
     @Id

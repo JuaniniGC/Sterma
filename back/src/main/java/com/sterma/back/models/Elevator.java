@@ -2,6 +2,8 @@ package com.sterma.back.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +12,8 @@ import java.time.Year;
 @Entity
 @Getter
 @Setter
+@AllArgsConstructor
+@Builder
 @Table(name = "elevator")
 public class Elevator {
 
@@ -27,5 +31,7 @@ public class Elevator {
     private Community community;
 
     public Elevator(){}
+
+
 
 }

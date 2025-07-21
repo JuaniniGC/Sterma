@@ -1,6 +1,8 @@
 package com.sterma.back.services;
 
+import com.sterma.back.dtos.auth.elevator.CreateElevatorRequest;
 import com.sterma.back.models.Elevator;
+import com.sterma.back.repositories.CommunityRepository;
 import com.sterma.back.repositories.ElevatorRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,29 +10,48 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
 public class ElevatorService {
 
     private final ElevatorRepository elevatorRepository;
+    private final CommunityRepository communityRepository;
 
-    public ElevatorService(ElevatorRepository elevatorRepository) {
+    public ElevatorService(ElevatorRepository elevatorRepository, CommunityRepository communityRepository) {
         this.elevatorRepository = elevatorRepository;
+        this.communityRepository = communityRepository;
     }
 
     @Transactional(readOnly = true)
-    public Page<Elevator> listAll (Pageable pageable){
+    public Page<Elevator> listAll(Pageable pageable) {
         return elevatorRepository.findAll(pageable);
     }
 
     @Transactional(readOnly = true)
-    public List<Elevator> listByElevatorId(Long communityId){
+    public List<Elevator> listByElevatorId(Long communityId) {
         return elevatorRepository.findByCommunityId(communityId);
     }
 
     @Transactional
-    public Elevator create(Elevator elevator) {
+    public Elevator create(CreateElevatorRequest createElevatorRequest) {
+        // Verificar si la comunidad existe
+        if (!communityRepository.existsById(createElevatorRequest.getCommunityId())) {
+            throw new NoSuchElementException("Comunidad no encontrada con ID: " + createElevatorRequest.getCommunityId());
+        }
+
+        // Verificar si el RAE ya está en uso
+        if (elevatorRepository.existsByRae(createElevatorRequest.getRae())) {
+            throw new IllegalStateException("El RAE ya está en uso: " + createElevatorRequest.getRae());
+        }
+
+        Elevator elevator = Elevator.builder()
+                .rae(createElevatorRequest.getRae())
+                .instalationYear(createElevatorRequest.getInstalationYear())
+                .community(communityRepository.getById(createElevatorRequest.getCommunityId()))
+                .build();
+
         return elevatorRepository.save(elevator);
     }
 
@@ -42,7 +63,13 @@ public class ElevatorService {
     @Transactional
     public Elevator update(Long id, Elevator updatedElevator) {
         Elevator existing = elevatorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Elevator not found"));
+                .orElseThrow(() -> new NoSuchElementException("Ascensor no encontrado con ID: " + id));
+
+        // Verificar si el nuevo RAE (si ha cambiado) ya está en uso
+        if (!existing.getRae().equals(updatedElevator.getRae()) &&
+                elevatorRepository.existsByRae(updatedElevator.getRae())) {
+            throw new IllegalStateException("El RAE ya está en uso: " + updatedElevator.getRae());
+        }
 
         existing.setRae(updatedElevator.getRae());
         existing.setInstalationYear(updatedElevator.getInstalationYear());
@@ -53,13 +80,9 @@ public class ElevatorService {
 
     @Transactional
     public void delete(Long id) {
-        checkIfElevatorExistById(id);
-        elevatorRepository.deleteById(id);
-    }
-
-    private void checkIfElevatorExistById(Long id){
         if (!elevatorRepository.existsById(id)) {
-            throw new RuntimeException("Elevator not found");
+            throw new NoSuchElementException("Ascensor no encontrado con ID: " + id);
         }
+        elevatorRepository.deleteById(id);
     }
 }
