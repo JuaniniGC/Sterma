@@ -2,12 +2,16 @@ package com.sterma.back.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 @Table(name = "community")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Community {
@@ -24,8 +28,8 @@ public class Community {
     @Column(nullable = false, unique = true)
     private String CIF;
 
-    //TODO: agraegar info para el mapa interactivo
-    private String localization;
+    @Embedded
+    private Localization localization;
 
     private String infoCommunityLeader;
 
