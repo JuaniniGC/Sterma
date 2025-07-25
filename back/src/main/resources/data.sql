@@ -7,12 +7,27 @@ VALUES
     (104, 'tecnico4', '$2a$10$VsE1b6gM3V5zliIyWiGIm.sb/.5q7BdHpYXfamV1bZyNVgSUhwZ0i', 'Sofía', 'Rodríguez Pérez');
 
 -- === COMMUNITIES ===
-INSERT INTO community (id, name, description, CIF, city, street, postal_code, info_community_leader)
+INSERT INTO community (
+    id, name, description, CIF,
+    city, street, postal_code,
+    community_leader_name, community_leader_telephone, community_leader_note
+)
 VALUES
-    (101, 'Residencial Las Rosas', 'Edificio residencial de 10 plantas', 'A12345678', 'Madrid', 'Calle Falsa 123', '28001', 'Presidente: Juan Pérez - Tel: 600111222'),
-    (102, 'Torre Barcelona', 'Torre de oficinas de 15 plantas', 'B87654321', 'Barcelona', 'Gran Vía 456', '08001', 'Presidenta: Ana Ruiz - Tel: 600222333'),
-    (103, 'Complejo Vallecas', 'Conjunto de 3 edificios residenciales', 'C11223344', 'Madrid', 'Av. Vallecas 789', '28031', 'Presidente: Luis Gómez - Tel: 600333444'),
-    (104, 'Edificio Diagonal', 'Edificio emblemático en Barcelona', 'D44332211', 'Barcelona', 'Diagonal 101', '08011', 'Presidente: Marta Vidal - Tel: 600444555');
+    (101, 'Residencial Las Rosas', 'Edificio residencial de 10 plantas', 'A12345678',
+     'Madrid', 'Calle Falsa 123', '28001',
+     'Juan Pérez', 600111222, 'Presidente'),
+
+    (102, 'Torre Barcelona', 'Torre de oficinas de 15 plantas', 'B87654321',
+     'Barcelona', 'Gran Vía 456', '08001',
+     'Ana Ruiz', 600222333, 'Presidenta'),
+
+    (103, 'Complejo Vallecas', 'Conjunto de 3 edificios residenciales', 'C11223344',
+     'Madrid', 'Av. Vallecas 789', '28031',
+     'Luis Gómez', 600333444, 'Presidente'),
+
+    (104, 'Edificio Diagonal', 'Edificio emblemático en Barcelona', 'D44332211',
+     'Barcelona', 'Diagonal 101', '08011',
+     'Marta Vidal', 600444555, 'Presidenta');
 
 -- === ELEVATORS ===
 INSERT INTO elevator (id, rae, instalation_year, community_id)

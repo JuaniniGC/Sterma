@@ -31,7 +31,8 @@ public class Community {
     @Embedded
     private Localization localization;
 
-    private String infoCommunityLeader;
+    @Embedded
+    private CommunityLeaderInfo communityLeaderInfo;
 
     public Community() {
     }
