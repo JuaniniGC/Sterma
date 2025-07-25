@@ -30,17 +30,17 @@ public class CommunityService {
 
 
     public Community createCommunity(CreateCommunityRequest request) {
-        Localization localization = new Localization(
-                request.getCity(),
-                request.getStreet(),
-                request.getPostalCode()
-        );
+        Localization localization = Localization.builder()
+                .city(request.getCity())
+                .postalCode(request.getPostalCode())
+                .street(request.getStreet())
+                .build();
 
-        CommunityLeaderInfo leaderInfo = new CommunityLeaderInfo(
-                request.getCommunityLeaderName(),
-                request.getCommunityLeaderTelephone(),
-                request.getCommunityLeaderNote()
-        );
+        CommunityLeaderInfo leaderInfo = CommunityLeaderInfo.builder()
+                .communityLeaderName(request.getCommunityLeaderName())
+                .communityLeaderTelephone(request.getCommunityLeaderTelephone())
+                .communityLeaderNote(request.getCommunityLeaderNote())
+                .build();
 
         Community community = Community.builder()
                 .name(request.getName())
