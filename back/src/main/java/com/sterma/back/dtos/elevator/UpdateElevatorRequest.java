@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateElevatorRequest {
+public class UpdateElevatorRequest {
 
     @NotNull
     private String rae;

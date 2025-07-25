@@ -1,6 +1,7 @@
 package com.sterma.back.services;
 
-import com.sterma.back.dtos.auth.elevator.CreateElevatorRequest;
+import com.sterma.back.dtos.elevator.CreateElevatorRequest;
+import com.sterma.back.dtos.elevator.UpdateElevatorRequest;
 import com.sterma.back.models.Elevator;
 import com.sterma.back.repositories.CommunityRepository;
 import com.sterma.back.repositories.ElevatorRepository;
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -27,8 +27,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -176,7 +174,7 @@ class ElevatorServiceTest {
         when(communityRepository.existsById(1L)).thenReturn(true);
         when(elevatorRepository.existsByRae("NEWRAE")).thenReturn(true);
 
-        CreateElevatorRequest updateRequest = new CreateElevatorRequest();
+        UpdateElevatorRequest updateRequest = new UpdateElevatorRequest();
         updateRequest.setRae("NEWRAE");
         updateRequest.setInstalationYear(2021);
         updateRequest.setCommunityId(1L);
@@ -196,7 +194,7 @@ class ElevatorServiceTest {
         when(elevatorRepository.existsByRae("NEWRAE")).thenReturn(false);
         when(elevatorRepository.save(any(Elevator.class))).thenReturn(existing);
 
-        CreateElevatorRequest updateRequest = new CreateElevatorRequest();
+        UpdateElevatorRequest updateRequest = new UpdateElevatorRequest();
         updateRequest.setRae("NEWRAE");
         updateRequest.setInstalationYear(2021);
         updateRequest.setCommunityId(1L);
