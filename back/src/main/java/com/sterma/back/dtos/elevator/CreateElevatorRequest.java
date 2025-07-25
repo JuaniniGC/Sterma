@@ -1,4 +1,4 @@
-package com.sterma.back.dtos.auth.elevator;
+package com.sterma.back.dtos.elevator;
 
 import com.sterma.back.models.Community;
 import jakarta.persistence.*;
@@ -14,8 +14,13 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CreateElevatorRequest {
 
+    @NotNull
     private String rae;
+
+    @NotNull
     private Integer instalationYear;
+
+    @NotNull
     private Long communityId;
 
 }
