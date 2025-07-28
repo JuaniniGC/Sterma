@@ -29,7 +29,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody SignUpRequest request){
+    public ResponseEntity<?> signup(@RequestBody @Valid SignUpRequest request){
         try{
             SignUpResponse response = authService.register(request.getUsername(), request.getPassword(), request.getName(), request.getSurname());
             return ResponseEntity.ok(response);
