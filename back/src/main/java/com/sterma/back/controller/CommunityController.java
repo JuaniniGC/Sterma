@@ -1,21 +1,20 @@
 package com.sterma.back.controller;
 
 
+import com.sterma.back.dtos.community.CreateCommunityRequest;
 import com.sterma.back.models.Community;
 import com.sterma.back.models.Elevator;
+import com.sterma.back.repositories.CommunityRepository;
+import com.sterma.back.repositories.ElevatorRepository;
 import com.sterma.back.services.CommunityService;
 import com.sterma.back.services.ElevatorService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/community")
@@ -40,14 +39,9 @@ public class CommunityController {
         return elevatorService.listByElevatorId(id);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getCommunity (@PathVariable Long id){
-        try {
-            return communityService.getById(id)
-                    .map(ResponseEntity::ok)
-                    .orElseThrow(() -> new NoSuchElementException("Comunidad no encontrado con ID: " + id));
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    @PostMapping
+    public ResponseEntity<Community> createCommunity(@RequestBody CreateCommunityRequest request) {
+        Community created = communityService.createCommunity(request);
+        return ResponseEntity.ok(created);
     }
 }

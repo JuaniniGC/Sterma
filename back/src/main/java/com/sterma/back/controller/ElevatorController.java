@@ -1,6 +1,7 @@
 package com.sterma.back.controller;
 
-import com.sterma.back.dtos.auth.elevator.CreateElevatorRequest;
+import com.sterma.back.dtos.elevator.CreateElevatorRequest;
+import com.sterma.back.dtos.elevator.UpdateElevatorRequest;
 import com.sterma.back.models.Elevator;
 import com.sterma.back.services.ElevatorService;
 import org.springframework.data.domain.Page;
@@ -54,7 +55,7 @@ public class ElevatorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody CreateElevatorRequest updateRequest) {
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UpdateElevatorRequest updateRequest) {
         try {
             Elevator updated = elevatorService.update(id, updateRequest);
             return ResponseEntity.ok(updated);

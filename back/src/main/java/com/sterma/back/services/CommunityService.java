@@ -1,12 +1,11 @@
 package com.sterma.back.services;
 
-import com.sterma.back.models.Community;
-import com.sterma.back.models.Technician;
+import com.sterma.back.dtos.community.CreateCommunityRequest;
+import com.sterma.back.models.*;
 import com.sterma.back.repositories.CommunityRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.swing.text.html.Option;
 import java.util.List;
@@ -21,14 +20,38 @@ public class CommunityService {
         this.communityRepository = communityRepository;
     }
 
-    @Transactional(readOnly = true)
-    public Page<Community> listAll(Pageable pageable) {
+    public Page<Community> listAll(Pageable pageable){
         return communityRepository.findAll(pageable);
     }
 
-    @Transactional(readOnly = true)
     public Optional<Community> getById(Long id){
         return communityRepository.findById(id);
     }
+
+
+    public Community createCommunity(CreateCommunityRequest request) {
+        Localization localization = Localization.builder()
+                .city(request.getCity())
+                .postalCode(request.getPostalCode())
+                .street(request.getStreet())
+                .build();
+
+        CommunityLeaderInfo leaderInfo = CommunityLeaderInfo.builder()
+                .communityLeaderName(request.getCommunityLeaderName())
+                .communityLeaderTelephone(request.getCommunityLeaderTelephone())
+                .communityLeaderNote(request.getCommunityLeaderNote())
+                .build();
+
+        Community community = Community.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .CIF(request.getCIF())
+                .localization(localization)
+                .communityLeaderInfo(leaderInfo)
+                .build();
+
+        return communityRepository.save(community);
+    }
+
 
 }

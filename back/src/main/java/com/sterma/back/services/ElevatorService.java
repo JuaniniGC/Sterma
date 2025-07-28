@@ -1,9 +1,11 @@
 package com.sterma.back.services;
 
-import com.sterma.back.dtos.auth.elevator.CreateElevatorRequest;
+import com.sterma.back.dtos.elevator.CreateElevatorRequest;
+import com.sterma.back.dtos.elevator.UpdateElevatorRequest;
 import com.sterma.back.models.Elevator;
 import com.sterma.back.repositories.CommunityRepository;
 import com.sterma.back.repositories.ElevatorRepository;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -34,8 +36,13 @@ public class ElevatorService {
         return elevatorRepository.findByCommunityId(communityId);
     }
 
+    @Transactional(readOnly = true)
+    public Optional<Elevator> getById(Long id) {
+        return elevatorRepository.findById(id);
+    }
+
     @Transactional
-    public Elevator create(CreateElevatorRequest createElevatorRequest) {
+    public Elevator create(@Valid CreateElevatorRequest createElevatorRequest) {
         checkCommunityExists(createElevatorRequest.getCommunityId());
         checkRaeNotUsed(createElevatorRequest.getRae());
 
@@ -48,12 +55,7 @@ public class ElevatorService {
     }
 
     @Transactional
-    public Optional<Elevator> getById(Long id) {
-        return elevatorRepository.findById(id);
-    }
-
-    @Transactional
-    public Elevator update(Long id, CreateElevatorRequest updateRequest) {
+    public Elevator update(Long id, @Valid UpdateElevatorRequest updateRequest) {
         Elevator existing = getExistingElevator(id);
         checkCommunityExists(updateRequest.getCommunityId());
 
