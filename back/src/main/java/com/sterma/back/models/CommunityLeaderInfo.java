@@ -15,4 +15,6 @@ public class CommunityLeaderInfo {
     private String communityLeaderName;
     private Integer communityLeaderTelephone;
     private String communityLeaderNote;
+
+    public CommunityLeaderInfo(){}
 }
