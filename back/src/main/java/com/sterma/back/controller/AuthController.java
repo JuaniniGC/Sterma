@@ -5,6 +5,7 @@ import com.sterma.back.dtos.auth.login.LoginRequest;
 import com.sterma.back.dtos.auth.signup.SignUpRequest;
 import com.sterma.back.dtos.auth.signup.SignUpResponse;
 import com.sterma.back.services.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest request) {
         try {
             String token = authService.login(request.getUsername(), request.getPassword());
             return ResponseEntity.ok(new JwtResponse(token));
