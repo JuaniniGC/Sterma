@@ -4,6 +4,7 @@ import com.sterma.back.dtos.elevator.CreateElevatorRequest;
 import com.sterma.back.dtos.elevator.UpdateElevatorRequest;
 import com.sterma.back.models.Elevator;
 import com.sterma.back.services.ElevatorService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -28,7 +29,7 @@ public class ElevatorController {
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody CreateElevatorRequest createElevatorRequest) {
+    public ResponseEntity<?> create(@RequestBody @Valid CreateElevatorRequest createElevatorRequest) {
         try {
             return ResponseEntity.ok(elevatorService.create(createElevatorRequest));
         } catch (NoSuchElementException e) {
@@ -55,7 +56,7 @@ public class ElevatorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UpdateElevatorRequest updateRequest) {
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody @Valid UpdateElevatorRequest updateRequest) {
         try {
             Elevator updated = elevatorService.update(id, updateRequest);
             return ResponseEntity.ok(updated);

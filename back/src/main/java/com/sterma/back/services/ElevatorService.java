@@ -42,7 +42,7 @@ public class ElevatorService {
     }
 
     @Transactional
-    public Elevator create(@Valid CreateElevatorRequest createElevatorRequest) {
+    public Elevator create(CreateElevatorRequest createElevatorRequest) {
         checkCommunityExists(createElevatorRequest.getCommunityId());
         checkRaeNotUsed(createElevatorRequest.getRae());
 
@@ -55,7 +55,7 @@ public class ElevatorService {
     }
 
     @Transactional
-    public Elevator update(Long id, @Valid UpdateElevatorRequest updateRequest) {
+    public Elevator update(Long id, UpdateElevatorRequest updateRequest) {
         Elevator existing = getExistingElevator(id);
         checkCommunityExists(updateRequest.getCommunityId());
 

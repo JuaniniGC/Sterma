@@ -2,12 +2,14 @@ package com.sterma.back.controller;
 
 
 import com.sterma.back.dtos.community.CreateCommunityRequest;
+import com.sterma.back.dtos.community.UpdateCommunityRequest;
 import com.sterma.back.models.Community;
 import com.sterma.back.models.Elevator;
 import com.sterma.back.repositories.CommunityRepository;
 import com.sterma.back.repositories.ElevatorRepository;
 import com.sterma.back.services.CommunityService;
 import com.sterma.back.services.ElevatorService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -40,8 +42,15 @@ public class CommunityController {
     }
 
     @PostMapping
-    public ResponseEntity<Community> createCommunity(@RequestBody CreateCommunityRequest request) {
-        Community created = communityService.createCommunity(request);
-        return ResponseEntity.ok(created);
+    public ResponseEntity<Community> createCommunity(@RequestBody @Valid CreateCommunityRequest request) {
+        Community community = communityService.createCommunity(request);
+        return ResponseEntity.ok(community);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Community> updateCommunity(@PathVariable Long id,@RequestBody @Valid UpdateCommunityRequest request ){
+        Community updateCommunity = communityService.updateCommunity(id, request);
+        return ResponseEntity.ok(updateCommunity);
+    }
+
 }
