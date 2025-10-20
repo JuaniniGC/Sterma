@@ -2,6 +2,7 @@ import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
+import 'utils/token_helper.dart';
 
 import 'pages/communities_page.dart';
 import 'pages/login_page.dart';
@@ -12,11 +13,6 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  Future<String?> _getToken() async {
-    const storage = FlutterSecureStorage();
-    return await storage.read(key: 'token');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,14 +27,17 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           colorScheme: ColorScheme.light(
             primary: Color(0xFF2051E5),
+            onPrimary: Color(0xFFFFFFFF),
             secondaryContainer: Color(0xFFEEF2FF),
-            secondary: Color(0xFFFF6B35),
-            onPrimary: Colors.white,
+            secondary: Color(0xFFEEF2FF),
+            onSecondary: Color(0xFF240D57),
+            tertiary: Color.fromARGB(255, 51, 51, 51),
+            onTertiary: Color(0xFFFFFFFF),
           ),
         ),
         // Aquí verificamos si hay token guardado
         home: FutureBuilder<String?>(
-          future: _getToken(),
+          future: getToken(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Scaffold(
@@ -134,24 +133,41 @@ class _MyHomePageState extends State<MyHomePage> {
           child: page,
         ),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: selectedIndex,
-        onDestinationSelected: (value) {
-          setState(() {
-            selectedIndex = value;
-          });
-        },
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home), label: 'Comunidades'),
-          NavigationDestination(
-            icon: Icon(Icons.create),
-            label: "Crear informe",
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: Theme.of(
+                context,
+              ).colorScheme.tertiary.withValues(alpha: 0.2),
+              width: 1.0,
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.elevator),
-            label: 'Ascensores',
-          ),
-        ],
+        ),
+        child: NavigationBar(
+          selectedIndex: selectedIndex,
+          onDestinationSelected: (value) {
+            setState(() {
+              selectedIndex = value;
+            });
+          },
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          indicatorColor: Theme.of(
+            context,
+          ).colorScheme.secondary.withValues(alpha: 0.2),
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          destinations: const [
+            NavigationDestination(icon: Icon(Icons.home), label: 'Comunidades'),
+            NavigationDestination(
+              icon: Icon(Icons.create),
+              label: "Crear informe",
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.elevator),
+              label: 'Ascensores',
+            ),
+          ],
+        ),
       ),
     );
   }
