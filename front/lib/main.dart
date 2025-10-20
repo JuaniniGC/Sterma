@@ -1,14 +1,13 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:front/core/services/dio_service.dart'; // ✅ Nuevo import
+import 'package:front/core/services/dio_service.dart';
 
 import 'pages/communities_page.dart';
 import 'pages/login_page.dart';
 
 void main() {
   DioService.onTokenExpired = _redirectToLogin;
-
   runApp(const MyApp());
 }
 
@@ -99,6 +98,13 @@ class _MyHomePageState extends State<MyHomePage> {
   int selectedIndex = 0;
   final DioService _dioService = DioService();
 
+  // ✅ Lista de títulos para cada pantalla
+  final List<String> _pageTitles = [
+    'Comunidades',
+    'Crear Informe',
+    'Ascensores',
+  ];
+
   Future<void> _logout() async {
     await _dioService.logout();
     if (context.mounted) {
@@ -128,7 +134,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Inicio"),
+        // ✅ Solo muestra el nombre de la pantalla actual
+        title: Text(_pageTitles[selectedIndex]),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),

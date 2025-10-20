@@ -117,7 +117,6 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Comunidades')),
       body: RefreshIndicator(
         onRefresh: fetchCommunities,
         child: communityList.isEmpty
