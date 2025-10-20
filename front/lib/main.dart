@@ -1,14 +1,26 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
-import 'utils/token_helper.dart';
+import 'package:front/core/services/dio_service.dart'; // ✅ Nuevo import
 
 import 'pages/communities_page.dart';
 import 'pages/login_page.dart';
 
 void main() {
+  DioService.onTokenExpired = _redirectToLogin;
+
   runApp(const MyApp());
+}
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+void _redirectToLogin() {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    navigatorKey.currentState?.pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+      (route) => false,
+    );
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -20,6 +32,7 @@ class MyApp extends StatelessWidget {
       create: (context) => MyAppState(),
       child: MaterialApp(
         title: 'Sterma App',
+        navigatorKey: navigatorKey,
         theme: ThemeData(
           primarySwatch: Colors.blue,
           primaryColor: Colors.blue.shade800,
@@ -35,9 +48,8 @@ class MyApp extends StatelessWidget {
             onTertiary: Color(0xFFFFFFFF),
           ),
         ),
-        // Aquí verificamos si hay token guardado
-        home: FutureBuilder<String?>(
-          future: getToken(),
+        home: FutureBuilder<bool>(
+          future: DioService().isLoggedIn(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Scaffold(
@@ -45,12 +57,10 @@ class MyApp extends StatelessWidget {
               );
             }
 
-            final token = snapshot.data;
-            if (token == null || token.isEmpty) {
-              // No hay token → mostrar LoginPage
+            final isLoggedIn = snapshot.data ?? false;
+            if (!isLoggedIn) {
               return const LoginPage();
             } else {
-              // Token existe → ir al Home
               return MyHomePage();
             }
           },
@@ -87,10 +97,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int selectedIndex = 0;
+  final DioService _dioService = DioService();
 
   Future<void> _logout() async {
-    const storage = FlutterSecureStorage();
-    await storage.delete(key: 'token');
+    await _dioService.logout();
     if (context.mounted) {
       Navigator.pushReplacement(
         context,
@@ -137,9 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
         decoration: BoxDecoration(
           border: Border(
             top: BorderSide(
-              color: Theme.of(
-                context,
-              ).colorScheme.tertiary.withValues(alpha: 0.2),
+              color: Theme.of(context).colorScheme.tertiary.withOpacity(0.2),
               width: 1.0,
             ),
           ),
@@ -154,7 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
           backgroundColor: Theme.of(context).colorScheme.surface,
           indicatorColor: Theme.of(
             context,
-          ).colorScheme.secondary.withValues(alpha: 0.2),
+          ).colorScheme.secondary.withOpacity(0.2),
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           destinations: const [
             NavigationDestination(icon: Icon(Icons.home), label: 'Comunidades'),

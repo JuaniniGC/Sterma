@@ -1,8 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
-import 'package:front/config/constants.dart';
+import 'package:front/core/services/dio_service.dart';
 import '../main.dart';
 
 class LoginPage extends StatefulWidget {
@@ -15,7 +12,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final storage = const FlutterSecureStorage();
+  final DioService _dioService = DioService();
   bool isLoading = false;
   String? errorMessage;
 
@@ -26,39 +23,23 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      final response = await http.post(
-        Uri.parse('$apiBaseUrl/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'username': emailController.text.trim(),
-          'password': passwordController.text.trim(),
-        }),
+      final success = await _dioService.login(
+        emailController.text.trim(),
+        passwordController.text.trim(),
       );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final token = data['token'];
-
-        if (token != null && token.isNotEmpty) {
-          await storage.write(key: 'token', value: token);
-
-          if (context.mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => MyHomePage()),
-            );
-          }
-        } else {
-          setState(() => errorMessage = "Token no recibido del servidor");
+      if (success) {
+        if (context.mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => MyHomePage()),
+          );
         }
       } else {
-        final error = jsonDecode(response.body);
-        setState(
-          () => errorMessage = error['message'] ?? "Error al iniciar sesión",
-        );
+        setState(() => errorMessage = "Usuario o contraseña incorrectos");
       }
     } catch (e) {
-      setState(() => errorMessage = "Error de conexión: $e");
+      setState(() => errorMessage = "Error: $e");
     } finally {
       setState(() => isLoading = false);
     }

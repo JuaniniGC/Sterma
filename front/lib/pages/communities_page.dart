@@ -1,7 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:front/utils/token_helper.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+import 'package:front/core/services/dio_service.dart';
 
 class CommunitiesPage extends StatefulWidget {
   const CommunitiesPage({super.key});
@@ -14,6 +13,7 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
   List<dynamic> communityList = [];
   bool isLoading = true;
   String? errorMessage;
+  final DioService _dioService = DioService();
 
   @override
   void initState() {
@@ -23,47 +23,60 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
 
   Future<void> fetchCommunities() async {
     try {
-      final token = await getToken();
-      if (token == null) {
-        setState(() {
-          errorMessage = 'No se encontró token de autenticación.';
-          isLoading = false;
-        });
-        return;
-      }
-      final response = await http.get(
-        Uri.parse('http://10.0.2.2:8080/community'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
+      setState(() {
+        isLoading = true;
+        errorMessage = null;
+      });
 
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
+      final response = await _dioService.get('/community');
 
-        final List<dynamic> data = jsonResponse['content'] ?? [];
+      final List<dynamic> data = response.data['content'] ?? [];
 
+      setState(() {
+        communityList = data;
+        isLoading = false;
+      });
+    } on DioException catch (e) {
+      if (e.response?.statusCode != 401) {
         setState(() {
-          communityList = data;
-          isLoading = false;
-        });
-      } else {
-        print(
-          'Error en la respuesta: ${response.statusCode} - ${response.body}',
-        );
-        setState(() {
-          errorMessage =
-              'Error al obtener comunidades (Código: ${response.statusCode})';
+          errorMessage = 'Error: ${_getErrorMessage(e)}';
           isLoading = false;
         });
       }
     } catch (e) {
       setState(() {
-        errorMessage = 'Error de conexión: $e';
+        errorMessage = 'Error inesperado: $e';
         isLoading = false;
       });
+    }
+  }
+
+  String _getErrorMessage(DioException e) {
+    switch (e.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        return 'Timeout de conexión. Verifica tu internet.';
+      case DioExceptionType.badResponse:
+        final statusCode = e.response?.statusCode;
+        switch (statusCode) {
+          case 400:
+            return 'Solicitud incorrecta';
+          case 403:
+            return 'Acceso denegado';
+          case 404:
+            return 'Recurso no encontrado';
+          case 500:
+            return 'Error interno del servidor';
+          default:
+            return 'Error del servidor (Código: $statusCode)';
+        }
+      case DioExceptionType.cancel:
+        return 'Petición cancelada';
+      case DioExceptionType.unknown:
+        return 'Error de conexión. Verifica tu internet.';
+      default:
+        return 'Error inesperado: ${e.message}';
     }
   }
 
@@ -92,7 +105,7 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
                     isLoading = true;
                     errorMessage = null;
                   });
-                  fetchCommunities(); // 🔄 vuelve a intentar la carga
+                  fetchCommunities();
                 },
                 icon: const Icon(Icons.refresh),
                 label: const Text('Reintentar'),
@@ -107,28 +120,44 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
       appBar: AppBar(title: const Text('Comunidades')),
       body: RefreshIndicator(
         onRefresh: fetchCommunities,
-        child: ListView.builder(
-          itemCount: communityList.length,
-          itemBuilder: (context, index) {
-            final community = communityList[index];
-            final localization = community['localization'] ?? {};
-            final leaderInfo = community['communityLeaderInfo'] ?? {};
+        child: communityList.isEmpty
+            ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.group_off, size: 64, color: Colors.grey),
+                    SizedBox(height: 16),
+                    Text(
+                      'No hay comunidades disponibles',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              )
+            : ListView.builder(
+                itemCount: communityList.length,
+                itemBuilder: (context, index) {
+                  final community = communityList[index];
+                  final localization = community['localization'] ?? {};
+                  final leaderInfo = community['communityLeaderInfo'] ?? {};
 
-            final location =
-                "${localization['street'] ?? ''}, ${localization['city'] ?? ''} (${localization['postalCode'] ?? ''})";
+                  final location =
+                      "${localization['street'] ?? ''}, ${localization['city'] ?? ''} (${localization['postalCode'] ?? ''})";
 
-            return CommunityGeneralInfoCard(
-              name: community['name'] ?? 'Sin nombre',
-              description: community['description'] ?? '',
-              location: location,
-              leaderName: leaderInfo['communityLeaderName'] ?? 'Sin líder',
-              leaderPhone:
-                  leaderInfo['communityLeaderTelephone']?.toString() ?? '',
-              leaderNote: leaderInfo['communityLeaderNote'] ?? '',
-              cif: community['cif'] ?? '',
-            );
-          },
-        ),
+                  return CommunityGeneralInfoCard(
+                    name: community['name'] ?? 'Sin nombre',
+                    description: community['description'] ?? '',
+                    location: location,
+                    leaderName:
+                        leaderInfo['communityLeaderName'] ?? 'Sin líder',
+                    leaderPhone:
+                        leaderInfo['communityLeaderTelephone']?.toString() ??
+                        '',
+                    leaderNote: leaderInfo['communityLeaderNote'] ?? '',
+                    cif: community['cif'] ?? '',
+                  );
+                },
+              ),
       ),
     );
   }
