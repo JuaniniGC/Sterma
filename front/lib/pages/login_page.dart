@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:front/config/constants.dart';
 import '../main.dart';
 
 class LoginPage extends StatefulWidget {
@@ -18,8 +19,6 @@ class _LoginPageState extends State<LoginPage> {
   bool isLoading = false;
   String? errorMessage;
 
-  static const String baseUrl = 'http://10.0.2.2:8080';
-
   Future<void> _login() async {
     setState(() {
       isLoading = true;
@@ -28,7 +27,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/auth/login'),
+        Uri.parse('$apiBaseUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'username': emailController.text.trim(),
