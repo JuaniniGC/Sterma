@@ -25,7 +25,10 @@ public class CommunityService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Community> listAll(Pageable pageable) {
+    public Page<Community> listAll(String name, Pageable pageable) {
+        if(name != null && !name.isBlank()){
+            return communityRepository.findByNameContainingIgnoreCase(name, pageable);
+        }
         return communityRepository.findAll(pageable);
     }
 
