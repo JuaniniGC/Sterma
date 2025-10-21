@@ -24,8 +24,10 @@ public class ElevatorController {
     }
 
     @GetMapping
-    public Page<Elevator> getAll(Pageable pageable) {
-        return elevatorService.listAll(pageable);
+    public Page<Elevator> getAll(@RequestParam(required = false) String rae,
+                                 @RequestParam(required = false) String communityName,
+                                 Pageable pageable) {
+        return elevatorService.listAll(rae, communityName, pageable);
     }
 
     @PostMapping

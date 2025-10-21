@@ -33,7 +33,6 @@ public class CommunityController {
 
     @GetMapping
     public Page<Community> getAll(@RequestParam(required = false) String name, Pageable pageable){
-
         return communityService.listAll(name, pageable);
     }
 

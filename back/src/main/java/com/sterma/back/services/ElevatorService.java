@@ -27,8 +27,11 @@ public class ElevatorService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Elevator> listAll(Pageable pageable) {
-        return elevatorRepository.findAll(pageable);
+    public Page<Elevator> listAll(String rae, String communityName, Pageable pageable) {
+        String nameFilter = (rae != null && !rae.isBlank()) ? rae : null;
+        String communityFilter = (communityName != null && !communityName.isBlank()) ? communityName : null;
+
+        return elevatorRepository.findByFilters(nameFilter, communityFilter, pageable);
     }
 
     @Transactional(readOnly = true)

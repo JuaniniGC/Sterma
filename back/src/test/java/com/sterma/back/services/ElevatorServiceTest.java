@@ -61,23 +61,53 @@ class ElevatorServiceTest {
     @Test
     void listAll_ShouldReturnPageOfElevators() {
         Page<Elevator> expectedPage = new PageImpl<>(List.of(sampleElevator));
-        when(elevatorRepository.findAll(any(Pageable.class))).thenReturn(expectedPage);
+        when(elevatorRepository.findByFilters(
+                isNull(),
+                isNull(),
+                any(Pageable.class))
+        ).thenReturn(expectedPage);
 
-        Page<Elevator> result = elevatorService.listAll(Pageable.unpaged());
+        Page<Elevator> result = elevatorService.listAll(null, null, Pageable.unpaged());
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        verify(elevatorRepository).findAll(any(Pageable.class));
+        verify(elevatorRepository).findByFilters(isNull(), isNull(), any(Pageable.class));
     }
 
     @Test
     void listAll_WithEmptyResult_ShouldReturnEmptyPage() {
-        when(elevatorRepository.findAll(any(Pageable.class))).thenReturn(Page.empty());
+        // Given
+        when(elevatorRepository.findByFilters(
+                isNull(),
+                isNull(),
+                any(Pageable.class))
+        ).thenReturn(Page.empty());
 
-        Page<Elevator> result = elevatorService.listAll(Pageable.unpaged());
+        Page<Elevator> result = elevatorService.listAll(null, null, Pageable.unpaged());
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
+        verify(elevatorRepository).findByFilters(isNull(), isNull(), any(Pageable.class));
+    }
+
+    @Test
+    void listAll_WithFilters_ShouldCallRepositoryWithFilters() {
+        // Given
+        String elevatorName = "RAE001";
+        String communityName = "Las Rosas";
+        Page<Elevator> expectedPage = new PageImpl<>(List.of(sampleElevator));
+
+        when(elevatorRepository.findByFilters(
+                eq(elevatorName),
+                eq(communityName),
+                any(Pageable.class))
+        ).thenReturn(expectedPage);
+
+        Page<Elevator> result = elevatorService.listAll(elevatorName, communityName, Pageable.unpaged());
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        verify(elevatorRepository).findByFilters(eq(elevatorName), eq(communityName), any(Pageable.class));
     }
 
     /* --------------------- Tests para listByElevatorId --------------------- */
