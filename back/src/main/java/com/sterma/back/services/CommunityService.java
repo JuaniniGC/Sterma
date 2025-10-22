@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -39,6 +40,7 @@ public class CommunityService {
 
     @Transactional
     public Community createCommunity(CreateCommunityRequest request) {
+
         Localization localization = Localization.builder()
                 .city(request.getCity())
                 .postalCode(request.getPostalCode())
@@ -64,6 +66,7 @@ public class CommunityService {
 
     @Transactional
     public Community updateCommunity(Long id, UpdateCommunityRequest request) {
+        checkCommunityExists(id);
         Community community = getExistingCommunity(id);
 
         community.getLocalization().setCity(request.getCity());
@@ -86,7 +89,13 @@ public class CommunityService {
                 .orElseThrow(() -> new EntityNotFoundException("Comunidad no encontrada con ID: " + id));
     }
 
-
-
+    private void checkCommunityExists(Long communityId) {
+        if (communityId == null) {
+            throw new IllegalArgumentException("El ID de comunidad no puede ser nulo");
+        }
+        if (!communityRepository.existsById(communityId)) {
+            throw new NoSuchElementException("Comunidad no encontrada con ID: " + communityId);
+        }
+    }
 
 }
