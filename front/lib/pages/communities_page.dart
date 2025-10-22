@@ -15,20 +15,36 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
   String? errorMessage;
   final DioService _dioService = DioService();
 
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     fetchCommunities();
   }
 
-  Future<void> fetchCommunities() async {
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> fetchCommunities({String? searchQuery}) async {
     try {
       setState(() {
         isLoading = true;
         errorMessage = null;
       });
 
-      final response = await _dioService.get('/community');
+      final Map<String, dynamic> queryParameters = {};
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        queryParameters['name'] = searchQuery;
+      }
+
+      final response = await _dioService.get(
+        '/community',
+        queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+      );
 
       final List<dynamic> data = response.data['content'] ?? [];
 
@@ -49,6 +65,19 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
         isLoading = false;
       });
     }
+  }
+
+  void _onSearchChanged(String query) {
+    fetchCommunities(searchQuery: query.isEmpty ? null : query);
+  }
+
+  void _onSearchSubmitted(String query) {
+    fetchCommunities(searchQuery: query.isEmpty ? null : query);
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    fetchCommunities();
   }
 
   String _getErrorMessage(DioException e) {
@@ -82,81 +111,146 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Buscar comunidades por nombre...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: _clearSearch,
+                      )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                filled: true,
+                fillColor: Colors.grey[50],
+              ),
+              onChanged: _onSearchChanged,
+              onSubmitted: _onSearchSubmitted,
+            ),
+          ),
+
+          if (!isLoading && communityList.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                children: [
+                  Text(
+                    '${communityList.length} comunidad(es) encontrada(s)',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                  ),
+                  if (_searchController.text.isNotEmpty)
+                    Text(
+                      ' para "${_searchController.text}"',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    ),
+                ],
+              ),
+            ),
+
+          Expanded(child: _buildCommunityList()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommunityList() {
     if (isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (errorMessage != null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Comunidades')),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                errorMessage!,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16, color: Colors.red),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    isLoading = true;
-                    errorMessage = null;
-                  });
-                  fetchCommunities();
-                },
-                icon: const Icon(Icons.refresh),
-                label: const Text('Reintentar'),
-              ),
-            ],
-          ),
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              errorMessage!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, color: Colors.red),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: () {
+                fetchCommunities(
+                  searchQuery: _searchController.text.isEmpty
+                      ? null
+                      : _searchController.text,
+                );
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('Reintentar'),
+            ),
+          ],
         ),
       );
     }
 
-    return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: fetchCommunities,
-        child: communityList.isEmpty
-            ? const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.group_off, size: 64, color: Colors.grey),
-                    SizedBox(height: 16),
-                    Text(
-                      'No hay comunidades disponibles',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              )
-            : ListView.builder(
-                itemCount: communityList.length,
-                itemBuilder: (context, index) {
-                  final community = communityList[index];
-                  final localization = community['localization'] ?? {};
-                  final leaderInfo = community['communityLeaderInfo'] ?? {};
-
-                  final location =
-                      "${localization['street'] ?? ''}, ${localization['city'] ?? ''} (${localization['postalCode'] ?? ''})";
-
-                  return CommunityGeneralInfoCard(
-                    name: community['name'] ?? 'Sin nombre',
-                    description: community['description'] ?? '',
-                    location: location,
-                    leaderName:
-                        leaderInfo['communityLeaderName'] ?? 'Sin líder',
-                    leaderPhone:
-                        leaderInfo['communityLeaderTelephone']?.toString() ??
-                        '',
-                    leaderNote: leaderInfo['communityLeaderNote'] ?? '',
-                    cif: community['cif'] ?? '',
-                  );
-                },
+    if (communityList.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              _searchController.text.isEmpty
+                  ? Icons.group_off
+                  : Icons.search_off,
+              size: 64,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _searchController.text.isEmpty
+                  ? 'No hay comunidades disponibles'
+                  : 'No se encontraron comunidades para "${_searchController.text}"',
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+            if (_searchController.text.isNotEmpty)
+              TextButton(
+                onPressed: _clearSearch,
+                child: const Text('Ver todas las comunidades'),
               ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () => fetchCommunities(
+        searchQuery: _searchController.text.isEmpty
+            ? null
+            : _searchController.text,
+      ),
+      child: ListView.builder(
+        itemCount: communityList.length,
+        itemBuilder: (context, index) {
+          final community = communityList[index];
+          final localization = community['localization'] ?? {};
+          final leaderInfo = community['communityLeaderInfo'] ?? {};
+
+          final location =
+              "${localization['street'] ?? ''}, ${localization['city'] ?? ''} (${localization['postalCode'] ?? ''})";
+
+          return CommunityGeneralInfoCard(
+            name: community['name'] ?? 'Sin nombre',
+            description: community['description'] ?? '',
+            location: location,
+            leaderName: leaderInfo['communityLeaderName'] ?? 'Sin líder',
+            leaderPhone:
+                leaderInfo['communityLeaderTelephone']?.toString() ?? '',
+            leaderNote: leaderInfo['communityLeaderNote'] ?? '',
+            cif: community['cif'] ?? '',
+          );
+        },
       ),
     );
   }
