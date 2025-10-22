@@ -111,7 +111,11 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
+      backgroundColor: Colors.white, // ✅ Fondo blanco para toda la página
       body: Column(
         children: [
           Padding(
@@ -120,10 +124,10 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Buscar comunidades por nombre...',
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: Icon(Icons.search, color: colorScheme.primary),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: Icon(Icons.clear, color: colorScheme.primary),
                         onPressed: _clearSearch,
                       )
                     : null,
@@ -131,100 +135,122 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
                   borderRadius: BorderRadius.circular(12.0),
                 ),
                 filled: true,
-                fillColor: Colors.grey[50],
+                fillColor: colorScheme.secondaryContainer,
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(
+                    color: colorScheme.primary,
+                    width: 2.0,
+                  ),
+                ),
               ),
               onChanged: _onSearchChanged,
               onSubmitted: _onSearchSubmitted,
             ),
           ),
 
-          if (!isLoading && communityList.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: [
-                  Text(
-                    '${communityList.length} comunidad(es) encontrada(s)',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                  ),
-                  if (_searchController.text.isNotEmpty)
-                    Text(
-                      ' para "${_searchController.text}"',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                    ),
-                ],
-              ),
+          // ❌ ELIMINADO: Texto de "comunidades encontradas"
+          Expanded(
+            child: Container(
+              color: Colors.white, // ✅ Fondo blanco para el área de la lista
+              child: _buildCommunityList(),
             ),
-
-          Expanded(child: _buildCommunityList()),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildCommunityList() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Container(
+        color: Colors.white, // ✅ Fondo blanco durante carga
+        child: Center(
+          child: CircularProgressIndicator(color: colorScheme.primary),
+        ),
+      );
     }
 
     if (errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              errorMessage!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, color: Colors.red),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: () {
-                fetchCommunities(
-                  searchQuery: _searchController.text.isEmpty
-                      ? null
-                      : _searchController.text,
-                );
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('Reintentar'),
-            ),
-          ],
+      return Container(
+        color: Colors.white, // ✅ Fondo blanco en error
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 64, color: colorScheme.error),
+              const SizedBox(height: 16),
+              Text(
+                errorMessage!,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: colorScheme.error),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: () {
+                  fetchCommunities(
+                    searchQuery: _searchController.text.isEmpty
+                        ? null
+                        : _searchController.text,
+                  );
+                },
+                icon: Icon(Icons.refresh, color: colorScheme.onPrimary),
+                label: Text(
+                  'Reintentar',
+                  style: TextStyle(color: colorScheme.onPrimary),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
 
     if (communityList.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              _searchController.text.isEmpty
-                  ? Icons.group_off
-                  : Icons.search_off,
-              size: 64,
-              color: Colors.grey,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _searchController.text.isEmpty
-                  ? 'No hay comunidades disponibles'
-                  : 'No se encontraron comunidades para "${_searchController.text}"',
-              style: const TextStyle(fontSize: 16, color: Colors.grey),
-              textAlign: TextAlign.center,
-            ),
-            if (_searchController.text.isNotEmpty)
-              TextButton(
-                onPressed: _clearSearch,
-                child: const Text('Ver todas las comunidades'),
+      return Container(
+        color: Colors.white, // ✅ Fondo blanco cuando no hay datos
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                _searchController.text.isEmpty
+                    ? Icons.group_off
+                    : Icons.search_off,
+                size: 64,
+                color: Colors.grey[400],
               ),
-          ],
+              const SizedBox(height: 16),
+              Text(
+                _searchController.text.isEmpty
+                    ? 'No hay comunidades disponibles'
+                    : 'No se encontraron comunidades para "${_searchController.text}"',
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                textAlign: TextAlign.center,
+              ),
+              if (_searchController.text.isNotEmpty)
+                TextButton(
+                  onPressed: _clearSearch,
+                  child: Text(
+                    'Ver todas las comunidades',
+                    style: TextStyle(color: colorScheme.primary),
+                  ),
+                ),
+            ],
+          ),
         ),
       );
     }
 
     return RefreshIndicator(
+      color: colorScheme.primary,
+      backgroundColor: Colors.white, // ✅ Fondo blanco para el refresh indicator
       onRefresh: () => fetchCommunities(
         searchQuery: _searchController.text.isEmpty
             ? null
@@ -278,6 +304,9 @@ class CommunityGeneralInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return InkWell(
       onTap: () {
         print('Comunidad seleccionada: $name');
@@ -286,66 +315,105 @@ class CommunityGeneralInfoCard extends StatelessWidget {
       child: Card(
         elevation: 4,
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        color: Colors.white, // ✅ Fondo blanco para las tarjetas
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                name,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                description,
-                style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-              ),
-              const SizedBox(height: 8),
+              // ✅ Header con nombre y CIF
               Row(
                 children: [
-                  const Icon(
-                    Icons.location_on,
-                    size: 20,
-                    color: Colors.blueGrey,
-                  ),
-                  const SizedBox(width: 4),
+                  Icon(Icons.home, color: colorScheme.primary, size: 24),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      location,
-                      style: const TextStyle(
+                      name,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color:
+                            Colors.black87, // ✅ Texto oscuro sobre fondo blanco
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'CIF: $cif',
+                      style: TextStyle(
                         fontSize: 14,
-                        color: Colors.black54,
+                        fontWeight: FontWeight.w500,
+                        color: colorScheme.onSecondary,
                       ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
+
+              // ✅ Descripción
+              Text(
+                description,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87, // ✅ Texto oscuro sobre fondo blanco
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // ✅ Ubicación
               Row(
                 children: [
-                  const Icon(Icons.person, size: 20, color: Colors.teal),
+                  Icon(Icons.location_on, size: 18, color: Colors.grey[600]),
                   const SizedBox(width: 4),
-                  Text(leaderName, style: const TextStyle(fontSize: 14)),
+                  Expanded(
+                    child: Text(
+                      location,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color:
+                            Colors.black54, // ✅ Texto gris sobre fondo blanco
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // ✅ Responsable
+              Row(
+                children: [
+                  Icon(Icons.person, size: 18, color: Colors.grey[600]),
+                  const SizedBox(width: 4),
+                  Text(
+                    leaderName,
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                  ),
                   const SizedBox(width: 8),
                   Text(
-                    '(${leaderNote})',
+                    '($leaderNote)',
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ],
               ),
               const SizedBox(height: 4),
+
+              // ✅ Teléfono
               Row(
                 children: [
-                  const Icon(Icons.phone, size: 18, color: Colors.green),
+                  Icon(Icons.phone, size: 16, color: Colors.grey[600]),
                   const SizedBox(width: 4),
-                  Text(leaderPhone),
-                  const Spacer(),
                   Text(
-                    'CIF: $cif',
-                    style: const TextStyle(fontSize: 13, color: Colors.grey),
+                    leaderPhone,
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
                   ),
                 ],
               ),
