@@ -1,5 +1,6 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'package:front/pages/elevators_page.dart';
 import 'package:provider/provider.dart';
 import 'package:front/core/services/dio_service.dart';
 
@@ -98,7 +99,6 @@ class _MyHomePageState extends State<MyHomePage> {
   int selectedIndex = 0;
   final DioService _dioService = DioService();
 
-  // ✅ Lista de títulos para cada pantalla
   final List<String> _pageTitles = [
     'Comunidades',
     'Crear Informe',
@@ -126,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
         page = GeneratorPage();
         break;
       case 2:
-        page = const Placeholder();
+        page = ElevatorsPage();
         break;
       default:
         throw UnimplementedError('No widget for $selectedIndex');
@@ -134,7 +134,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        // ✅ Solo muestra el nombre de la pantalla actual
         title: Text(_pageTitles[selectedIndex]),
         actions: [
           IconButton(
