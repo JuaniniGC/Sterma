@@ -115,7 +115,7 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: Colors.white, // ✅ Fondo blanco para toda la página
+      backgroundColor: Colors.white,
       body: Column(
         children: [
           Padding(
@@ -149,12 +149,8 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
             ),
           ),
 
-          // ❌ ELIMINADO: Texto de "comunidades encontradas"
           Expanded(
-            child: Container(
-              color: Colors.white, // ✅ Fondo blanco para el área de la lista
-              child: _buildCommunityList(),
-            ),
+            child: Container(color: Colors.white, child: _buildCommunityList()),
           ),
         ],
       ),
@@ -167,7 +163,7 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
 
     if (isLoading) {
       return Container(
-        color: Colors.white, // ✅ Fondo blanco durante carga
+        color: Colors.white,
         child: Center(
           child: CircularProgressIndicator(color: colorScheme.primary),
         ),
@@ -176,7 +172,7 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
 
     if (errorMessage != null) {
       return Container(
-        color: Colors.white, // ✅ Fondo blanco en error
+        color: Colors.white,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -214,7 +210,7 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
 
     if (communityList.isEmpty) {
       return Container(
-        color: Colors.white, // ✅ Fondo blanco cuando no hay datos
+        color: Colors.white,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -250,7 +246,7 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
 
     return RefreshIndicator(
       color: colorScheme.primary,
-      backgroundColor: Colors.white, // ✅ Fondo blanco para el refresh indicator
+      backgroundColor: Colors.white,
       onRefresh: () => fetchCommunities(
         searchQuery: _searchController.text.isEmpty
             ? null
@@ -315,13 +311,13 @@ class CommunityGeneralInfoCard extends StatelessWidget {
       child: Card(
         elevation: 4,
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        color: Colors.white, // ✅ Fondo blanco para las tarjetas
+        color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ✅ Header con nombre y CIF
+              // Header con nombre y CIF
               Row(
                 children: [
                   Icon(Icons.home, color: colorScheme.primary, size: 24),
@@ -332,8 +328,7 @@ class CommunityGeneralInfoCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color:
-                            Colors.black87, // ✅ Texto oscuro sobre fondo blanco
+                        color: Colors.black87,
                       ),
                     ),
                   ),
@@ -359,17 +354,14 @@ class CommunityGeneralInfoCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
 
-              // ✅ Descripción
+              // Descripción
               Text(
                 description,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black87, // ✅ Texto oscuro sobre fondo blanco
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.black87),
               ),
               const SizedBox(height: 12),
 
-              // ✅ Ubicación
+              // Ubicación
               Row(
                 children: [
                   Icon(Icons.location_on, size: 18, color: Colors.grey[600]),
@@ -379,8 +371,7 @@ class CommunityGeneralInfoCard extends StatelessWidget {
                       location,
                       style: const TextStyle(
                         fontSize: 14,
-                        color:
-                            Colors.black54, // ✅ Texto gris sobre fondo blanco
+                        color: Colors.black54,
                       ),
                     ),
                   ),
@@ -388,7 +379,7 @@ class CommunityGeneralInfoCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
 
-              // ✅ Responsable
+              // Responsable
               Row(
                 children: [
                   Icon(Icons.person, size: 18, color: Colors.grey[600]),
@@ -406,7 +397,7 @@ class CommunityGeneralInfoCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
 
-              // ✅ Teléfono
+              // Teléfono
               Row(
                 children: [
                   Icon(Icons.phone, size: 16, color: Colors.grey[600]),

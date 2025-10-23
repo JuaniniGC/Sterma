@@ -17,7 +17,6 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
 
   final TextEditingController _searchController = TextEditingController();
 
-  // ✅ Nuevo: Tipo de búsqueda seleccionado
   String _selectedSearchType = 'rae'; // 'rae' o 'communityName'
 
   @override
@@ -41,7 +40,6 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
 
       final Map<String, dynamic> queryParameters = {};
       if (searchQuery != null && searchQuery.isNotEmpty) {
-        // ✅ Usar el tipo de búsqueda seleccionado
         queryParameters[_selectedSearchType] = searchQuery;
       }
 
@@ -84,12 +82,12 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
     fetchElevators();
   }
 
-  // ✅ Cambiar tipo de búsqueda con botones
+  // Cambiar tipo de búsqueda con botones
   void _changeSearchType(String newType) {
     setState(() {
       _selectedSearchType = newType;
     });
-    // 🔄 Si hay texto en la búsqueda, hacer nueva búsqueda con el tipo seleccionado
+    // Si hay texto en la búsqueda, hacer nueva búsqueda con el tipo seleccionado
     if (_searchController.text.isNotEmpty) {
       fetchElevators(searchQuery: _searchController.text);
     }
@@ -130,14 +128,14 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: Colors.white, // ✅ Fondo blanco para toda la página
+      backgroundColor: Colors.white,
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                // ✅ Barra de búsqueda
+                //  Barra de búsqueda
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
@@ -167,7 +165,7 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
                 ),
                 const SizedBox(height: 12),
 
-                // ✅ Botones de selección de tipo de búsqueda (usando tema)
+                // Botones de selección de tipo de búsqueda (usando tema)
                 Row(
                   children: [
                     Text(
@@ -180,7 +178,7 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
                     ),
                     const SizedBox(width: 16),
 
-                    // ✅ Botón RAE
+                    //  Botón RAE
                     ElevatedButton(
                       onPressed: () => _changeSearchType('rae'),
                       style: ElevatedButton.styleFrom(
@@ -230,17 +228,14 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
                     ),
                     const SizedBox(width: 12),
 
-                    // ✅ Botón Comunidad (mismo color azul que RAE)
                     ElevatedButton(
                       onPressed: () => _changeSearchType('communityName'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _selectedSearchType == 'communityName'
-                            ? colorScheme
-                                  .primary // ✅ Mismo color azul
+                            ? colorScheme.primary
                             : colorScheme.surface,
                         foregroundColor: _selectedSearchType == 'communityName'
-                            ? colorScheme
-                                  .onPrimary // ✅ Mismo texto blanco
+                            ? colorScheme.onPrimary
                             : colorScheme.onSurface,
                         elevation: _selectedSearchType == 'communityName'
                             ? 2
@@ -249,8 +244,7 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
                           borderRadius: BorderRadius.circular(8),
                           side: BorderSide(
                             color: _selectedSearchType == 'communityName'
-                                ? colorScheme
-                                      .primary // ✅ Mismo borde azul
+                                ? colorScheme.primary
                                 : colorScheme.outline.withOpacity(0.3),
                             width: 1,
                           ),
@@ -267,8 +261,7 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
                             Icons.home,
                             size: 16,
                             color: _selectedSearchType == 'communityName'
-                                ? colorScheme
-                                      .onPrimary // ✅ Mismo icono blanco
+                                ? colorScheme.onPrimary
                                 : colorScheme.onSurface,
                           ),
                           const SizedBox(width: 6),
@@ -290,26 +283,20 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
             ),
           ),
 
-          // ❌ ELIMINADO: Texto de "ascensores encontrados"
           Expanded(
-            child: Container(
-              color: Colors.white, // ✅ Fondo blanco para el área de la lista
-              child: _buildElevatorList(),
-            ),
+            child: Container(color: Colors.white, child: _buildElevatorList()),
           ),
         ],
       ),
     );
   }
 
-  // ✅ Texto del hint dinámico según el tipo de búsqueda
   String _getSearchHintText() {
     return _selectedSearchType == 'rae'
         ? 'Buscar por código RAE...'
         : 'Buscar por nombre de comunidad...';
   }
 
-  // ✅ Descripción de búsqueda dinámica
   String _getSearchDescription() {
     return _selectedSearchType == 'rae' ? 'para RAE' : 'para comunidad';
   }
@@ -320,7 +307,7 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
 
     if (isLoading) {
       return Container(
-        color: Colors.white, // ✅ Fondo blanco durante carga
+        color: Colors.white,
         child: Center(
           child: CircularProgressIndicator(color: colorScheme.primary),
         ),
@@ -329,7 +316,7 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
 
     if (errorMessage != null) {
       return Container(
-        color: Colors.white, // ✅ Fondo blanco en error
+        color: Colors.white,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -367,7 +354,7 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
 
     if (elevatorList.isEmpty) {
       return Container(
-        color: Colors.white, // ✅ Fondo blanco cuando no hay datos
+        color: Colors.white,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -384,10 +371,7 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
                 _searchController.text.isEmpty
                     ? 'No hay ascensores disponibles'
                     : 'No se encontraron ascensores ${_getSearchDescription()} "${_searchController.text}"',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600], // ✅ Gris sobre fondo blanco
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 textAlign: TextAlign.center,
               ),
               if (_searchController.text.isNotEmpty)
@@ -406,7 +390,7 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
 
     return RefreshIndicator(
       color: colorScheme.primary,
-      backgroundColor: Colors.white, // ✅ Fondo blanco para el refresh indicator
+      backgroundColor: Colors.white,
       onRefresh: () => fetchElevators(
         searchQuery: _searchController.text.isEmpty
             ? null
@@ -461,13 +445,13 @@ class ElevatorGeneralInfoCard extends StatelessWidget {
       child: Card(
         elevation: 4,
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        color: Colors.white, // ✅ Fondo blanco para las tarjetas
+        color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ✅ Header con RAE y año de instalación
+              // Header con RAE y año de instalación
               Row(
                 children: [
                   Icon(Icons.elevator, color: colorScheme.primary, size: 24),
@@ -478,8 +462,7 @@ class ElevatorGeneralInfoCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color:
-                            Colors.black87, // ✅ Texto oscuro sobre fondo blanco
+                        color: Colors.black87,
                       ),
                     ),
                   ),
@@ -505,7 +488,7 @@ class ElevatorGeneralInfoCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
 
-              // ✅ Información de la comunidad
+              // Información de la comunidad
               Text(
                 communityName,
                 style: TextStyle(
@@ -516,7 +499,7 @@ class ElevatorGeneralInfoCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
 
-              // ✅ Ubicación
+              // Ubicación
               Row(
                 children: [
                   Icon(Icons.location_on, size: 18, color: Colors.grey[600]),
@@ -526,8 +509,7 @@ class ElevatorGeneralInfoCard extends StatelessWidget {
                       location,
                       style: const TextStyle(
                         fontSize: 14,
-                        color:
-                            Colors.black54, // ✅ Texto gris sobre fondo blanco
+                        color: Colors.black54,
                       ),
                     ),
                   ),

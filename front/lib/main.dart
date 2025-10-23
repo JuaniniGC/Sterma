@@ -134,11 +134,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_pageTitles[selectedIndex]),
+        title: Text(
+          _pageTitles[selectedIndex],
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Color(0xFF2051E5),
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Cerrar sesión',
+            icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: _logout,
           ),
         ],
