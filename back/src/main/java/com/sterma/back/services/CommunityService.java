@@ -2,8 +2,10 @@ package com.sterma.back.services;
 
 import com.sterma.back.dtos.community.CreateCommunityRequest;
 import com.sterma.back.dtos.community.UpdateCommunityRequest;
+import com.sterma.back.dtos.community.list.ListCommunityResponse;
 import com.sterma.back.models.*;
 import com.sterma.back.repositories.CommunityRepository;
+import com.sterma.back.repositories.ElevatorRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -20,9 +22,11 @@ import java.util.Optional;
 public class CommunityService {
 
     private final CommunityRepository communityRepository;
+    private final ElevatorRepository elevatorRepository;
 
-    public CommunityService(CommunityRepository communityRepository) {
+    public CommunityService(CommunityRepository communityRepository, ElevatorRepository elevatorRepository) {
         this.communityRepository = communityRepository;
+        this.elevatorRepository = elevatorRepository;
     }
 
     @Transactional(readOnly = true)
@@ -32,6 +36,18 @@ public class CommunityService {
         }
         return communityRepository.findAll(pageable);
     }
+
+    //TODO: mejorar las busqueda del numero de ascensores por comunidad (metodo listAllWithElevators)
+    @Transactional(readOnly = true)
+    public Page<ListCommunityResponse> listAllWithElevators(String name, Pageable pageable, ElevatorService elevatorService) {
+        Page<Community> communities = listAll(name, pageable);
+
+        return communities.map(community -> {
+            List<Elevator> elevators = elevatorRepository.findByCommunityId(community.getId());
+            return ListCommunityResponse.from(community, elevators);
+        });
+    }
+
 
     @Transactional(readOnly = true)
     public Optional<Community> getById(Long id){

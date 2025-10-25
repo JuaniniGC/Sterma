@@ -25,4 +25,6 @@ public interface ElevatorRepository  extends JpaRepository<Elevator, Long> {
     Page<Elevator> findByFilters(@Param("elevatorName") String elevatorName,
                                  @Param("communityName") String communityName,
                                  Pageable pageable);
+
+
 }
