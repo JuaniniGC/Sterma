@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:front/core/services/dio_service.dart';
+import 'package:front/data/models/community_model.dart';
+import 'package:front/pages/community_detail_page.dart';
 
 class CommunitiesPage extends StatefulWidget {
   const CommunitiesPage({super.key});
@@ -10,7 +12,7 @@ class CommunitiesPage extends StatefulWidget {
 }
 
 class _CommunitiesPageState extends State<CommunitiesPage> {
-  List<dynamic> communityList = [];
+  List<Community> communityList = []; // ✅ Cambiado a List<Community>
   bool isLoading = true;
   String? errorMessage;
   final DioService _dioService = DioService();
@@ -48,8 +50,13 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
 
       final List<dynamic> data = response.data['content'] ?? [];
 
+      // ✅ Convertir a objetos Community
+      final List<Community> communities = data
+          .map((json) => Community.fromJson(json))
+          .toList();
+
       setState(() {
-        communityList = data;
+        communityList = communities;
         isLoading = false;
       });
     } on DioException catch (e) {
@@ -65,6 +72,16 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
         isLoading = false;
       });
     }
+  }
+
+  // ✅ Función para navegar a los detalles
+  void _navigateToCommunityDetails(Community community) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CommunityDetailPage(community: community),
+      ),
+    );
   }
 
   void _onSearchChanged(String query) {
@@ -256,21 +273,11 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
         itemCount: communityList.length,
         itemBuilder: (context, index) {
           final community = communityList[index];
-          final localization = community['localization'] ?? {};
-          final leaderInfo = community['communityLeaderInfo'] ?? {};
-
-          final location =
-              "${localization['street'] ?? ''}, ${localization['city'] ?? ''} (${localization['postalCode'] ?? ''})";
 
           return CommunityGeneralInfoCard(
-            name: community['name'] ?? 'Sin nombre',
-            description: community['description'] ?? '',
-            location: location,
-            leaderName: leaderInfo['communityLeaderName'] ?? 'Sin líder',
-            leaderPhone:
-                leaderInfo['communityLeaderTelephone']?.toString() ?? '',
-            leaderNote: leaderInfo['communityLeaderNote'] ?? '',
-            cif: community['cif'] ?? '',
+            community: community, // ✅ Pasar el objeto Community completo
+            onTap: () =>
+                _navigateToCommunityDetails(community), // ✅ Agregar navegación
           );
         },
       ),
@@ -278,24 +285,15 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
   }
 }
 
+// ✅ Actualizar el widget para recibir Community y onTap
 class CommunityGeneralInfoCard extends StatelessWidget {
-  final String name;
-  final String description;
-  final String location;
-  final String leaderName;
-  final String leaderPhone;
-  final String leaderNote;
-  final String cif;
+  final Community community;
+  final VoidCallback onTap;
 
   const CommunityGeneralInfoCard({
     super.key,
-    required this.name,
-    required this.description,
-    required this.location,
-    required this.leaderName,
-    required this.leaderPhone,
-    required this.leaderNote,
-    required this.cif,
+    required this.community,
+    required this.onTap,
   });
 
   @override
@@ -304,9 +302,7 @@ class CommunityGeneralInfoCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return InkWell(
-      onTap: () {
-        print('Comunidad seleccionada: $name');
-      },
+      onTap: onTap, // ✅ Usar el callback de navegación
       borderRadius: BorderRadius.circular(12),
       child: Card(
         elevation: 4,
@@ -324,7 +320,7 @@ class CommunityGeneralInfoCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      name,
+                      community.name,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -342,7 +338,7 @@ class CommunityGeneralInfoCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      'CIF: $cif',
+                      'CIF: ${community.cif}',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -356,7 +352,7 @@ class CommunityGeneralInfoCard extends StatelessWidget {
 
               // Descripción
               Text(
-                description,
+                community.description,
                 style: TextStyle(fontSize: 16, color: Colors.black87),
               ),
               const SizedBox(height: 12),
@@ -368,7 +364,7 @@ class CommunityGeneralInfoCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      location,
+                      community.localization.fullAddress,
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.black54,
@@ -385,12 +381,12 @@ class CommunityGeneralInfoCard extends StatelessWidget {
                   Icon(Icons.person, size: 18, color: Colors.grey[600]),
                   const SizedBox(width: 4),
                   Text(
-                    leaderName,
+                    community.communityLeaderInfo.communityLeaderName,
                     style: const TextStyle(fontSize: 14, color: Colors.black87),
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '($leaderNote)',
+                    '(${community.communityLeaderInfo.communityLeaderNote})',
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ],
@@ -403,7 +399,7 @@ class CommunityGeneralInfoCard extends StatelessWidget {
                   Icon(Icons.phone, size: 16, color: Colors.grey[600]),
                   const SizedBox(width: 4),
                   Text(
-                    leaderPhone,
+                    community.communityLeaderInfo.communityLeaderTelephone,
                     style: const TextStyle(fontSize: 14, color: Colors.black87),
                   ),
                 ],
