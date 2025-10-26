@@ -68,8 +68,7 @@ class CommunityLeaderInfo {
   factory CommunityLeaderInfo.fromJson(Map<String, dynamic> json) {
     return CommunityLeaderInfo(
       communityLeaderName: json['communityLeaderName'] ?? '',
-      communityLeaderTelephone:
-          json['communityLeaderTelephone']?.toString() ?? '',
+      communityLeaderTelephone: json['communityLeaderTelephone'] ?? '',
       communityLeaderNote: json['communityLeaderNote'] ?? '',
     );
   }
