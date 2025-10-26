@@ -12,7 +12,7 @@ class CommunitiesPage extends StatefulWidget {
 }
 
 class _CommunitiesPageState extends State<CommunitiesPage> {
-  List<Community> communityList = []; // ✅ Cambiado a List<Community>
+  List<Community> communityList = [];
   bool isLoading = true;
   String? errorMessage;
   final DioService _dioService = DioService();
@@ -50,7 +50,6 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
 
       final List<dynamic> data = response.data['content'] ?? [];
 
-      // ✅ Convertir a objetos Community
       final List<Community> communities = data
           .map((json) => Community.fromJson(json))
           .toList();
@@ -74,7 +73,6 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
     }
   }
 
-  // ✅ Función para navegar a los detalles
   void _navigateToCommunityDetails(Community community) {
     Navigator.push(
       context,
@@ -275,7 +273,7 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
           final community = communityList[index];
 
           return CommunityGeneralInfoCard(
-            community: community, // ✅ Pasar el objeto Community completo
+            community: community,
             onTap: () =>
                 _navigateToCommunityDetails(community), // ✅ Agregar navegación
           );
@@ -285,7 +283,6 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
   }
 }
 
-// ✅ Actualizar el widget para recibir Community y onTap
 class CommunityGeneralInfoCard extends StatelessWidget {
   final Community community;
   final VoidCallback onTap;
@@ -302,7 +299,7 @@ class CommunityGeneralInfoCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return InkWell(
-      onTap: onTap, // ✅ Usar el callback de navegación
+      onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Card(
         elevation: 4,
