@@ -15,19 +15,19 @@ INSERT INTO community (
 VALUES
     (101, 'Residencial Las Rosas', 'Edificio residencial de 10 plantas', 'A12345678',
      'Madrid', 'Calle Falsa 123', '28001',
-     'Juan Pérez', 600111222, 'Presidente'),
+     'Juan Pérez', '600111222', 'Presidente'),
 
     (102, 'Torre Barcelona', 'Torre de oficinas de 15 plantas', 'B87654321',
      'Barcelona', 'Gran Vía 456', '08001',
-     'Ana Ruiz', 600222333, 'Presidenta'),
+     'Ana Ruiz', '600222333', 'Presidenta'),
 
     (103, 'Complejo Vallecas', 'Conjunto de 3 edificios residenciales', 'C11223344',
      'Madrid', 'Av. Vallecas 789', '28031',
-     'Luis Gómez', 600333444, 'Presidente'),
+     'Luis Gómez', '600333444', 'Presidente'),
 
     (104, 'Edificio Diagonal', 'Edificio emblemático en Barcelona', 'D44332211',
      'Barcelona', 'Diagonal 101', '08011',
-     'Marta Vidal', 600444555, 'Presidenta');
+     'Marta Vidal', '600444555', 'Presidenta');
 
 -- === ELEVATORS ===
 INSERT INTO elevator (id, rae, instalation_year, community_id)
