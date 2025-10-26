@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:front/core/services/dio_service.dart';
+import 'package:front/data/models/elevator_model.dart';
+import 'elevator_detail_page.dart';
 
 class ElevatorsPage extends StatefulWidget {
   const ElevatorsPage({super.key});
@@ -10,14 +12,13 @@ class ElevatorsPage extends StatefulWidget {
 }
 
 class _ElevatorsPageState extends State<ElevatorsPage> {
-  List<dynamic> elevatorList = [];
+  List<Elevator> elevatorList = [];
   bool isLoading = true;
   String? errorMessage;
   final DioService _dioService = DioService();
 
   final TextEditingController _searchController = TextEditingController();
-
-  String _selectedSearchType = 'rae'; // 'rae' o 'communityName'
+  String _selectedSearchType = 'rae';
 
   @override
   void initState() {
@@ -38,20 +39,15 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
         errorMessage = null;
       });
 
-      final Map<String, dynamic> queryParameters = {};
-      if (searchQuery != null && searchQuery.isNotEmpty) {
-        queryParameters[_selectedSearchType] = searchQuery;
-      }
-
-      final response = await _dioService.get(
-        '/elevator',
-        queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+      final data = await _dioService.getElevators(
+        searchQuery: searchQuery,
+        searchType: _selectedSearchType,
       );
 
-      final List<dynamic> data = response.data['content'] ?? [];
+      final elevators = data.map((json) => Elevator.fromJson(json)).toList();
 
       setState(() {
-        elevatorList = data;
+        elevatorList = elevators.cast<Elevator>();
         isLoading = false;
       });
     } on DioException catch (e) {
@@ -69,6 +65,15 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
     }
   }
 
+  void _navigateToElevatorDetails(Elevator elevator) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ElevatorDetailPage(elevator: elevator),
+      ),
+    );
+  }
+
   void _onSearchChanged(String query) {
     fetchElevators(searchQuery: query.isEmpty ? null : query);
   }
@@ -82,12 +87,10 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
     fetchElevators();
   }
 
-  // Cambiar tipo de búsqueda con botones
   void _changeSearchType(String newType) {
     setState(() {
       _selectedSearchType = newType;
     });
-    // Si hay texto en la búsqueda, hacer nueva búsqueda con el tipo seleccionado
     if (_searchController.text.isNotEmpty) {
       fetchElevators(searchQuery: _searchController.text);
     }
@@ -135,7 +138,6 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                //  Barra de búsqueda
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
@@ -164,8 +166,6 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
                   onSubmitted: _onSearchSubmitted,
                 ),
                 const SizedBox(height: 12),
-
-                // Botones de selección de tipo de búsqueda (usando tema)
                 Row(
                   children: [
                     Text(
@@ -177,8 +177,6 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
                       ),
                     ),
                     const SizedBox(width: 16),
-
-                    //  Botón RAE
                     ElevatedButton(
                       onPressed: () => _changeSearchType('rae'),
                       style: ElevatedButton.styleFrom(
@@ -227,7 +225,6 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
                       ),
                     ),
                     const SizedBox(width: 12),
-
                     ElevatedButton(
                       onPressed: () => _changeSearchType('communityName'),
                       style: ElevatedButton.styleFrom(
@@ -282,7 +279,6 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
               ],
             ),
           ),
-
           Expanded(
             child: Container(color: Colors.white, child: _buildElevatorList()),
           ),
@@ -400,17 +396,10 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
         itemCount: elevatorList.length,
         itemBuilder: (context, index) {
           final elevator = elevatorList[index];
-          final community = elevator['community'] ?? {};
-          final localization = community['localization'] ?? {};
-
-          final location =
-              "${localization['street'] ?? ''}, ${localization['city'] ?? ''} (${localization['postalCode'] ?? ''})";
 
           return ElevatorGeneralInfoCard(
-            rae: elevator['rae'] ?? 'Sin RAE',
-            installationYear: elevator['instalationYear']?.toString() ?? 'N/A',
-            communityName: community['name'] ?? 'Sin comunidad',
-            location: location,
+            elevator: elevator,
+            onTap: () => _navigateToElevatorDetails(elevator),
           );
         },
       ),
@@ -419,17 +408,13 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
 }
 
 class ElevatorGeneralInfoCard extends StatelessWidget {
-  final String rae;
-  final String installationYear;
-  final String communityName;
-  final String location;
+  final Elevator elevator;
+  final VoidCallback onTap;
 
   const ElevatorGeneralInfoCard({
     super.key,
-    required this.rae,
-    required this.installationYear,
-    required this.communityName,
-    required this.location,
+    required this.elevator,
+    required this.onTap,
   });
 
   @override
@@ -438,9 +423,7 @@ class ElevatorGeneralInfoCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return InkWell(
-      onTap: () {
-        print('Ascensor seleccionado: $rae');
-      },
+      onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Card(
         elevation: 4,
@@ -451,14 +434,13 @@ class ElevatorGeneralInfoCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header con RAE y año de instalación
               Row(
                 children: [
                   Icon(Icons.elevator, color: colorScheme.primary, size: 24),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'RAE: $rae',
+                      'RAE: ${elevator.rae}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -476,7 +458,7 @@ class ElevatorGeneralInfoCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      'Año: $installationYear',
+                      'Año: ${elevator.installationYear}',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -487,10 +469,8 @@ class ElevatorGeneralInfoCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-
-              // Información de la comunidad
               Text(
-                communityName,
+                elevator.community.name,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -498,15 +478,13 @@ class ElevatorGeneralInfoCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-
-              // Ubicación
               Row(
                 children: [
                   Icon(Icons.location_on, size: 18, color: Colors.grey[600]),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      location,
+                      elevator.community.localization.fullAddress,
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.black54,
