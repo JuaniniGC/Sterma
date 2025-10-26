@@ -188,6 +188,123 @@ class DioService {
     );
   }
 
+  // ========== MÉTODOS ESPECÍFICOS PARA ASCENSORES ==========
+
+  /// Obtiene todos los ascensores, opcionalmente filtrados por búsqueda
+  Future<List<dynamic>> getElevators({
+    String? searchQuery,
+    String searchType = 'rae',
+  }) async {
+    try {
+      final Map<String, dynamic> queryParameters = {};
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        queryParameters[searchType] = searchQuery;
+      }
+
+      final response = await _dio.get(
+        '/elevator',
+        queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+      );
+
+      return response.data['content'] ?? [];
+    } on DioException catch (e) {
+      throw Exception('Error al obtener ascensores: ${_getDioErrorMessage(e)}');
+    } catch (e) {
+      throw Exception('Error inesperado al obtener ascensores: $e');
+    }
+  }
+
+  /// Obtiene un ascensor específico por su ID
+  Future<Map<String, dynamic>> getElevatorById(String id) async {
+    try {
+      final response = await _dio.get('/elevator/$id');
+      return response.data;
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener el ascensor: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception('Error inesperado al obtener el ascensor: $e');
+    }
+  }
+
+  /// Obtiene ascensores por comunidad
+  Future<List<dynamic>> getElevatorsByCommunity(String communityName) async {
+    try {
+      final response = await _dio.get(
+        '/elevator',
+        queryParameters: {'communityName': communityName},
+      );
+
+      return response.data['content'] ?? [];
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener ascensores por comunidad: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception(
+        'Error inesperado al obtener ascensores por comunidad: $e',
+      );
+    }
+  }
+
+  /// Obtiene ascensores por RAE
+  Future<List<dynamic>> getElevatorsByRae(String rae) async {
+    try {
+      final response = await _dio.get(
+        '/elevator',
+        queryParameters: {'rae': rae},
+      );
+
+      return response.data['content'] ?? [];
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener ascensores por RAE: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception('Error inesperado al obtener ascensores por RAE: $e');
+    }
+  }
+
+  // ========== MÉTODOS ESPECÍFICOS PARA COMUNIDADES ==========
+
+  /// Obtiene todas las comunidades, opcionalmente filtradas por nombre
+  Future<List<dynamic>> getCommunities({String? searchQuery}) async {
+    try {
+      final Map<String, dynamic> queryParameters = {};
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        queryParameters['name'] = searchQuery;
+      }
+
+      final response = await _dio.get(
+        '/community',
+        queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+      );
+
+      return response.data['content'] ?? [];
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener comunidades: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception('Error inesperado al obtener comunidades: $e');
+    }
+  }
+
+  /// Obtiene una comunidad específica por su ID
+  Future<Map<String, dynamic>> getCommunityById(String id) async {
+    try {
+      final response = await _dio.get('/community/$id');
+      return response.data;
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener la comunidad: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception('Error inesperado al obtener la comunidad: $e');
+    }
+  }
+
   // ========== UTILIDADES ==========
 
   String _getDioErrorMessage(DioException e) {
