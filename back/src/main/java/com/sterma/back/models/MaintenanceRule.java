@@ -1,7 +1,6 @@
 package com.sterma.back.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "maintenance_rules")
-public class MaintenanceRules {
+public class MaintenanceRule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,6 +25,6 @@ public class MaintenanceRules {
     @Column(nullable = false)
     private MaintenanceType maintenanceType;
 
-    public MaintenanceRules() {
+    public MaintenanceRule() {
     }
 }
