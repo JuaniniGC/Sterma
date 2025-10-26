@@ -59,13 +59,16 @@ VALUES
     (105, 'Limpieza general', 'Limpieza profunda de cabina y mecanismos', 5, 'BIANNUAL');
 
 -- === MAINTENANCE REPORTS ===
-INSERT INTO maintenance_report (id, start_date, end_date, commentary, technician_id, elevator_id)
+INSERT INTO maintenance_report (id, start_date, end_date, commentary, technician_id, elevator_id, maintenance_type)
 VALUES
-    (101, '2025-01-15 09:00:00', '2025-01-15 11:30:00', 'Revisión mensual rutinaria - Todo correcto', 101, 101),
-    (102, '2025-01-16 10:00:00', '2025-01-16 12:45:00', 'Lubricación realizada - Se detectó desgaste en rodamientos', 102, 102),
-    (103, '2025-02-10 08:30:00', '2025-02-10 16:00:00', 'Revisión anual completa - Cambiados 3 componentes', 103, 103),
-    (104, '2025-02-12 09:15:00', '2025-02-12 10:30:00', 'Comprobación de seguridad - Sistemas OK', 101, 104),
-    (105, '2025-03-05 11:00:00', '2025-03-05 13:20:00', 'Limpieza general - Cabina en buen estado', 101, 105);
+    (101, '2025-01-15 09:00:00', '2025-01-15 11:30:00', 'Revisión mensual rutinaria - Todo correcto', 101, 101, 'MONTHLY'),
+    (102, '2025-01-16 10:00:00', '2025-01-16 12:45:00', 'Lubricación realizada - Se detectó desgaste en rodamientos', 102, 102, 'BIANNUAL'),
+    (103, '2025-02-10 08:30:00', '2025-02-10 16:00:00', 'Revisión anual completa - Cambiados 3 componentes', 103, 103, 'ANNUAL'),
+    (104, '2025-02-12 09:15:00', '2025-02-12 10:30:00', 'Comprobación de seguridad - Sistemas OK', 101, 104, 'MONTHLY'),
+    (105, '2025-03-05 11:00:00', '2025-03-05 13:20:00', 'Limpieza general - Cabina en buen estado', 101, 105, 'BIANNUAL'),
+    (106, '2025-03-20 14:00:00', '2025-03-20 17:30:00', 'Revisión semestral completa', 102, 101, 'BIANNUAL'),
+    (107, '2025-04-01 08:00:00', '2025-04-01 09:15:00', 'Revisión mensual rápida', 103, 102, 'MONTHLY'),
+    (108, '2025-06-15 07:30:00', '2025-06-15 15:45:00', 'Mantenimiento anual exhaustivo', 101, 103, 'ANNUAL');
 
 -- === INCIDENT REPORTS ===
 INSERT INTO incident_report (id, start_date, end_date, commentary, technician_id, elevator_id)
