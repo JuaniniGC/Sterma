@@ -7,13 +7,11 @@ import com.sterma.back.models.*;
 import com.sterma.back.repositories.CommunityRepository;
 import com.sterma.back.repositories.ElevatorRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -37,7 +35,6 @@ public class CommunityService {
         return communityRepository.findAll(pageable);
     }
 
-    //TODO: mejorar las busqueda del numero de ascensores por comunidad (metodo listAllWithElevators)
     @Transactional(readOnly = true)
     public Page<ListCommunityResponse> listAllWithElevators(String name, Pageable pageable, ElevatorService elevatorService) {
         Page<Community> communities = listAll(name, pageable);
@@ -48,7 +45,6 @@ public class CommunityService {
         });
     }
 
-
     @Transactional(readOnly = true)
     public Optional<Community> getById(Long id){
         return communityRepository.findById(id);
@@ -56,6 +52,7 @@ public class CommunityService {
 
     @Transactional
     public Community createCommunity(CreateCommunityRequest request) {
+        validateCIFUniqueness(request.getCIF(), null);
 
         Localization localization = Localization.builder()
                 .city(request.getCity())
@@ -85,6 +82,8 @@ public class CommunityService {
         checkCommunityExists(id);
         Community community = getExistingCommunity(id);
 
+        validateCIFUniqueness(request.getCIF(), id);
+
         community.getLocalization().setCity(request.getCity());
         community.getLocalization().setPostalCode(request.getPostalCode());
         community.getLocalization().setStreet(request.getStreet());
@@ -100,6 +99,31 @@ public class CommunityService {
         return communityRepository.save(community);
     }
 
+    @Transactional
+    public void delete(Long id) {
+        checkCommunityExists(id);
+
+        List<Elevator> elevators = elevatorRepository.findByCommunityId(id);
+        if (!elevators.isEmpty()) {
+            elevatorRepository.deleteAll(elevators);
+        }
+
+        communityRepository.deleteById(id);
+    }
+
+    private void validateCIFUniqueness(String cif, Long currentCommunityId) {
+        boolean cifExists;
+        if (currentCommunityId != null) {
+            cifExists = communityRepository.existsByCIFAndIdNot(cif, currentCommunityId);
+        } else {
+            cifExists = communityRepository.existsByCIF(cif);
+        }
+
+        if (cifExists) {
+            throw new IllegalArgumentException("Ya existe una comunidad con el CIF: " + cif);
+        }
+    }
+
     private Community getExistingCommunity(Long id) {
         return communityRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Comunidad no encontrada con ID: " + id));
@@ -113,5 +137,4 @@ public class CommunityService {
             throw new NoSuchElementException("Comunidad no encontrada con ID: " + communityId);
         }
     }
-
 }

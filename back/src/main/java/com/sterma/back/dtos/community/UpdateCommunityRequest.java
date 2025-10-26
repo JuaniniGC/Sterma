@@ -26,6 +26,6 @@ public class UpdateCommunityRequest {
     private String postalCode;
 
     private String communityLeaderName;
-    private Integer communityLeaderTelephone;
+    private String communityLeaderTelephone;
     private String communityLeaderNote;
 }

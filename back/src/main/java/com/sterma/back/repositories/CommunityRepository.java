@@ -10,4 +10,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CommunityRepository extends JpaRepository<Community, Long> {
     Page<Community> findByNameContainingIgnoreCase(String name, Pageable pageable);
+
+    boolean existsByCIF(String cif);
+    boolean existsByCIFAndIdNot(String cif, Long id);
+
 }

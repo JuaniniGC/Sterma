@@ -22,7 +22,7 @@ public class ListCommunityResponse {
     private String postalCode;
     private String street;
     private String communityLeaderName;
-    private Integer communityLeaderTelephone;
+    private String communityLeaderTelephone;
     private String communityLeaderNote;
     private List<Elevator> elevators;
 
