@@ -9,6 +9,7 @@ import com.sterma.back.models.reports.MaintenanceReport;
 import com.sterma.back.repositories.MaintenanceReportRepository;
 import com.sterma.back.repositories.MaintenanceRuleRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,8 +26,17 @@ public class BiannualMaintenanceService implements MaintenanceServiceStrategy {
 
 
     @Override
+    @Transactional
     public MaintenanceReport createReport(CreateMaintenanceReportRequest request, Technician technician, Elevator elevator) {
-        return null;
+        MaintenanceReport maintenanceReport = MaintenanceReport.builder()
+                .maintenanceType(this.getMaintenanceType())
+                .commentary(request.getCommentary())
+                .technician(technician)
+                .elevator(elevator)
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .build();
+        return maintenanceReportRepository.save(maintenanceReport);
     }
 
     @Override
@@ -35,7 +45,7 @@ public class BiannualMaintenanceService implements MaintenanceServiceStrategy {
     }
 
     @Override
-    public MaintenanceType getType() {
+    public MaintenanceType getMaintenanceType() {
         return MaintenanceType.BIANNUAL;
     }
 }

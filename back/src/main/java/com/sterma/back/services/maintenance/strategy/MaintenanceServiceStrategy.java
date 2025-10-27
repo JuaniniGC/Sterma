@@ -12,6 +12,6 @@ import java.util.List;
 public interface MaintenanceServiceStrategy {
     MaintenanceReport createReport(CreateMaintenanceReportRequest request, Technician technician, Elevator elevator);
     List<MaintenanceRule> getRules();
-    MaintenanceType getType();
+    MaintenanceType getMaintenanceType();
 
 }

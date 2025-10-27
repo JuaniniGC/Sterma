@@ -4,12 +4,15 @@ import com.sterma.back.models.Elevator;
 import com.sterma.back.models.Technician;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
 @MappedSuperclass
+@SuperBuilder
 public abstract class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,11 +1,9 @@
 package com.sterma.back.controller;
 
-import com.sterma.back.models.Elevator;
+import com.sterma.back.dtos.maintenanceReport.CreateMaintenanceReportRequest;
 import com.sterma.back.models.MaintenanceRule;
-import com.sterma.back.models.MaintenanceType;
+import com.sterma.back.models.reports.MaintenanceReport;
 import com.sterma.back.services.maintenance.MaintenanceService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +30,22 @@ public class MaintenanceController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
+    @PostMapping()
+    public ResponseEntity<?> createMaintenanceReport(@RequestBody CreateMaintenanceReportRequest request) {
+        try {
+            MaintenanceReport createdReport = maintenanceService.createMaintenanceRule(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdReport);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error interno al crear el reporte de mantenimiento: " + e.getMessage());
+        }
+    }
+
 
 
 }

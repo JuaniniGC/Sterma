@@ -1,10 +1,12 @@
 package com.sterma.back.services.maintenance;
 
+import com.sterma.back.dtos.maintenanceReport.CreateMaintenanceReportRequest;
+import com.sterma.back.models.Elevator;
 import com.sterma.back.models.MaintenanceRule;
 import com.sterma.back.models.MaintenanceType;
+import com.sterma.back.models.Technician;
 import com.sterma.back.models.reports.MaintenanceReport;
-import com.sterma.back.repositories.MaintenanceReportRepository;
-import com.sterma.back.repositories.MaintenanceRuleRepository;
+import com.sterma.back.repositories.*;
 import com.sterma.back.services.maintenance.strategy.MaintenanceServiceStrategy;
 import org.springframework.stereotype.Service;
 
@@ -21,14 +23,24 @@ public class MaintenanceService {
     private final MaintenanceReportRepository maintenanceReportRepository;
     private final MaintenanceRuleRepository maintenanceRuleRepository;
 
+    private final ElevatorRepository elevatorRepository;
+
+    private final TechnicianRepository technicianRepository;
+
+
 
     public MaintenanceService(List<MaintenanceServiceStrategy> strategies,
                               MaintenanceReportRepository maintenanceReportRepository,
-                              MaintenanceRuleRepository maintenanceRuleRepository){
+                              MaintenanceRuleRepository maintenanceRuleRepository,
+                              ElevatorRepository elevatorRepository,
+                              TechnicianRepository technicianRepository
+    ){
         this.maintenanceReportRepository = maintenanceReportRepository;
         this.maintenanceRuleRepository = maintenanceRuleRepository;
+        this.elevatorRepository = elevatorRepository;
+        this.technicianRepository = technicianRepository;
         for (MaintenanceServiceStrategy strategy : strategies) {
-            strategyMap.put(strategy.getType(), strategy);
+            strategyMap.put(strategy.getMaintenanceType(), strategy);
         }
     }
 
@@ -48,5 +60,32 @@ public class MaintenanceService {
             throw new NoSuchElementException("No se han encontrado reglas para el tipo de mantenimiento: " + maintenanceType);
         }
         return rules;
+    }
+
+    public MaintenanceReport createMaintenanceRule(CreateMaintenanceReportRequest request){
+        checkElevatorExists(request.getElevatorId());
+        checkTechnicianExists(request.getTechnicianId());
+        Elevator elevator = elevatorRepository.getReferenceById(request.getElevatorId());
+        Technician technician = technicianRepository.getReferenceById(request.getTechnicianId());
+        MaintenanceReport createdReport = strategyMap.get(request.getMaintenanceType()).createReport(request, technician, elevator);
+        return createdReport;
+    }
+
+    private void checkElevatorExists(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("El ID de ascensor no puede ser nulo");
+        }
+        if (!elevatorRepository.existsById(id)) {
+            throw new NoSuchElementException("Ascensor no encontrado con ID: " + id);
+        }
+    }
+
+    private void checkTechnicianExists(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("El ID de ascensor no puede ser nulo");
+        }
+        if (!technicianRepository.existsById(id)) {
+            throw new NoSuchElementException("Técnico no encontrado con ID: " + id);
+        }
     }
 }
