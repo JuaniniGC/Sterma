@@ -41,7 +41,7 @@ class CommunityServiceTest {
         validRequest.setPostalCode("28001");
         validRequest.setStreet("Gran Vía 1");
         validRequest.setCommunityLeaderName("Juan Pérez");
-        validRequest.setCommunityLeaderTelephone(600123456);
+        validRequest.setCommunityLeaderTelephone("600123456");
         validRequest.setCommunityLeaderNote("Disponible por las tardes");
 
         updateRequest = new UpdateCommunityRequest();
@@ -52,7 +52,7 @@ class CommunityServiceTest {
         updateRequest.setPostalCode("08001");
         updateRequest.setStreet("Diagonal 123");
         updateRequest.setCommunityLeaderName("Ana López");
-        updateRequest.setCommunityLeaderTelephone(611222333);
+        updateRequest.setCommunityLeaderTelephone("611222333");
         updateRequest.setCommunityLeaderNote("Reuniones los lunes");
 
         Localization localization = Localization.builder()
@@ -63,7 +63,7 @@ class CommunityServiceTest {
 
         CommunityLeaderInfo leaderInfo = CommunityLeaderInfo.builder()
                 .communityLeaderName("Juan Pérez")
-                .communityLeaderTelephone(600123456)
+                .communityLeaderTelephone("600123456")
                 .communityLeaderNote("Disponible por las tardes")
                 .build();
 

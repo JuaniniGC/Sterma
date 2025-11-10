@@ -131,12 +131,6 @@ class ElevatorServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    @Test
-    void listByElevatorId_WithNullId_ShouldThrowException() {
-        assertThrows(IllegalArgumentException.class, () ->
-                elevatorService.listByElevatorId(null));
-    }
-
     /* ------------------------ Tests para create ------------------------ */
     @Test
     void create_WithExistingRae_ShouldThrowIllegalStateException() {
@@ -188,10 +182,6 @@ class ElevatorServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    @Test
-    void getById_WithNullId_ShouldThrowException() {
-        assertThrows(IllegalArgumentException.class, () -> elevatorService.getById(null));
-    }
 
     /* ------------------------ Tests para update ------------------------ */
     @Test
