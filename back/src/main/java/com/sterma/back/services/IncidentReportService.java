@@ -9,6 +9,7 @@ import com.sterma.back.repositories.IncidentReportRepository;
 import com.sterma.back.repositories.TechnicianRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
 @Service
@@ -50,5 +51,15 @@ public class IncidentReportService {
             throw new NoSuchElementException("Ascensor no encontrado con ID: " + id);
         }
     }
+
+    public void checkEndDateIsBeforeStartDate(LocalDateTime startDate, LocalDateTime endDate) {
+        if (startDate != null && endDate != null && !startDate.isBefore(endDate)) {
+            throw new IllegalArgumentException(
+                    "La fecha pasada debe ser anterior a la fecha futura. Fecha pasada: "
+                            + startDate + ", Fecha futura: " + endDate
+            );
+        }
+    }
+
 }
 
