@@ -34,7 +34,7 @@ public class MaintenanceController {
     @PostMapping()
     public ResponseEntity<?> createMaintenanceReport(@RequestBody CreateMaintenanceReportRequest request) {
         try {
-            MaintenanceReport createdReport = maintenanceService.createMaintenanceRule(request);
+            MaintenanceReport createdReport = maintenanceService.createMaintenanceReport(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdReport);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

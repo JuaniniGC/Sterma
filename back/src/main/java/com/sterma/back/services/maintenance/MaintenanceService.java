@@ -62,7 +62,7 @@ public class MaintenanceService {
         return rules;
     }
 
-    public MaintenanceReport createMaintenanceRule(CreateMaintenanceReportRequest request){
+    public MaintenanceReport createMaintenanceReport(CreateMaintenanceReportRequest request){
         checkElevatorExists(request.getElevatorId());
         checkTechnicianExists(request.getTechnicianId());
         Elevator elevator = elevatorRepository.getReferenceById(request.getElevatorId());
