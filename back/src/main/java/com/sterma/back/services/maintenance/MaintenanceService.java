@@ -10,6 +10,7 @@ import com.sterma.back.repositories.*;
 import com.sterma.back.services.maintenance.strategy.MaintenanceServiceStrategy;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,7 @@ public class MaintenanceService {
     public MaintenanceReport createMaintenanceReport(CreateMaintenanceReportRequest request){
         checkElevatorExists(request.getElevatorId());
         checkTechnicianExists(request.getTechnicianId());
+        checkEndDateIsAfterStartDate(request.getStartDate(), request.getEndDate());
         Elevator elevator = elevatorRepository.getReferenceById(request.getElevatorId());
         Technician technician = technicianRepository.getReferenceById(request.getTechnicianId());
         MaintenanceReport createdReport = strategyMap.get(request.getMaintenanceType()).createReport(request, technician, elevator);
@@ -86,6 +88,15 @@ public class MaintenanceService {
         }
         if (!technicianRepository.existsById(id)) {
             throw new NoSuchElementException("Técnico no encontrado con ID: " + id);
+        }
+    }
+
+    public void checkEndDateIsAfterStartDate(LocalDateTime startDate, LocalDateTime endDate) {
+        if (startDate != null && endDate != null && !startDate.isBefore(endDate)) {
+            throw new IllegalArgumentException(
+                    "La fecha pasada debe ser anterior a la fecha futura. Fecha pasada: "
+                            + startDate + ", Fecha futura: " + endDate
+            );
         }
     }
 }

@@ -29,6 +29,7 @@ public class IncidentReportService {
 
     public IncidentReport createIncidentReport(CreateIncidentReportRequest request, String username) {
         checkElevatorExists(request.getElevatorId());
+        checkEndDateIsAfterStartDate(request.getStartDate(), request.getEndDate());
         Elevator elevator = elevatorRepository.findById(request.getElevatorId())
                 .orElseThrow(() -> new NoSuchElementException("Ascensor no encontrado"));
         Technician technician = technicianRepository.findByUsername(username)
@@ -52,7 +53,7 @@ public class IncidentReportService {
         }
     }
 
-    public void checkEndDateIsBeforeStartDate(LocalDateTime startDate, LocalDateTime endDate) {
+    public void checkEndDateIsAfterStartDate(LocalDateTime startDate, LocalDateTime endDate) {
         if (startDate != null && endDate != null && !startDate.isBefore(endDate)) {
             throw new IllegalArgumentException(
                     "La fecha pasada debe ser anterior a la fecha futura. Fecha pasada: "
