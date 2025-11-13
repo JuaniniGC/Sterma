@@ -5,6 +5,7 @@ import com.sterma.back.dtos.maintenanceReport.CreateMaintenanceReportRequest;
 import com.sterma.back.models.reports.IncidentReport;
 import com.sterma.back.models.reports.MaintenanceReport;
 import com.sterma.back.services.IncidentReportService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -27,7 +28,7 @@ public class IncidentReportController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createIncidentReport(@RequestBody CreateIncidentReportRequest request) {
+    public ResponseEntity<?> createIncidentReport(@Valid @RequestBody CreateIncidentReportRequest request) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String username = auth.getName();

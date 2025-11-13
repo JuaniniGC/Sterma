@@ -4,6 +4,7 @@ import com.sterma.back.dtos.maintenanceReport.CreateMaintenanceReportRequest;
 import com.sterma.back.models.MaintenanceRule;
 import com.sterma.back.models.reports.MaintenanceReport;
 import com.sterma.back.services.maintenance.MaintenanceService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class MaintenanceController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> createMaintenanceReport(@RequestBody CreateMaintenanceReportRequest request) {
+    public ResponseEntity<?> createMaintenanceReport(@Valid @RequestBody CreateMaintenanceReportRequest request) {
         try {
             MaintenanceReport createdReport = maintenanceService.createMaintenanceReport(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdReport);
