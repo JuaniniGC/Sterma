@@ -7,6 +7,8 @@ import com.sterma.back.models.reports.IncidentReport;
 import com.sterma.back.repositories.ElevatorRepository;
 import com.sterma.back.repositories.IncidentReportRepository;
 import com.sterma.back.repositories.TechnicianRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,12 +29,13 @@ public class IncidentReportService {
         this.technicianRepository = technicianRepository;
     }
 
-    public IncidentReport createIncidentReport(CreateIncidentReportRequest request, String username) {
+    public IncidentReport createIncidentReport(CreateIncidentReportRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         checkElevatorExists(request.getElevatorId());
         checkEndDateIsAfterStartDate(request.getStartDate(), request.getEndDate());
         Elevator elevator = elevatorRepository.findById(request.getElevatorId())
                 .orElseThrow(() -> new NoSuchElementException("Ascensor no encontrado"));
-        Technician technician = technicianRepository.findByUsername(username)
+        Technician technician = technicianRepository.findByUsername(auth.getName())
                 .orElseThrow(() -> new NoSuchElementException("Técnico incorrecto"));
         IncidentReport report = IncidentReport.builder()
                 .commentary(request.getCommentary())

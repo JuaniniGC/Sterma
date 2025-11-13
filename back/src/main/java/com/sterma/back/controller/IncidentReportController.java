@@ -29,10 +29,8 @@ public class IncidentReportController {
 
     @PostMapping
     public ResponseEntity<?> createIncidentReport(@Valid @RequestBody CreateIncidentReportRequest request) {
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String username = auth.getName();
-            IncidentReport createdReport = incidentReportService.createIncidentReport(request, username);
+        try {;
+            IncidentReport createdReport = incidentReportService.createIncidentReport(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdReport);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
