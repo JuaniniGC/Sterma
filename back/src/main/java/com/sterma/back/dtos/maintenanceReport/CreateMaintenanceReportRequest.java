@@ -23,8 +23,5 @@ public class CreateMaintenanceReportRequest {
     private String commentary;
 
     @NotNull
-    private Long technicianId;
-
-    @NotNull
     private Long elevatorId;
 }

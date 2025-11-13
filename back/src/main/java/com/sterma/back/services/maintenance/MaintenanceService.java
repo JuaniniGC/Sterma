@@ -8,6 +8,8 @@ import com.sterma.back.models.Technician;
 import com.sterma.back.models.reports.MaintenanceReport;
 import com.sterma.back.repositories.*;
 import com.sterma.back.services.maintenance.strategy.MaintenanceServiceStrategy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -65,12 +67,13 @@ public class MaintenanceService {
 
     public MaintenanceReport createMaintenanceReport(CreateMaintenanceReportRequest request){
         checkElevatorExists(request.getElevatorId());
-        checkTechnicianExists(request.getTechnicianId());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         checkEndDateIsAfterStartDate(request.getStartDate(), request.getEndDate());
         Elevator elevator = elevatorRepository.getReferenceById(request.getElevatorId());
-        Technician technician = technicianRepository.getReferenceById(request.getTechnicianId());
+        Technician technician = technicianRepository.findByUsername(auth.getName())
+                .orElseThrow(() -> new NoSuchElementException("Técnico incorrecto"));
         MaintenanceReport createdReport = strategyMap.get(request.getMaintenanceType()).createReport(request, technician, elevator);
-        return createdReport;
+        return maintenanceReportRepository.save(createdReport);
     }
 
     private void checkElevatorExists(Long id) {
