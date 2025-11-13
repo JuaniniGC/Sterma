@@ -1,6 +1,5 @@
 package com.sterma.back.dtos.incidentReport;
 
-import com.sterma.back.models.MaintenanceType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 

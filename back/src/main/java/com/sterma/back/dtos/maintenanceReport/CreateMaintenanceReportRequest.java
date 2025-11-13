@@ -1,9 +1,6 @@
 package com.sterma.back.dtos.maintenanceReport;
 
-import com.sterma.back.models.Elevator;
 import com.sterma.back.models.MaintenanceType;
-import com.sterma.back.models.Technician;
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
