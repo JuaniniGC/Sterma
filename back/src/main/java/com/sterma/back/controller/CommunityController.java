@@ -36,7 +36,7 @@ public class CommunityController {
     @GetMapping("/{id}/elevator")
     public ResponseEntity<?> getElevator(@PathVariable Long id){
         try {
-            List<Elevator> elevators = elevatorService.listByElevatorId(id);
+            List<Elevator> elevators = elevatorService.listByCommunityId(id);
             return ResponseEntity.ok(elevators);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
