@@ -5,7 +5,6 @@ import com.sterma.back.dtos.elevator.UpdateElevatorRequest;
 import com.sterma.back.models.Elevator;
 import com.sterma.back.repositories.CommunityRepository;
 import com.sterma.back.repositories.ElevatorRepository;
-import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,7 @@ public class ElevatorService {
     }
 
     @Transactional(readOnly = true)
-    public List<Elevator> listByElevatorId(Long communityId) {
+    public List<Elevator> listByCommunityId(Long communityId) {
         return elevatorRepository.findByCommunityId(communityId);
     }
 

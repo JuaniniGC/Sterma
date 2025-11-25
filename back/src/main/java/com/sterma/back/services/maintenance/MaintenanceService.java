@@ -1,22 +1,25 @@
 package com.sterma.back.services.maintenance;
 
 import com.sterma.back.dtos.maintenanceReport.CreateMaintenanceReportRequest;
+import com.sterma.back.dtos.maintenanceReport.NextMaintenanceResponse;
 import com.sterma.back.models.Elevator;
 import com.sterma.back.models.MaintenanceRule;
 import com.sterma.back.models.MaintenanceType;
 import com.sterma.back.models.Technician;
 import com.sterma.back.models.reports.MaintenanceReport;
+import com.sterma.back.models.reports.Report;
 import com.sterma.back.repositories.*;
 import com.sterma.back.services.maintenance.strategy.MaintenanceServiceStrategy;
+import org.springframework.cglib.core.Local;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 public class MaintenanceService {
@@ -47,6 +50,7 @@ public class MaintenanceService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<MaintenanceRule> getMaintenanceReportRules(String maintenanceType) {
         MaintenanceType type;
         try {
@@ -64,7 +68,7 @@ public class MaintenanceService {
         }
         return rules;
     }
-
+    @Transactional
     public MaintenanceReport createMaintenanceReport(CreateMaintenanceReportRequest request){
         checkElevatorExists(request.getElevatorId());
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -74,6 +78,46 @@ public class MaintenanceService {
                 .orElseThrow(() -> new NoSuchElementException("Técnico incorrecto"));
         MaintenanceReport createdReport = strategyMap.get(request.getMaintenanceType()).createReport(request, technician, elevator);
         return maintenanceReportRepository.save(createdReport);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MaintenanceReport> getMaintenanceReportsList(Long elevatorId){
+        checkElevatorExists(elevatorId);
+        return maintenanceReportRepository.findByElevator_Id(elevatorId);
+    }
+
+    @Transactional(readOnly = true)
+    public NextMaintenanceResponse getNextImportantMaintenance(Long elevatorId) {
+
+        MaintenanceType nextType;
+        LocalDate nextDate;
+        LocalDate installationDate = LocalDate.now();
+        List<MaintenanceReport> reports = getMaintenanceReportsList(elevatorId);
+
+        LocalDate nextAnnual = strategyMap.get(MaintenanceType.ANNUAL).getNextMaintenanceDate(reports, installationDate);
+        LocalDate nextBiannual = strategyMap.get(MaintenanceType.BIANNUAL).getNextMaintenanceDate(reports, installationDate);
+
+        if (nextBiannual.isBefore(nextAnnual)) {
+            nextType = MaintenanceType.BIANNUAL;
+            nextDate = nextBiannual;
+        } else {
+            nextType = MaintenanceType.ANNUAL;
+            nextDate = nextAnnual;
+        }
+
+        return new NextMaintenanceResponse(nextType, nextDate, generateMaintenanceStatusMessage(nextDate));
+    }
+
+    private String generateMaintenanceStatusMessage(LocalDate nextDate){
+        String statusMessage;
+        if (nextDate.isBefore(LocalDate.now())) {
+            statusMessage = "Peligro";
+        } else if (!nextDate.isAfter(LocalDate.now().plusMonths(1))) {
+            statusMessage = "Advertencia";
+        } else {
+            statusMessage = "Todo bien";
+        }
+        return statusMessage;
     }
 
     private void checkElevatorExists(Long id) {

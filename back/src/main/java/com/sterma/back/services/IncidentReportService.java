@@ -10,6 +10,7 @@ import com.sterma.back.repositories.TechnicianRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
@@ -29,6 +30,7 @@ public class IncidentReportService {
         this.technicianRepository = technicianRepository;
     }
 
+    @Transactional
     public IncidentReport createIncidentReport(CreateIncidentReportRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         checkElevatorExists(request.getElevatorId());
@@ -46,6 +48,8 @@ public class IncidentReportService {
                 .build();
         return incidentReportRepository.save(report);
     }
+
+
 
     private void checkElevatorExists(Long id) {
         if (id == null) {

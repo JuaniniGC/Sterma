@@ -115,7 +115,7 @@ class ElevatorServiceTest {
     void listByElevatorId_ShouldReturnListOfElevators() {
         when(elevatorRepository.findByCommunityId(1L)).thenReturn(List.of(sampleElevator));
 
-        List<Elevator> result = elevatorService.listByElevatorId(1L);
+        List<Elevator> result = elevatorService.listByCommunityId(1L);
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
@@ -126,7 +126,7 @@ class ElevatorServiceTest {
     void listByElevatorId_WithNoResults_ShouldReturnEmptyList() {
         when(elevatorRepository.findByCommunityId(1L)).thenReturn(Collections.emptyList());
 
-        List<Elevator> result = elevatorService.listByElevatorId(1L);
+        List<Elevator> result = elevatorService.listByCommunityId(1L);
 
         assertTrue(result.isEmpty());
     }
