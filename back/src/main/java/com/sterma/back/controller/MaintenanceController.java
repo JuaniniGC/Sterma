@@ -60,9 +60,9 @@ public class MaintenanceController {
     }
 
     @GetMapping("next")
-    public ResponseEntity<?> getAllNearMaintenance(){
+    public ResponseEntity<?> getAllSoonMaintenance(){
         try {
-            List<NearMaintenanceTuple> nextMaintenances = maintenanceService.listAllImportantMaintenance();
+            List<NearMaintenanceTuple> nextMaintenances = maintenanceService.listSoonMaintenance();
             return ResponseEntity.ok(nextMaintenances);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

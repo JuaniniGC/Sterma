@@ -118,7 +118,7 @@ public class MaintenanceService {
     }
 
     @Transactional
-    public List<NearMaintenanceTuple> listAllImportantMaintenance() {
+    public List<NearMaintenanceTuple> listSoonMaintenance() {
         return elevatorRepository.findAll().stream()
                 .map(elevator -> new NearMaintenanceTuple(elevator, getNextImportantMaintenance(elevator.getId())))
                 .filter(nearMaintenanceTuple -> !nearMaintenanceTuple.getNextMaintenanceResponse().getStatus().equals(NextMaintenanceStatus.GOOD))
