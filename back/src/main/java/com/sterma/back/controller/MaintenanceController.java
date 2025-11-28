@@ -69,7 +69,15 @@ public class MaintenanceController {
         }
     }
 
-
+    @GetMapping("{elevatorId}")
+    public ResponseEntity<?> listAllMaintenanceReportsForElevatorId(@PathVariable Long elevatorId){
+        try {
+            List<MaintenanceReport> response = maintenanceService.getMaintenanceReportsList(elevatorId);
+            return ResponseEntity.ok(response);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
 
 
 }

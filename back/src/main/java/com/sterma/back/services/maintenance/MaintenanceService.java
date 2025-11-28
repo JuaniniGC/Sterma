@@ -117,7 +117,7 @@ public class MaintenanceService {
         return new NextMaintenanceResponse(nextType, nextDate, generateMaintenanceStatus(nextDate));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<NearMaintenanceTuple> listSoonMaintenance() {
         return elevatorRepository.findAll().stream()
                 .map(elevator -> new NearMaintenanceTuple(elevator, getNextImportantMaintenance(elevator.getId())))
@@ -158,8 +158,7 @@ public class MaintenanceService {
             throw new NoSuchElementException("Técnico no encontrado con ID: " + id);
         }
     }
-
-    public void checkEndDateIsAfterStartDate(LocalDateTime startDate, LocalDateTime endDate) {
+    private void checkEndDateIsAfterStartDate(LocalDateTime startDate, LocalDateTime endDate) {
         if (startDate != null && endDate != null && !startDate.isBefore(endDate)) {
             throw new IllegalArgumentException(
                     "La fecha pasada debe ser anterior a la fecha futura. Fecha pasada: "
