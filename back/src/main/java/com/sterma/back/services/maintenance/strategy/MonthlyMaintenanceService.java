@@ -54,12 +54,12 @@ public class MonthlyMaintenanceService implements MaintenanceServiceStrategy {
     }
 
     @Override
-    public LocalDate getNextMaintenanceDate(List<MaintenanceReport> reports, LocalDate installationDate){
+    public LocalDate getNextMaintenanceDate(List<MaintenanceReport> reports){
         return reports.stream()
                 .filter(r -> r.getMaintenanceType() == MaintenanceType.ANNUAL ||  r.getMaintenanceType() == MaintenanceType.BIANNUAL  || r.getMaintenanceType() == MaintenanceType.MONTHLY)
                 .max(Comparator.comparing(Report::getStartDate))
                 .map(MaintenanceReport::getNextMaintenanceDate)
                 .map(LocalDateTime::toLocalDate)
-                .orElse(installationDate.plusMonths(1));
+                .orElse(null);
     }
 }

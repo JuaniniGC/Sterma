@@ -12,5 +12,6 @@ public class NextMaintenanceResponse {
 
     private MaintenanceType maintenanceType;
     private LocalDate nextDate;
-    private String statusMessage;
+    private String status;
+
 }

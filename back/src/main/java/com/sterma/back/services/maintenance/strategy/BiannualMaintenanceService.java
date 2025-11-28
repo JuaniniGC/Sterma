@@ -29,7 +29,6 @@ public class BiannualMaintenanceService implements MaintenanceServiceStrategy {
         this.maintenanceRuleRepository = maintenanceRuleRepository;
     }
 
-
     @Override
     @Transactional
     public MaintenanceReport createReport(CreateMaintenanceReportRequest request, Technician technician, Elevator elevator) {
@@ -55,12 +54,12 @@ public class BiannualMaintenanceService implements MaintenanceServiceStrategy {
     }
 
     @Override
-    public LocalDate getNextMaintenanceDate(List<MaintenanceReport> reports, LocalDate installationDate){
+    public LocalDate getNextMaintenanceDate(List<MaintenanceReport> reports){
         return reports.stream()
                 .filter(r -> r.getMaintenanceType() == MaintenanceType.ANNUAL ||  r.getMaintenanceType() == MaintenanceType.BIANNUAL)
                 .max(Comparator.comparing(Report::getStartDate))
                 .map(MaintenanceReport::getNextMaintenanceDate)
                 .map(LocalDateTime::toLocalDate)
-                .orElse(installationDate.plusMonths(6));
+                .orElse(null);
     }
 }

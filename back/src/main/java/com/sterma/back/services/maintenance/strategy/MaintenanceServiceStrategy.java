@@ -15,6 +15,6 @@ public interface MaintenanceServiceStrategy {
     MaintenanceReport createReport(CreateMaintenanceReportRequest request, Technician technician, Elevator elevator);
     List<MaintenanceRule> getRules();
     MaintenanceType getMaintenanceType();
-    LocalDate getNextMaintenanceDate(List<MaintenanceReport> reports, LocalDate installationDate);
+    LocalDate getNextMaintenanceDate(List<MaintenanceReport> reports);
 
 }

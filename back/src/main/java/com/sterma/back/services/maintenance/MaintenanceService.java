@@ -10,6 +10,7 @@ import com.sterma.back.models.reports.MaintenanceReport;
 import com.sterma.back.models.reports.Report;
 import com.sterma.back.repositories.*;
 import com.sterma.back.services.maintenance.strategy.MaintenanceServiceStrategy;
+import org.springframework.cglib.SpringCglibInfo;
 import org.springframework.cglib.core.Local;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -88,34 +89,54 @@ public class MaintenanceService {
 
     @Transactional(readOnly = true)
     public NextMaintenanceResponse getNextImportantMaintenance(Long elevatorId) {
+        checkElevatorExists(elevatorId);
 
         MaintenanceType nextType;
         LocalDate nextDate;
-        LocalDate installationDate = LocalDate.now();
         List<MaintenanceReport> reports = getMaintenanceReportsList(elevatorId);
 
-        LocalDate nextAnnual = strategyMap.get(MaintenanceType.ANNUAL).getNextMaintenanceDate(reports, installationDate);
-        LocalDate nextBiannual = strategyMap.get(MaintenanceType.BIANNUAL).getNextMaintenanceDate(reports, installationDate);
-
-        if (nextBiannual.isBefore(nextAnnual)) {
-            nextType = MaintenanceType.BIANNUAL;
-            nextDate = nextBiannual;
-        } else {
-            nextType = MaintenanceType.ANNUAL;
-            nextDate = nextAnnual;
+        for (MaintenanceReport report: reports){
+            System.out.println(report.getMaintenanceType());
         }
 
-        return new NextMaintenanceResponse(nextType, nextDate, generateMaintenanceStatusMessage(nextDate));
+        LocalDate nextAnnual = strategyMap.get(MaintenanceType.ANNUAL).getNextMaintenanceDate(reports);
+        LocalDate nextBiannual = strategyMap.get(MaintenanceType.BIANNUAL).getNextMaintenanceDate(reports);
+
+        System.out.println(nextAnnual);
+        System.out.println(nextBiannual);
+
+        if (nextAnnual == null && nextBiannual == null) {
+            nextType = MaintenanceType.ANNUAL;
+            nextDate = null;
+        } else if (nextAnnual == null) {
+            nextType = MaintenanceType.ANNUAL;
+            nextDate = null;
+        } else if (nextBiannual == null) {
+            nextType = MaintenanceType.BIANNUAL;
+            nextDate = nextAnnual.minusMonths(6);
+        } else {
+            if (nextBiannual.isBefore(nextAnnual)) {
+                nextType = MaintenanceType.BIANNUAL;
+                nextDate = nextBiannual;
+            } else {
+                nextType = MaintenanceType.ANNUAL;
+                nextDate = nextAnnual;
+            }
+        }
+        return new NextMaintenanceResponse(nextType, nextDate, generateMaintenanceStatus(nextDate));
     }
 
-    private String generateMaintenanceStatusMessage(LocalDate nextDate){
+
+    private String generateMaintenanceStatus(LocalDate nextDate){
         String statusMessage;
-        if (nextDate.isBefore(LocalDate.now())) {
-            statusMessage = "Peligro";
+        if(nextDate == null){
+            statusMessage = "NEVER_PASS";
+        } else if (nextDate.isBefore(LocalDate.now())) {
+            statusMessage = "DANGER";
         } else if (!nextDate.isAfter(LocalDate.now().plusMonths(1))) {
-            statusMessage = "Advertencia";
+            statusMessage = "WARNING";
         } else {
-            statusMessage = "Todo bien";
+            statusMessage = "GOOD";
         }
         return statusMessage;
     }
