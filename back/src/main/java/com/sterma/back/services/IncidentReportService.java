@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -49,7 +50,10 @@ public class IncidentReportService {
         return incidentReportRepository.save(report);
     }
 
-
+    public List<IncidentReport> listAllIncidentReportForElevator(Long elevatorId){
+        checkElevatorExists(elevatorId);
+        return incidentReportRepository.findByElevator_Id(elevatorId);
+    }
 
     private void checkElevatorExists(Long id) {
         if (id == null) {
@@ -60,7 +64,7 @@ public class IncidentReportService {
         }
     }
 
-    public void checkEndDateIsAfterStartDate(LocalDateTime startDate, LocalDateTime endDate) {
+    private void checkEndDateIsAfterStartDate(LocalDateTime startDate, LocalDateTime endDate) {
         if (startDate != null && endDate != null && !startDate.isBefore(endDate)) {
             throw new IllegalArgumentException(
                     "La fecha pasada debe ser anterior a la fecha futura. Fecha pasada: "

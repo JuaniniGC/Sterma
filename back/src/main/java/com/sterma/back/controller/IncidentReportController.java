@@ -2,15 +2,14 @@ package com.sterma.back.controller;
 
 import com.sterma.back.dtos.incidentReport.CreateIncidentReportRequest;
 import com.sterma.back.models.reports.IncidentReport;
+import com.sterma.back.models.reports.MaintenanceReport;
 import com.sterma.back.services.IncidentReportService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -35,6 +34,16 @@ public class IncidentReportController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error interno al crear el reporte de incidencia: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("{elevatorId}")
+    public ResponseEntity<?> listAllIncidentReportsForElevatorId(@PathVariable Long elevatorId){
+        try {
+            List<IncidentReport> response = incidentReportService.listAllIncidentReportForElevator(elevatorId);
+            return ResponseEntity.ok(response);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 }
