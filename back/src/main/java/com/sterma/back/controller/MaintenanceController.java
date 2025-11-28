@@ -1,7 +1,8 @@
 package com.sterma.back.controller;
 
 import com.sterma.back.dtos.maintenanceReport.CreateMaintenanceReportRequest;
-import com.sterma.back.dtos.maintenanceReport.NextMaintenanceResponse;
+import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NearMaintenanceTuple;
+import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NextMaintenanceResponse;
 import com.sterma.back.models.MaintenanceRule;
 import com.sterma.back.models.reports.MaintenanceReport;
 import com.sterma.back.services.maintenance.MaintenanceService;
@@ -57,6 +58,17 @@ public class MaintenanceController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
+    @GetMapping("next")
+    public ResponseEntity<?> getAllNearMaintenance(){
+        try {
+            List<NearMaintenanceTuple> nextMaintenances = maintenanceService.listAllImportantMaintenance();
+            return ResponseEntity.ok(nextMaintenances);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
 
 
 

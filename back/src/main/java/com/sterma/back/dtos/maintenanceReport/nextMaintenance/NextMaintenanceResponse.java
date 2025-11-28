@@ -1,4 +1,4 @@
-package com.sterma.back.dtos.maintenanceReport;
+package com.sterma.back.dtos.maintenanceReport.nextMaintenance;
 
 import com.sterma.back.models.MaintenanceType;
 import lombok.AllArgsConstructor;
@@ -12,6 +12,6 @@ public class NextMaintenanceResponse {
 
     private MaintenanceType maintenanceType;
     private LocalDate nextDate;
-    private String status;
+    private NextMaintenanceStatus status;
 
 }

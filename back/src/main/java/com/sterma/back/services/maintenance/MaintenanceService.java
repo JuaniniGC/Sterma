@@ -1,17 +1,16 @@
 package com.sterma.back.services.maintenance;
 
 import com.sterma.back.dtos.maintenanceReport.CreateMaintenanceReportRequest;
-import com.sterma.back.dtos.maintenanceReport.NextMaintenanceResponse;
+import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NearMaintenanceTuple;
+import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NextMaintenanceResponse;
+import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NextMaintenanceStatus;
 import com.sterma.back.models.Elevator;
 import com.sterma.back.models.MaintenanceRule;
 import com.sterma.back.models.MaintenanceType;
 import com.sterma.back.models.Technician;
 import com.sterma.back.models.reports.MaintenanceReport;
-import com.sterma.back.models.reports.Report;
 import com.sterma.back.repositories.*;
 import com.sterma.back.services.maintenance.strategy.MaintenanceServiceStrategy;
-import org.springframework.cglib.SpringCglibInfo;
-import org.springframework.cglib.core.Local;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Stream;
 
 @Service
 public class MaintenanceService {
@@ -95,15 +93,8 @@ public class MaintenanceService {
         LocalDate nextDate;
         List<MaintenanceReport> reports = getMaintenanceReportsList(elevatorId);
 
-        for (MaintenanceReport report: reports){
-            System.out.println(report.getMaintenanceType());
-        }
-
         LocalDate nextAnnual = strategyMap.get(MaintenanceType.ANNUAL).getNextMaintenanceDate(reports);
         LocalDate nextBiannual = strategyMap.get(MaintenanceType.BIANNUAL).getNextMaintenanceDate(reports);
-
-        System.out.println(nextAnnual);
-        System.out.println(nextBiannual);
 
         if (nextAnnual == null && nextBiannual == null) {
             nextType = MaintenanceType.ANNUAL;
@@ -126,19 +117,28 @@ public class MaintenanceService {
         return new NextMaintenanceResponse(nextType, nextDate, generateMaintenanceStatus(nextDate));
     }
 
+    @Transactional
+    public List<NearMaintenanceTuple> listAllImportantMaintenance() {
+        return elevatorRepository.findAll().stream()
+                .map(elevator -> new NearMaintenanceTuple(elevator, getNextImportantMaintenance(elevator.getId())))
+                .filter(nearMaintenanceTuple -> !nearMaintenanceTuple.getNextMaintenanceResponse().getStatus().equals(NextMaintenanceStatus.GOOD))
+                .sorted(Comparator.comparingInt(r -> r.getNextMaintenanceResponse().getStatus().weight))
+                .toList();
+    }
 
-    private String generateMaintenanceStatus(LocalDate nextDate){
-        String statusMessage;
+
+    private NextMaintenanceStatus generateMaintenanceStatus(LocalDate nextDate){
+        NextMaintenanceStatus status;
         if(nextDate == null){
-            statusMessage = "NEVER_PASS";
+            status = NextMaintenanceStatus.NEVER_PASS;
         } else if (nextDate.isBefore(LocalDate.now())) {
-            statusMessage = "DANGER";
+            status = NextMaintenanceStatus.DANGER;
         } else if (!nextDate.isAfter(LocalDate.now().plusMonths(1))) {
-            statusMessage = "WARNING";
+            status = NextMaintenanceStatus.WARNING;
         } else {
-            statusMessage = "GOOD";
+            status = NextMaintenanceStatus.GOOD;
         }
-        return statusMessage;
+        return status;
     }
 
     private void checkElevatorExists(Long id) {
