@@ -5,7 +5,9 @@ import 'package:front/data/models/elevator_model.dart';
 import 'elevator_detail_page.dart';
 
 class ElevatorsPage extends StatefulWidget {
-  const ElevatorsPage({super.key});
+  final String? initialCommunityName;
+
+  const ElevatorsPage({super.key, this.initialCommunityName});
 
   @override
   State<ElevatorsPage> createState() => _ElevatorsPageState();
@@ -23,6 +25,12 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.initialCommunityName != null) {
+      _selectedSearchType = 'communityName';
+      _searchController.text = widget.initialCommunityName!;
+    }
+
     fetchElevators();
   }
 
@@ -90,7 +98,14 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
   void _changeSearchType(String newType) {
     setState(() {
       _selectedSearchType = newType;
+      if (newType != 'communityName' && widget.initialCommunityName != null) {
+        _searchController.clear();
+      } else if (newType == 'communityName' &&
+          widget.initialCommunityName != null) {
+        _searchController.text = widget.initialCommunityName!;
+      }
     });
+
     if (_searchController.text.isNotEmpty) {
       fetchElevators(searchQuery: _searchController.text);
     }
@@ -132,6 +147,15 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text(
+          widget.initialCommunityName != null
+              ? 'Ascensores - ${widget.initialCommunityName}'
+              : 'Todos los Ascensores',
+        ),
+        backgroundColor: colorScheme.primary,
+        foregroundColor: Colors.white,
+      ),
       body: Column(
         children: [
           Padding(
