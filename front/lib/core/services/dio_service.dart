@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:front/data/models/maintenance_rule_model.dart';
 
 class DioService {
   final Dio _dio;
@@ -319,6 +320,72 @@ class DioService {
       );
     } catch (e) {
       throw Exception('Error inesperado al obtener la comunidad: $e');
+    }
+  }
+
+  // ========== MÉTODOS ESPECÍFICOS PARA REPORTES ==========
+
+  /// Crea un nuevo informe de mantenimiento
+  Future<Map<String, dynamic>> createMaintenanceReport({
+    required String maintenanceType,
+    required DateTime startDate,
+    required DateTime endDate,
+    String? commentary, // Ahora es opcional
+    required String elevatorRAE,
+  }) async {
+    try {
+      final data = {
+        'maintenanceType': maintenanceType,
+        'startDate': startDate.toUtc().toIso8601String(),
+        'endDate': endDate.toUtc().toIso8601String(),
+        'elevatorRAE': elevatorRAE,
+      };
+
+      // Solo añadir commentary si no es null o vacío
+      if (commentary != null && commentary.isNotEmpty) {
+        data['commentary'] = commentary;
+      }
+
+      final response = await _dio.post('/report/maintenance', data: data);
+
+      return response.data;
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al crear el informe de mantenimiento: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception(
+        'Error inesperado al crear el informe de mantenimiento: $e',
+      );
+    }
+  }
+
+  // En la sección de MÉTODOS ESPECÍFICOS PARA REPORTES, añade:
+
+  /// Obtiene las reglas de mantenimiento por tipo
+  Future<List<MaintenanceRule>> getMaintenanceRules(
+    String maintenanceType,
+  ) async {
+    try {
+      final response = await _dio.get(
+        '/report/maintenance/rules/$maintenanceType',
+      );
+
+      if (response.data is List) {
+        return (response.data as List)
+            .map((item) => MaintenanceRule.fromJson(item))
+            .toList();
+      } else {
+        throw Exception('Formato de respuesta inesperado');
+      }
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener las reglas de mantenimiento: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception(
+        'Error inesperado al obtener las reglas de mantenimiento: $e',
+      );
     }
   }
 
