@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:front/core/services/dio_service.dart';
+import 'package:front/pages/maintenance_report_page.dart';
 
 class ReportTypeSelectionPage extends StatefulWidget {
   const ReportTypeSelectionPage({super.key});
@@ -478,13 +479,12 @@ class _ReportTypeSelectionPageState extends State<ReportTypeSelectionPage> {
       ),
     );
 
-    // TODO: Implementar navegación real
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => MaintenanceReportPage(rae: _selectedRae!),
-    //   ),
-    // );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MaintenanceReportPage(rae: _selectedRae!),
+      ),
+    );
   }
 
   void _navigateToBreakdownReport(BuildContext context) {

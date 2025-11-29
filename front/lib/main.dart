@@ -122,13 +122,10 @@ class _MyHomePageState extends State<MyHomePage> {
     switch (selectedIndex) {
       case 0:
         page = CommunitiesPage();
-        break;
       case 1:
         page = ReportTypeSelectionPage();
-        break;
       case 2:
         page = ElevatorsPage();
-        break;
       default:
         throw UnimplementedError('No widget for $selectedIndex');
     }
