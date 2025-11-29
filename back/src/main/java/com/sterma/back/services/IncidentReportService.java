@@ -34,10 +34,11 @@ public class IncidentReportService {
     @Transactional
     public IncidentReport createIncidentReport(CreateIncidentReportRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        checkElevatorExists(request.getElevatorId());
         checkEndDateIsAfterStartDate(request.getStartDate(), request.getEndDate());
-        Elevator elevator = elevatorRepository.findById(request.getElevatorId())
-                .orElseThrow(() -> new NoSuchElementException("Ascensor no encontrado"));
+        Elevator elevator = elevatorRepository.findByRae(request.getElevatorRAE())
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Ascensor no encontrado con RAE: " + request.getElevatorRAE()
+                ));
         Technician technician = technicianRepository.findByUsername(auth.getName())
                 .orElseThrow(() -> new NoSuchElementException("Técnico incorrecto"));
         IncidentReport report = IncidentReport.builder()

@@ -15,5 +15,5 @@ public class CreateIncidentReportRequest {
     private String commentary;
 
     @NotNull
-    private Long elevatorId;
+    private String elevatorRAE;
 }

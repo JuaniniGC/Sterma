@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ElevatorRepository  extends JpaRepository<Elevator, Long> {
@@ -26,5 +27,6 @@ public interface ElevatorRepository  extends JpaRepository<Elevator, Long> {
                                  @Param("communityName") String communityName,
                                  Pageable pageable);
 
+    Optional<Elevator> findByRae(String rae);
 
 }

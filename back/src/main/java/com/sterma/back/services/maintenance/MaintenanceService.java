@@ -70,10 +70,12 @@ public class MaintenanceService {
     }
     @Transactional
     public MaintenanceReport createMaintenanceReport(CreateMaintenanceReportRequest request){
-        checkElevatorExists(request.getElevatorId());
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         checkEndDateIsAfterStartDate(request.getStartDate(), request.getEndDate());
-        Elevator elevator = elevatorRepository.getReferenceById(request.getElevatorId());
+        Elevator elevator = elevatorRepository.findByRae(request.getElevatorRAE())
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Ascensor no encontrado con RAE: " + request.getElevatorRAE()
+                ));
         Technician technician = technicianRepository.findByUsername(auth.getName())
                 .orElseThrow(() -> new NoSuchElementException("Técnico incorrecto"));
         MaintenanceReport createdReport = strategyMap.get(request.getMaintenanceType()).createReport(request, technician, elevator);
