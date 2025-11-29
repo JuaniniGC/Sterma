@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:front/data/models/community_model.dart';
+import 'elevators_page.dart'; // Asegúrate de importar la página de ascensores
 
 class CommunityDetailPage extends StatelessWidget {
   final Community community;
@@ -58,9 +59,7 @@ class CommunityDetailPage extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                print(
-                  'Ver ascensores de la comunidad: ${community.name} (ID: ${community.id})',
-                );
+                _navigateToElevatorsPage(context);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: colorScheme.primary,
@@ -89,6 +88,17 @@ class CommunityDetailPage extends StatelessWidget {
     );
   }
 
+  void _navigateToElevatorsPage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            ElevatorsPage(initialCommunityName: community.name),
+      ),
+    );
+  }
+
+  // ... (el resto de los métodos _buildHeaderSection, _buildDescriptionSection, etc. se mantienen igual)
   Widget _buildHeaderSection(ColorScheme colorScheme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
