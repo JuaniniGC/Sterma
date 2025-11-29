@@ -3,6 +3,7 @@ package com.sterma.back.controller;
 import com.sterma.back.dtos.maintenanceReport.CreateMaintenanceReportRequest;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NearMaintenanceTuple;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NextMaintenanceResponse;
+import com.sterma.back.dtos.maintenanceRule.CreateMaintenanceRuleRequest;
 import com.sterma.back.models.MaintenanceRule;
 import com.sterma.back.models.reports.MaintenanceReport;
 import com.sterma.back.services.maintenance.MaintenanceService;
@@ -76,6 +77,17 @@ public class MaintenanceController {
             return ResponseEntity.ok(response);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("rules")
+    public ResponseEntity<?> createMaintenanceRule(@Valid @RequestBody CreateMaintenanceRuleRequest request){
+        try {
+            MaintenanceRule createdRule = maintenanceService.createMaintenanceRule(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdRule);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error interno al crear el reporte de mantenimiento: " + e.getMessage());
         }
     }
 

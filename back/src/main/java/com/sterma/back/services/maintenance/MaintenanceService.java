@@ -4,6 +4,7 @@ import com.sterma.back.dtos.maintenanceReport.CreateMaintenanceReportRequest;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NearMaintenanceTuple;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NextMaintenanceResponse;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NextMaintenanceStatus;
+import com.sterma.back.dtos.maintenanceRule.CreateMaintenanceRuleRequest;
 import com.sterma.back.models.Elevator;
 import com.sterma.back.models.MaintenanceRule;
 import com.sterma.back.models.MaintenanceType;
@@ -124,6 +125,17 @@ public class MaintenanceService {
                 .filter(nearMaintenanceTuple -> !nearMaintenanceTuple.getNextMaintenanceResponse().getStatus().equals(NextMaintenanceStatus.GOOD))
                 .sorted(Comparator.comparingInt(r -> r.getNextMaintenanceResponse().getStatus().weight))
                 .toList();
+    }
+
+    @Transactional
+    public MaintenanceRule createMaintenanceRule(CreateMaintenanceRuleRequest request){
+        MaintenanceRule maintenanceRule = MaintenanceRule.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .maintenanceType(request.getMaintenanceType())
+                .orderNum(request.getOrderNum())
+                .build();
+        return maintenanceRuleRepository.save(maintenanceRule);
     }
 
 

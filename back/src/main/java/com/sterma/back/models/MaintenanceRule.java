@@ -1,12 +1,16 @@
 package com.sterma.back.models;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 @Table(name = "maintenance_rules")
 public class MaintenanceRule {
     @Id
