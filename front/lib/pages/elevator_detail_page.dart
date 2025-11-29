@@ -70,7 +70,6 @@ class ElevatorDetailPage extends StatelessWidget {
               'Año de instalación',
               elevator.installationYear.toString(),
             ),
-            _buildInfoRow('ID del ascensor', elevator.id),
           ],
         ),
       ),

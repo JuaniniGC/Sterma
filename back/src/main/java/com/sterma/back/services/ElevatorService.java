@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -75,6 +76,19 @@ public class ElevatorService {
     public void delete(Long id) {
         checkElevatorExists(id);
         elevatorRepository.deleteById(id);
+    }
+
+    public List<String> getAllRae(Long communityId) {
+        List<Elevator> elevators;
+        if (communityId != null) {
+            elevators = elevatorRepository.findByCommunityId(communityId);
+        } else {
+            elevators = elevatorRepository.findAll();
+        }
+        return elevators.stream()
+                .map(Elevator::getRae)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     private void checkCommunityExists(Long communityId) {

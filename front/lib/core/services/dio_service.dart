@@ -266,6 +266,23 @@ class DioService {
     }
   }
 
+  /// Obtiene todos los códigos RAE disponibles
+  Future<List<String>> getAllRaes() async {
+    try {
+      final response = await _dio.get('/elevator/rae');
+
+      if (response.data is List) {
+        return response.data.cast<String>();
+      } else {
+        throw Exception('Formato de respuesta inesperado');
+      }
+    } on DioException catch (e) {
+      throw Exception('Error al obtener los RAE: ${_getDioErrorMessage(e)}');
+    } catch (e) {
+      throw Exception('Error inesperado al obtener los RAE: $e');
+    }
+  }
+
   // ========== MÉTODOS ESPECÍFICOS PARA COMUNIDADES ==========
 
   /// Obtiene todas las comunidades, opcionalmente filtradas por nombre

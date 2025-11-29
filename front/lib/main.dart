@@ -1,6 +1,7 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:front/pages/elevators_page.dart';
+import 'package:front/pages/report_type_selection_page.dart';
 import 'package:provider/provider.dart';
 import 'package:front/core/services/dio_service.dart';
 
@@ -123,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
         page = CommunitiesPage();
         break;
       case 1:
-        page = GeneratorPage();
+        page = ReportTypeSelectionPage();
         break;
       case 2:
         page = ElevatorsPage();
