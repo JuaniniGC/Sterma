@@ -16,16 +16,18 @@ class NextMaintenanceModel {
   factory NextMaintenanceModel.fromJson(Map<String, dynamic> json) {
     return NextMaintenanceModel(
       maintenanceType: json['maintenanceType'],
-      nextDate: DateTime.parse(json['nextDate']),
+      nextDate: json['nextDate'] != null
+          ? DateTime.parse(json['nextDate'])
+          : DateTime.now(),
       status: json['status'],
-      priority: json['priority'] ?? 4, // Default to GOOD if not provided
+      priority: json['priority'] ?? 4,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'maintenanceType': maintenanceType,
-      'nextDate': nextDate.toIso8601String().split('T')[0], // Solo la fecha
+      'nextDate': nextDate.toIso8601String().split('T')[0],
       'status': status,
       'priority': priority,
     };
