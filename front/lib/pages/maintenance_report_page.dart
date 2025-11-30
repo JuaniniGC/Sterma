@@ -348,7 +348,7 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
               child: Text(
                 'RAE: ${widget.rae}',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),

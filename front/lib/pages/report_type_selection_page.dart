@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:front/core/services/dio_service.dart';
+import 'package:front/pages/incident_report_page.dart';
 import 'package:front/pages/maintenance_report_page.dart';
 
 class ReportTypeSelectionPage extends StatefulWidget {
@@ -52,14 +53,6 @@ class _ReportTypeSelectionPageState extends State<ReportTypeSelectionPage> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Crear Informe'),
-        centerTitle: true,
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-        elevation: 2,
-        shadowColor: colorScheme.shadow,
-      ),
       body: Container(
         width: double.infinity,
         height: double.infinity,
@@ -69,12 +62,10 @@ class _ReportTypeSelectionPageState extends State<ReportTypeSelectionPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Selector de RAE
               _buildRaeSelector(context),
 
               const SizedBox(height: 40),
 
-              // Título
               Text(
                 'Selecciona el tipo de informe',
                 style: theme.textTheme.headlineSmall?.copyWith(
@@ -85,7 +76,6 @@ class _ReportTypeSelectionPageState extends State<ReportTypeSelectionPage> {
 
               const SizedBox(height: 40),
 
-              // Botón para informe de mantenimiento
               _buildReportTypeCard(
                 context,
                 title: 'Informe de Mantenimiento',
@@ -101,14 +91,13 @@ class _ReportTypeSelectionPageState extends State<ReportTypeSelectionPage> {
 
               const SizedBox(height: 24),
 
-              // Botón para informe de avería
               _buildReportTypeCard(
                 context,
                 title: 'Informe de Avería',
                 subtitle: 'Reporte de fallos o problemas',
                 icon: Icons.warning_amber_rounded,
-                primaryColor: colorScheme.secondary,
-                secondaryColor: colorScheme.secondaryContainer,
+                primaryColor: colorScheme.primary,
+                secondaryColor: colorScheme.primaryContainer,
                 isEnabled: _selectedRae != null,
                 onTap: () {
                   _navigateToBreakdownReport(context);
@@ -117,7 +106,6 @@ class _ReportTypeSelectionPageState extends State<ReportTypeSelectionPage> {
 
               const SizedBox(height: 40),
 
-              // Texto informativo
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
@@ -172,17 +160,14 @@ class _ReportTypeSelectionPageState extends State<ReportTypeSelectionPage> {
 
             const SizedBox(height: 20),
 
-            // Estado de carga o error
             if (_isLoading) ...[
               _buildLoadingIndicator(),
             ] else if (_errorMessage != null) ...[
               _buildErrorWidget(),
             ] else ...[
-              // Dropdown de RAE
               _buildRaeDropdown(context),
             ],
 
-            // Indicador de selección actual
             if (_selectedRae != null) ...[
               const SizedBox(height: 16),
               Container(
@@ -468,17 +453,6 @@ class _ReportTypeSelectionPageState extends State<ReportTypeSelectionPage> {
 
   void _navigateToMaintenanceReport(BuildContext context) {
     if (_selectedRae == null) return;
-
-    // Navegar a la pantalla de informe de mantenimiento pasando el RAE
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Creando informe de mantenimiento para $_selectedRae'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-    );
-
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -489,23 +463,11 @@ class _ReportTypeSelectionPageState extends State<ReportTypeSelectionPage> {
 
   void _navigateToBreakdownReport(BuildContext context) {
     if (_selectedRae == null) return;
-
-    // Navegar a la pantalla de informe de avería pasando el RAE
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Creando informe de avería para $_selectedRae'),
-        backgroundColor: Theme.of(context).colorScheme.secondary,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => IncidentReportPage(rae: _selectedRae!),
       ),
     );
-
-    // TODO: Implementar navegación real
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => BreakdownReportPage(rae: _selectedRae!),
-    //   ),
-    // );
   }
 }

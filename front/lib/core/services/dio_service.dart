@@ -330,7 +330,7 @@ class DioService {
     required String maintenanceType,
     required DateTime startDate,
     required DateTime endDate,
-    String? commentary, // Ahora es opcional
+    String? commentary,
     required String elevatorRAE,
   }) async {
     try {
@@ -341,7 +341,6 @@ class DioService {
         'elevatorRAE': elevatorRAE,
       };
 
-      // Solo añadir commentary si no es null o vacío
       if (commentary != null && commentary.isNotEmpty) {
         data['commentary'] = commentary;
       }
@@ -359,8 +358,6 @@ class DioService {
       );
     }
   }
-
-  // En la sección de MÉTODOS ESPECÍFICOS PARA REPORTES, añade:
 
   /// Obtiene las reglas de mantenimiento por tipo
   Future<List<MaintenanceRule>> getMaintenanceRules(
@@ -386,6 +383,36 @@ class DioService {
       throw Exception(
         'Error inesperado al obtener las reglas de mantenimiento: $e',
       );
+    }
+  }
+
+  /// Crea un nuevo informe de avería
+  Future<Map<String, dynamic>> createIncidentReport({
+    required DateTime startDate,
+    required DateTime endDate,
+    String? commentary,
+    required String elevatorRAE,
+  }) async {
+    try {
+      final data = {
+        'startDate': startDate.toUtc().toIso8601String(),
+        'endDate': endDate.toUtc().toIso8601String(),
+        'elevatorRAE': elevatorRAE,
+      };
+
+      if (commentary != null && commentary.isNotEmpty) {
+        data['commentary'] = commentary;
+      }
+
+      final response = await _dio.post('/report/incident', data: data);
+
+      return response.data;
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al crear el informe de avería: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception('Error inesperado al crear el informe de avería: $e');
     }
   }
 
