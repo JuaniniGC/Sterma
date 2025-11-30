@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:front/data/models/elevator_model.dart';
+import 'package:front/pages/maintenance_report_page.dart';
+import 'package:front/pages/incident_report_page.dart';
 
 class ElevatorDetailPage extends StatelessWidget {
   final Elevator elevator;
@@ -25,15 +27,12 @@ class ElevatorDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Información principal del ascensor
-            _buildElevatorInfoSection(),
+            _buildElevatorInfoSection(context),
             const SizedBox(height: 24),
 
-            // Información de la comunidad
             _buildCommunitySection(),
             const SizedBox(height: 24),
 
-            // Información de contacto
             _buildContactSection(),
           ],
         ),
@@ -41,7 +40,9 @@ class ElevatorDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildElevatorInfoSection() {
+  Widget _buildElevatorInfoSection(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -70,8 +71,80 @@ class ElevatorDetailPage extends StatelessWidget {
               'Año de instalación',
               elevator.installationYear.toString(),
             ),
+
+            const SizedBox(height: 16),
+
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Crear informe para este ascensor:',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () => _navigateToMaintenanceReport(context),
+                      icon: const Icon(Icons.build, size: 16),
+                      label: const Text('Mantenimiento'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      onPressed: () => _navigateToIncidentReport(context),
+                      icon: const Icon(Icons.report_problem, size: 16),
+                      label: const Text('Avería'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.secondary,
+                        foregroundColor: colorScheme.onSecondary,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _navigateToMaintenanceReport(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MaintenanceReportPage(rae: elevator.rae),
+      ),
+    );
+  }
+
+  void _navigateToIncidentReport(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => IncidentReportPage(rae: elevator.rae),
       ),
     );
   }

@@ -151,7 +151,7 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
         title: Text(
           widget.initialCommunityName != null
               ? 'Ascensores - ${widget.initialCommunityName}'
-              : 'Todos los Ascensores',
+              : '',
         ),
         backgroundColor: colorScheme.primary,
         foregroundColor: Colors.white,
