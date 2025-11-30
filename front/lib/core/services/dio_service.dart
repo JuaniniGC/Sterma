@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:front/data/models/maintenance_rule_model.dart';
+import 'package:front/data/models/next_maintenance_model.dart';
 
 class DioService {
   final Dio _dio;
@@ -413,6 +414,23 @@ class DioService {
       );
     } catch (e) {
       throw Exception('Error inesperado al crear el informe de avería: $e');
+    }
+  }
+
+  /// Obtiene el próximo mantenimiento de un ascensor
+  Future<NextMaintenanceModel> getNextMaintenance(String elevatorId) async {
+    try {
+      final response = await _dio.get('/report/maintenance/next/$elevatorId');
+
+      return NextMaintenanceModel.fromJson(response.data);
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener el próximo mantenimiento: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception(
+        'Error inesperado al obtener el próximo mantenimiento: $e',
+      );
     }
   }
 

@@ -1,12 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:front/data/models/elevator_model.dart';
+import 'package:front/data/models/next_maintenance_model.dart';
+import 'package:front/core/services/dio_service.dart';
 import 'package:front/pages/maintenance_report_page.dart';
 import 'package:front/pages/incident_report_page.dart';
 
-class ElevatorDetailPage extends StatelessWidget {
+class ElevatorDetailPage extends StatefulWidget {
   final Elevator elevator;
 
   const ElevatorDetailPage({super.key, required this.elevator});
+
+  @override
+  State<ElevatorDetailPage> createState() => _ElevatorDetailPageState();
+}
+
+class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
+  NextMaintenanceModel? _nextMaintenance;
+  bool _isLoadingNextMaintenance = false;
+  String? _nextMaintenanceError;
+
+  final DioService _dioService = DioService();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNextMaintenance();
+  }
+
+  Future<void> _loadNextMaintenance() async {
+    setState(() {
+      _isLoadingNextMaintenance = true;
+      _nextMaintenanceError = null;
+    });
+
+    try {
+      final nextMaintenance = await _dioService.getNextMaintenance(
+        widget.elevator.id,
+      );
+      setState(() {
+        _nextMaintenance = nextMaintenance;
+        _isLoadingNextMaintenance = false;
+      });
+    } catch (e) {
+      setState(() {
+        _nextMaintenanceError = e.toString().replaceFirst('Exception: ', '');
+        _isLoadingNextMaintenance = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +57,7 @@ class ElevatorDetailPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Ascensor ${elevator.rae}',
+          'Ascensor ${widget.elevator.rae}',
           style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: colorScheme.primary,
@@ -27,15 +68,217 @@ class ElevatorDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Información principal del ascensor
             _buildElevatorInfoSection(context),
             const SizedBox(height: 24),
 
+            // Próximo mantenimiento
+            _buildNextMaintenanceSection(),
+            const SizedBox(height: 24),
+
+            // Información de la comunidad
             _buildCommunitySection(),
             const SizedBox(height: 24),
 
+            // Información de contacto
             _buildContactSection(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildNextMaintenanceSection() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Próximo Mantenimiento',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+
+            if (_isLoadingNextMaintenance) ...[
+              _buildLoadingIndicator(),
+            ] else if (_nextMaintenanceError != null) ...[
+              _buildErrorWidget(),
+            ] else if (_nextMaintenance != null) ...[
+              _buildNextMaintenanceInfo(),
+            ] else ...[
+              _buildNoMaintenanceInfo(),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNextMaintenanceInfo() {
+    final theme = Theme.of(context);
+    final nextMaintenance = _nextMaintenance!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Tipo de mantenimiento
+        _buildMaintenanceInfoRow(
+          'Tipo',
+          nextMaintenance.maintenanceTypeDisplayName,
+        ),
+
+        // Fecha del próximo mantenimiento
+        _buildMaintenanceInfoRow(
+          'Próxima fecha',
+          '${nextMaintenance.nextDate.day}/${nextMaintenance.nextDate.month}/${nextMaintenance.nextDate.year}',
+        ),
+
+        // Estado
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 120,
+              child: Text(
+                'Estado:',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[700],
+                ),
+              ),
+            ),
+            Expanded(
+              child: Row(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: nextMaintenance.statusColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    nextMaintenance.statusDisplayName,
+                    style: TextStyle(
+                      color: nextMaintenance.statusColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMaintenanceInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              '$label:',
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[700],
+              ),
+            ),
+          ),
+          Expanded(child: Text(value, style: const TextStyle(fontSize: 16))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: const Row(
+        children: [
+          SizedBox(
+            height: 20,
+            width: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          SizedBox(width: 12),
+          Text('Cargando información de mantenimiento...'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget() {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.errorContainer.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(Icons.error_outline, color: colorScheme.error, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'No se pudo cargar la información del próximo mantenimiento',
+                  style: TextStyle(color: colorScheme.error, fontSize: 14),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ElevatedButton.icon(
+            onPressed: _loadNextMaintenance,
+            icon: Icon(Icons.refresh, size: 16, color: colorScheme.onPrimary),
+            label: Text(
+              'Reintentar',
+              style: TextStyle(color: colorScheme.onPrimary),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoMaintenanceInfo() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Row(
+        children: [
+          Icon(Icons.info_outline, color: Colors.grey, size: 20),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'No hay información disponible sobre el próximo mantenimiento',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -56,7 +299,7 @@ class ElevatorDetailPage extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Ascensor ${elevator.rae}',
+                    'Ascensor ${widget.elevator.rae}',
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -66,14 +309,15 @@ class ElevatorDetailPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _buildInfoRow('Código RAE', elevator.rae),
+            _buildInfoRow('Código RAE', widget.elevator.rae),
             _buildInfoRow(
               'Año de instalación',
-              elevator.installationYear.toString(),
+              widget.elevator.installationYear.toString(),
             ),
 
             const SizedBox(height: 16),
 
+            // Texto y botones para crear informes
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -88,6 +332,7 @@ class ElevatorDetailPage extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
+                    // Botón para informe de mantenimiento
                     ElevatedButton.icon(
                       onPressed: () => _navigateToMaintenanceReport(context),
                       icon: const Icon(Icons.build, size: 16),
@@ -105,6 +350,7 @@ class ElevatorDetailPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
+                    // Botón para informe de avería
                     ElevatedButton.icon(
                       onPressed: () => _navigateToIncidentReport(context),
                       icon: const Icon(Icons.report_problem, size: 16),
@@ -135,7 +381,7 @@ class ElevatorDetailPage extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => MaintenanceReportPage(rae: elevator.rae),
+        builder: (context) => MaintenanceReportPage(rae: widget.elevator.rae),
       ),
     );
   }
@@ -144,7 +390,7 @@ class ElevatorDetailPage extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => IncidentReportPage(rae: elevator.rae),
+        builder: (context) => IncidentReportPage(rae: widget.elevator.rae),
       ),
     );
   }
@@ -162,9 +408,9 @@ class ElevatorDetailPage extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            _buildInfoRow('Nombre', elevator.community.name),
-            _buildInfoRow('Descripción', elevator.community.description),
-            _buildInfoRow('CIF', elevator.community.cif),
+            _buildInfoRow('Nombre', widget.elevator.community.name),
+            _buildInfoRow('Descripción', widget.elevator.community.description),
+            _buildInfoRow('CIF', widget.elevator.community.cif),
             const SizedBox(height: 12),
             // Ubicación
             Row(
@@ -184,7 +430,7 @@ class ElevatorDetailPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(elevator.community.localization.fullAddress),
+                      Text(widget.elevator.community.localization.fullAddress),
                     ],
                   ),
                 ),
@@ -212,14 +458,19 @@ class ElevatorDetailPage extends StatelessWidget {
             _buildContactRow(
               Icons.person,
               'Nombre',
-              elevator.community.communityLeaderInfo.communityLeaderName,
+              widget.elevator.community.communityLeaderInfo.communityLeaderName,
             ),
             _buildContactRow(
               Icons.phone,
               'Teléfono',
-              elevator.community.communityLeaderInfo.communityLeaderTelephone,
+              widget
+                  .elevator
+                  .community
+                  .communityLeaderInfo
+                  .communityLeaderTelephone,
             ),
-            if (elevator
+            if (widget
+                .elevator
                 .community
                 .communityLeaderInfo
                 .communityLeaderNote
@@ -227,7 +478,11 @@ class ElevatorDetailPage extends StatelessWidget {
               _buildContactRow(
                 Icons.note,
                 'Nota',
-                elevator.community.communityLeaderInfo.communityLeaderNote,
+                widget
+                    .elevator
+                    .community
+                    .communityLeaderInfo
+                    .communityLeaderNote,
               ),
           ],
         ),
