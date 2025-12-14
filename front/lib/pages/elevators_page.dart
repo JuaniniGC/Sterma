@@ -147,21 +147,48 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(
-          widget.initialCommunityName != null
-              ? 'Ascensores - ${widget.initialCommunityName}'
-              : '',
-        ),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: Colors.white,
-      ),
+      // AppBar condicional - solo se muestra cuando hay initialCommunityName
+      appBar: widget.initialCommunityName != null
+          ? AppBar(
+              title: Text(
+                'Ascensores - ${widget.initialCommunityName}',
+                style: const TextStyle(color: Colors.white),
+              ),
+              backgroundColor: colorScheme.primary,
+              foregroundColor: Colors.white,
+            )
+          : null, // Cuando es null, no se muestra AppBar
       body: Column(
         children: [
+          // Si no hay AppBar, añadimos un poco más de padding arriba
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(
+              16.0,
+            ).copyWith(top: widget.initialCommunityName == null ? 24.0 : 16.0),
             child: Column(
               children: [
+                // Si no hay AppBar, mostramos un título en el body
+                if (widget.initialCommunityName == null) ...[
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.elevator,
+                        size: 28,
+                        color: colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Ascensores',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                ],
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(

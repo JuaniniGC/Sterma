@@ -106,7 +106,7 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
             const SizedBox(height: 12),
 
             if (_isLoadingNextMaintenance) ...[
-              _buildLoadingIndicator(),
+              _buildSkeletonLoader(),
             ] else if (_nextMaintenanceError != null) ...[
               _buildErrorWidget(),
             ] else if (_nextMaintenance != null) ...[
@@ -117,6 +117,91 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
           ],
         ),
       ),
+    );
+  }
+
+  // NUEVO: Skeleton Loader
+  Widget _buildSkeletonLoader() {
+    return Column(
+      children: [
+        // Skeleton para "Tipo"
+        _buildSkeletonRow(),
+        const SizedBox(height: 12),
+
+        // Skeleton para "Próxima fecha"
+        _buildSkeletonRow(),
+        const SizedBox(height: 12),
+
+        // Skeleton para "Estado"
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 120,
+              child: Container(
+                height: 16,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Row(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Container(
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSkeletonRow() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 120,
+          child: Container(
+            height: 16,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Container(
+            height: 16,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -203,22 +288,7 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
     );
   }
 
-  Widget _buildLoadingIndicator() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: const Row(
-        children: [
-          SizedBox(
-            height: 20,
-            width: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-          SizedBox(width: 12),
-          Text('Cargando información de mantenimiento...'),
-        ],
-      ),
-    );
-  }
+  // ELIMINADO: _buildLoadingIndicator ya no se usa
 
   Widget _buildErrorWidget() {
     final colorScheme = Theme.of(context).colorScheme;
@@ -283,6 +353,7 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
     );
   }
 
+  // Resto del código permanece igual...
   Widget _buildElevatorInfoSection(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
