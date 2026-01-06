@@ -140,7 +140,6 @@ public class MaintenanceService {
         return maintenanceRuleRepository.save(maintenanceRule);
     }
 
-
     private NextMaintenanceStatus generateMaintenanceStatus(LocalDate nextDate){
         NextMaintenanceStatus status;
         if(nextDate == null){
