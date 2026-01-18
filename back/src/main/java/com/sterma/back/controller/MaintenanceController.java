@@ -101,5 +101,15 @@ public class MaintenanceController {
         }
     }
 
+    @DeleteMapping("rules/{reportId}")
+    public ResponseEntity<?> deleteMaintenanceRule(@PathVariable Long reportId){
+        try {
+            maintenanceService.deleteMaintenanceRule(reportId);
+            return ResponseEntity.ok("Se ha borrado correctamente la regla");
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
 
 }

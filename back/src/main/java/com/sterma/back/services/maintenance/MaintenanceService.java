@@ -146,6 +146,12 @@ public class MaintenanceService {
         maintenanceReportRepository.deleteById(id);
     }
 
+    @Transactional
+    public void deleteMaintenanceRule(Long id){
+        checkMaintenanceRuleExists(id);
+        maintenanceRuleRepository.deleteById(id);
+    }
+
     private NextMaintenanceStatus generateMaintenanceStatus(LocalDate nextDate){
         NextMaintenanceStatus status;
         if(nextDate == null){
@@ -191,7 +197,16 @@ public class MaintenanceService {
             throw new IllegalArgumentException("El ID no puede ser nulo");
         }
         if (!maintenanceReportRepository.existsById(id)) {
-            throw new NoSuchElementException("Reporte no encontrado con ID: " + id);
+            throw new NoSuchElementException("Informe no encontrado con ID: " + id);
+        }
+    }
+
+    private void checkMaintenanceRuleExists(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("El ID no puede ser nulo");
+        }
+        if (!maintenanceRuleRepository.existsById(id)) {
+            throw new NoSuchElementException("Regla no encontrado con ID: " + id);
         }
     }
 
