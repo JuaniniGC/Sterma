@@ -140,6 +140,12 @@ public class MaintenanceService {
         return maintenanceRuleRepository.save(maintenanceRule);
     }
 
+    @Transactional
+    public void deleteMaintenanceReport(Long id){
+        checkMaintenanceReportExists(id);
+        maintenanceReportRepository.deleteById(id);
+    }
+
     private NextMaintenanceStatus generateMaintenanceStatus(LocalDate nextDate){
         NextMaintenanceStatus status;
         if(nextDate == null){
@@ -179,4 +185,14 @@ public class MaintenanceService {
             );
         }
     }
+
+    private void checkMaintenanceReportExists(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("El ID no puede ser nulo");
+        }
+        if (!maintenanceReportRepository.existsById(id)) {
+            throw new NoSuchElementException("Reporte no encontrado con ID: " + id);
+        }
+    }
+
 }

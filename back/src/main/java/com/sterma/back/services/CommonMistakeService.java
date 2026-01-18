@@ -4,6 +4,7 @@ import com.sterma.back.dtos.commonMistakes.CommonMistakeCreateRequest;
 import com.sterma.back.models.CommonMistake;
 import com.sterma.back.repositories.CommonMistakeRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CommonMistakeService {
@@ -14,6 +15,7 @@ public class CommonMistakeService {
         this.commonMistakeRepository = commonMistakeRepository;
     }
 
+    @Transactional
     public CommonMistake createCommonMistake(CommonMistakeCreateRequest request){
         checkIdentificatorNotUsed(request.getIdentificator());
         CommonMistake commonMistake = CommonMistake.builder()
