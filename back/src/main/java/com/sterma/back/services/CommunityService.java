@@ -2,26 +2,29 @@ package com.sterma.back.services;
 
 import com.sterma.back.dtos.community.CreateCommunityRequest;
 import com.sterma.back.dtos.community.UpdateCommunityRequest;
+import com.sterma.back.dtos.community.list.ListCommunityResponse;
 import com.sterma.back.models.*;
 import com.sterma.back.repositories.CommunityRepository;
+import com.sterma.back.repositories.ElevatorRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
 public class CommunityService {
 
     private final CommunityRepository communityRepository;
+    private final ElevatorRepository elevatorRepository;
 
-    public CommunityService(CommunityRepository communityRepository) {
+    public CommunityService(CommunityRepository communityRepository, ElevatorRepository elevatorRepository) {
         this.communityRepository = communityRepository;
+        this.elevatorRepository = elevatorRepository;
     }
 
     @Transactional(readOnly = true)
@@ -33,12 +36,24 @@ public class CommunityService {
     }
 
     @Transactional(readOnly = true)
+    public Page<ListCommunityResponse> listAllWithElevators(String name, Pageable pageable, ElevatorService elevatorService) {
+        Page<Community> communities = listAll(name, pageable);
+
+        return communities.map(community -> {
+            List<Elevator> elevators = elevatorRepository.findByCommunityId(community.getId());
+            return ListCommunityResponse.from(community, elevators);
+        });
+    }
+
+    @Transactional(readOnly = true)
     public Optional<Community> getById(Long id){
         return communityRepository.findById(id);
     }
 
     @Transactional
     public Community createCommunity(CreateCommunityRequest request) {
+        validateCIFUniqueness(request.getCIF(), null);
+
         Localization localization = Localization.builder()
                 .city(request.getCity())
                 .postalCode(request.getPostalCode())
@@ -64,7 +79,10 @@ public class CommunityService {
 
     @Transactional
     public Community updateCommunity(Long id, UpdateCommunityRequest request) {
+        checkCommunityExists(id);
         Community community = getExistingCommunity(id);
+
+        validateCIFUniqueness(request.getCIF(), id);
 
         community.getLocalization().setCity(request.getCity());
         community.getLocalization().setPostalCode(request.getPostalCode());
@@ -81,12 +99,42 @@ public class CommunityService {
         return communityRepository.save(community);
     }
 
+    @Transactional
+    public void delete(Long id) {
+        checkCommunityExists(id);
+
+        List<Elevator> elevators = elevatorRepository.findByCommunityId(id);
+        if (!elevators.isEmpty()) {
+            elevatorRepository.deleteAll(elevators);
+        }
+
+        communityRepository.deleteById(id);
+    }
+
+    private void validateCIFUniqueness(String cif, Long currentCommunityId) {
+        boolean cifExists;
+        if (currentCommunityId != null) {
+            cifExists = communityRepository.existsByCIFAndIdNot(cif, currentCommunityId);
+        } else {
+            cifExists = communityRepository.existsByCIF(cif);
+        }
+
+        if (cifExists) {
+            throw new IllegalArgumentException("Ya existe una comunidad con el CIF: " + cif);
+        }
+    }
+
     private Community getExistingCommunity(Long id) {
         return communityRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Comunidad no encontrada con ID: " + id));
     }
 
-
-
-
+    private void checkCommunityExists(Long communityId) {
+        if (communityId == null) {
+            throw new IllegalArgumentException("El ID de comunidad no puede ser nulo");
+        }
+        if (!communityRepository.existsById(communityId)) {
+            throw new NoSuchElementException("Comunidad no encontrada con ID: " + communityId);
+        }
+    }
 }

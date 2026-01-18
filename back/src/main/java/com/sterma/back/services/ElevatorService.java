@@ -5,7 +5,6 @@ import com.sterma.back.dtos.elevator.UpdateElevatorRequest;
 import com.sterma.back.models.Elevator;
 import com.sterma.back.repositories.CommunityRepository;
 import com.sterma.back.repositories.ElevatorRepository;
-import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -13,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -35,7 +35,7 @@ public class ElevatorService {
     }
 
     @Transactional(readOnly = true)
-    public List<Elevator> listByElevatorId(Long communityId) {
+    public List<Elevator> listByCommunityId(Long communityId) {
         return elevatorRepository.findByCommunityId(communityId);
     }
 
@@ -76,6 +76,19 @@ public class ElevatorService {
     public void delete(Long id) {
         checkElevatorExists(id);
         elevatorRepository.deleteById(id);
+    }
+
+    public List<String> getAllRae(Long communityId) {
+        List<Elevator> elevators;
+        if (communityId != null) {
+            elevators = elevatorRepository.findByCommunityId(communityId);
+        } else {
+            elevators = elevatorRepository.findAll();
+        }
+        return elevators.stream()
+                .map(Elevator::getRae)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     private void checkCommunityExists(Long communityId) {

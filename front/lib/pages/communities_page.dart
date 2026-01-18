@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:front/core/services/dio_service.dart';
+import 'package:front/data/models/community_model.dart';
+import 'package:front/pages/community_detail_page.dart';
 
 class CommunitiesPage extends StatefulWidget {
   const CommunitiesPage({super.key});
@@ -10,7 +12,7 @@ class CommunitiesPage extends StatefulWidget {
 }
 
 class _CommunitiesPageState extends State<CommunitiesPage> {
-  List<dynamic> communityList = [];
+  List<Community> communityList = [];
   bool isLoading = true;
   String? errorMessage;
   final DioService _dioService = DioService();
@@ -48,8 +50,12 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
 
       final List<dynamic> data = response.data['content'] ?? [];
 
+      final List<Community> communities = data
+          .map((json) => Community.fromJson(json))
+          .toList();
+
       setState(() {
-        communityList = data;
+        communityList = communities;
         isLoading = false;
       });
     } on DioException catch (e) {
@@ -65,6 +71,15 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
         isLoading = false;
       });
     }
+  }
+
+  void _navigateToCommunityDetails(Community community) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CommunityDetailPage(community: community),
+      ),
+    );
   }
 
   void _onSearchChanged(String query) {
@@ -111,7 +126,11 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Column(
         children: [
           Padding(
@@ -120,10 +139,10 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Buscar comunidades por nombre...',
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: Icon(Icons.search, color: colorScheme.primary),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: Icon(Icons.clear, color: colorScheme.primary),
                         onPressed: _clearSearch,
                       )
                     : null,
@@ -131,100 +150,118 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
                   borderRadius: BorderRadius.circular(12.0),
                 ),
                 filled: true,
-                fillColor: Colors.grey[50],
+                fillColor: colorScheme.secondaryContainer,
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide(
+                    color: colorScheme.primary,
+                    width: 2.0,
+                  ),
+                ),
               ),
               onChanged: _onSearchChanged,
               onSubmitted: _onSearchSubmitted,
             ),
           ),
 
-          if (!isLoading && communityList.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: [
-                  Text(
-                    '${communityList.length} comunidad(es) encontrada(s)',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                  ),
-                  if (_searchController.text.isNotEmpty)
-                    Text(
-                      ' para "${_searchController.text}"',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                    ),
-                ],
-              ),
-            ),
-
-          Expanded(child: _buildCommunityList()),
+          Expanded(
+            child: Container(color: Colors.white, child: _buildCommunityList()),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildCommunityList() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Container(
+        color: Colors.white,
+        child: Center(
+          child: CircularProgressIndicator(color: colorScheme.primary),
+        ),
+      );
     }
 
     if (errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              errorMessage!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, color: Colors.red),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: () {
-                fetchCommunities(
-                  searchQuery: _searchController.text.isEmpty
-                      ? null
-                      : _searchController.text,
-                );
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('Reintentar'),
-            ),
-          ],
+      return Container(
+        color: Colors.white,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 64, color: colorScheme.error),
+              const SizedBox(height: 16),
+              Text(
+                errorMessage!,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: colorScheme.error),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: () {
+                  fetchCommunities(
+                    searchQuery: _searchController.text.isEmpty
+                        ? null
+                        : _searchController.text,
+                  );
+                },
+                icon: Icon(Icons.refresh, color: colorScheme.onPrimary),
+                label: Text(
+                  'Reintentar',
+                  style: TextStyle(color: colorScheme.onPrimary),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
 
     if (communityList.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              _searchController.text.isEmpty
-                  ? Icons.group_off
-                  : Icons.search_off,
-              size: 64,
-              color: Colors.grey,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _searchController.text.isEmpty
-                  ? 'No hay comunidades disponibles'
-                  : 'No se encontraron comunidades para "${_searchController.text}"',
-              style: const TextStyle(fontSize: 16, color: Colors.grey),
-              textAlign: TextAlign.center,
-            ),
-            if (_searchController.text.isNotEmpty)
-              TextButton(
-                onPressed: _clearSearch,
-                child: const Text('Ver todas las comunidades'),
+      return Container(
+        color: Colors.white,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                _searchController.text.isEmpty
+                    ? Icons.group_off
+                    : Icons.search_off,
+                size: 64,
+                color: Colors.grey[400],
               ),
-          ],
+              const SizedBox(height: 16),
+              Text(
+                _searchController.text.isEmpty
+                    ? 'No hay comunidades disponibles'
+                    : 'No se encontraron comunidades para "${_searchController.text}"',
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                textAlign: TextAlign.center,
+              ),
+              if (_searchController.text.isNotEmpty)
+                TextButton(
+                  onPressed: _clearSearch,
+                  child: Text(
+                    'Ver todas las comunidades',
+                    style: TextStyle(color: colorScheme.primary),
+                  ),
+                ),
+            ],
+          ),
         ),
       );
     }
 
     return RefreshIndicator(
+      color: colorScheme.primary,
+      backgroundColor: Colors.white,
       onRefresh: () => fetchCommunities(
         searchQuery: _searchController.text.isEmpty
             ? null
@@ -234,21 +271,11 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
         itemCount: communityList.length,
         itemBuilder: (context, index) {
           final community = communityList[index];
-          final localization = community['localization'] ?? {};
-          final leaderInfo = community['communityLeaderInfo'] ?? {};
-
-          final location =
-              "${localization['street'] ?? ''}, ${localization['city'] ?? ''} (${localization['postalCode'] ?? ''})";
 
           return CommunityGeneralInfoCard(
-            name: community['name'] ?? 'Sin nombre',
-            description: community['description'] ?? '',
-            location: location,
-            leaderName: leaderInfo['communityLeaderName'] ?? 'Sin líder',
-            leaderPhone:
-                leaderInfo['communityLeaderTelephone']?.toString() ?? '',
-            leaderNote: leaderInfo['communityLeaderNote'] ?? '',
-            cif: community['cif'] ?? '',
+            community: community,
+            onTap: () =>
+                _navigateToCommunityDetails(community), // ✅ Agregar navegación
           );
         },
       ),
@@ -257,64 +284,84 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
 }
 
 class CommunityGeneralInfoCard extends StatelessWidget {
-  final String name;
-  final String description;
-  final String location;
-  final String leaderName;
-  final String leaderPhone;
-  final String leaderNote;
-  final String cif;
+  final Community community;
+  final VoidCallback onTap;
 
   const CommunityGeneralInfoCard({
     super.key,
-    required this.name,
-    required this.description,
-    required this.location,
-    required this.leaderName,
-    required this.leaderPhone,
-    required this.leaderNote,
-    required this.cif,
+    required this.community,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return InkWell(
-      onTap: () {
-        print('Comunidad seleccionada: $name');
-      },
+      onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Card(
         elevation: 4,
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                name,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                description,
-                style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-              ),
-              const SizedBox(height: 8),
+              // Header con nombre y CIF
               Row(
                 children: [
-                  const Icon(
-                    Icons.location_on,
-                    size: 20,
-                    color: Colors.blueGrey,
+                  Icon(Icons.home, color: colorScheme.primary, size: 24),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      community.name,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
                   ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'CIF: ${community.cif}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: colorScheme.onSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // Descripción
+              Text(
+                community.description,
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+              const SizedBox(height: 12),
+
+              // Ubicación
+              Row(
+                children: [
+                  Icon(Icons.location_on, size: 18, color: Colors.grey[600]),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      location,
+                      community.localization.fullAddress,
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.black54,
@@ -324,28 +371,33 @@ class CommunityGeneralInfoCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
+
+              // Responsable
               Row(
                 children: [
-                  const Icon(Icons.person, size: 20, color: Colors.teal),
+                  Icon(Icons.person, size: 18, color: Colors.grey[600]),
                   const SizedBox(width: 4),
-                  Text(leaderName, style: const TextStyle(fontSize: 14)),
+                  Text(
+                    community.communityLeaderInfo.communityLeaderName,
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                  ),
                   const SizedBox(width: 8),
                   Text(
-                    '(${leaderNote})',
+                    '(${community.communityLeaderInfo.communityLeaderNote})',
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ],
               ),
               const SizedBox(height: 4),
+
+              // Teléfono
               Row(
                 children: [
-                  const Icon(Icons.phone, size: 18, color: Colors.green),
+                  Icon(Icons.phone, size: 16, color: Colors.grey[600]),
                   const SizedBox(width: 4),
-                  Text(leaderPhone),
-                  const Spacer(),
                   Text(
-                    'CIF: $cif',
-                    style: const TextStyle(fontSize: 13, color: Colors.grey),
+                    community.communityLeaderInfo.communityLeaderTelephone,
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
                   ),
                 ],
               ),

@@ -23,9 +23,13 @@ public class CreateCommunityRequest {
     private String street;
 
     @NotNull
+    @Pattern(regexp = "^\\d{5}$", message = "El código postal debe tener exactamente 5 dígitos")
     private String postalCode;
 
     private String communityLeaderName;
-    private Integer communityLeaderTelephone;
+
+    @Pattern(regexp = "^\\d{9}$", message = "El teléfono debe tener exactamente 9 dígitos")
+    private String communityLeaderTelephone;
+
     private String communityLeaderNote;
 }

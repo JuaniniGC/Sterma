@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:front/data/models/elevator_next_maintenance_model.dart';
+import 'package:front/data/models/maintenance_rule_model.dart';
+import 'package:front/data/models/next_maintenance_model.dart';
 
 class DioService {
   final Dio _dio;
@@ -186,6 +189,273 @@ class DioService {
       queryParameters: queryParameters,
       options: options,
     );
+  }
+
+  // ========== MÉTODOS ESPECÍFICOS PARA ASCENSORES ==========
+
+  /// Obtiene todos los ascensores, opcionalmente filtrados por búsqueda
+  Future<List<dynamic>> getElevators({
+    String? searchQuery,
+    String searchType = 'rae',
+  }) async {
+    try {
+      final Map<String, dynamic> queryParameters = {};
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        queryParameters[searchType] = searchQuery;
+      }
+
+      final response = await _dio.get(
+        '/elevator',
+        queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+      );
+
+      return response.data['content'] ?? [];
+    } on DioException catch (e) {
+      throw Exception('Error al obtener ascensores: ${_getDioErrorMessage(e)}');
+    } catch (e) {
+      throw Exception('Error inesperado al obtener ascensores: $e');
+    }
+  }
+
+  /// Obtiene un ascensor específico por su ID
+  Future<Map<String, dynamic>> getElevatorById(String id) async {
+    try {
+      final response = await _dio.get('/elevator/$id');
+      return response.data;
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener el ascensor: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception('Error inesperado al obtener el ascensor: $e');
+    }
+  }
+
+  /// Obtiene ascensores por comunidad
+  Future<List<dynamic>> getElevatorsByCommunity(String communityName) async {
+    try {
+      final response = await _dio.get(
+        '/elevator',
+        queryParameters: {'communityName': communityName},
+      );
+
+      return response.data['content'] ?? [];
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener ascensores por comunidad: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception(
+        'Error inesperado al obtener ascensores por comunidad: $e',
+      );
+    }
+  }
+
+  /// Obtiene ascensores por RAE
+  Future<List<dynamic>> getElevatorsByRae(String rae) async {
+    try {
+      final response = await _dio.get(
+        '/elevator',
+        queryParameters: {'rae': rae},
+      );
+
+      return response.data['content'] ?? [];
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener ascensores por RAE: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception('Error inesperado al obtener ascensores por RAE: $e');
+    }
+  }
+
+  /// Obtiene todos los códigos RAE disponibles
+  Future<List<String>> getAllRaes() async {
+    try {
+      final response = await _dio.get('/elevator/rae');
+
+      if (response.data is List) {
+        return response.data.cast<String>();
+      } else {
+        throw Exception('Formato de respuesta inesperado');
+      }
+    } on DioException catch (e) {
+      throw Exception('Error al obtener los RAE: ${_getDioErrorMessage(e)}');
+    } catch (e) {
+      throw Exception('Error inesperado al obtener los RAE: $e');
+    }
+  }
+
+  // ========== MÉTODOS ESPECÍFICOS PARA COMUNIDADES ==========
+
+  /// Obtiene todas las comunidades, opcionalmente filtradas por nombre
+  Future<List<dynamic>> getCommunities({String? searchQuery}) async {
+    try {
+      final Map<String, dynamic> queryParameters = {};
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        queryParameters['name'] = searchQuery;
+      }
+
+      final response = await _dio.get(
+        '/community',
+        queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+      );
+
+      return response.data['content'] ?? [];
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener comunidades: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception('Error inesperado al obtener comunidades: $e');
+    }
+  }
+
+  /// Obtiene una comunidad específica por su ID
+  Future<Map<String, dynamic>> getCommunityById(String id) async {
+    try {
+      final response = await _dio.get('/community/$id');
+      return response.data;
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener la comunidad: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception('Error inesperado al obtener la comunidad: $e');
+    }
+  }
+
+  // ========== MÉTODOS ESPECÍFICOS PARA REPORTES ==========
+
+  /// Crea un nuevo informe de mantenimiento
+  Future<Map<String, dynamic>> createMaintenanceReport({
+    required String maintenanceType,
+    required DateTime startDate,
+    required DateTime endDate,
+    String? commentary,
+    required String elevatorRAE,
+  }) async {
+    try {
+      final data = {
+        'maintenanceType': maintenanceType,
+        'startDate': startDate.toUtc().toIso8601String(),
+        'endDate': endDate.toUtc().toIso8601String(),
+        'elevatorRAE': elevatorRAE,
+      };
+
+      if (commentary != null && commentary.isNotEmpty) {
+        data['commentary'] = commentary;
+      }
+
+      final response = await _dio.post('/report/maintenance', data: data);
+
+      return response.data;
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al crear el informe de mantenimiento: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception(
+        'Error inesperado al crear el informe de mantenimiento: $e',
+      );
+    }
+  }
+
+  /// Obtiene las reglas de mantenimiento por tipo
+  Future<List<MaintenanceRule>> getMaintenanceRules(
+    String maintenanceType,
+  ) async {
+    try {
+      final response = await _dio.get(
+        '/report/maintenance/rules/$maintenanceType',
+      );
+
+      if (response.data is List) {
+        return (response.data as List)
+            .map((item) => MaintenanceRule.fromJson(item))
+            .toList();
+      } else {
+        throw Exception('Formato de respuesta inesperado');
+      }
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener las reglas de mantenimiento: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception(
+        'Error inesperado al obtener las reglas de mantenimiento: $e',
+      );
+    }
+  }
+
+  /// Crea un nuevo informe de avería
+  Future<Map<String, dynamic>> createIncidentReport({
+    required DateTime startDate,
+    required DateTime endDate,
+    String? commentary,
+    required String elevatorRAE,
+  }) async {
+    try {
+      final data = {
+        'startDate': startDate.toUtc().toIso8601String(),
+        'endDate': endDate.toUtc().toIso8601String(),
+        'elevatorRAE': elevatorRAE,
+      };
+
+      if (commentary != null && commentary.isNotEmpty) {
+        data['commentary'] = commentary;
+      }
+
+      final response = await _dio.post('/report/incident', data: data);
+
+      return response.data;
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al crear el informe de avería: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception('Error inesperado al crear el informe de avería: $e');
+    }
+  }
+
+  /// Obtiene el próximo mantenimiento de un ascensor
+  Future<NextMaintenanceModel> getNextMaintenance(String elevatorId) async {
+    try {
+      final response = await _dio.get('/report/maintenance/next/$elevatorId');
+
+      return NextMaintenanceModel.fromJson(response.data);
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener el próximo mantenimiento: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception(
+        'Error inesperado al obtener el próximo mantenimiento: $e',
+      );
+    }
+  }
+
+  /// Obtiene todos los próximos mantenimientos
+  Future<List<ElevatorNextMaintenance>> getAllNextMaintenances() async {
+    try {
+      final response = await _dio.get('/report/maintenance/next');
+
+      if (response.data is List) {
+        return (response.data as List)
+            .map((item) => ElevatorNextMaintenance.fromJson(item))
+            .toList();
+      } else {
+        throw Exception('Formato de respuesta inesperado');
+      }
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener los próximos mantenimientos: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception(
+        'Error inesperado al obtener los próximos mantenimientos: $e',
+      );
+    }
   }
 
   // ========== UTILIDADES ==========

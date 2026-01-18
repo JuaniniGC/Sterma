@@ -27,11 +27,10 @@ public class Elevator {
     @NotNull
     private Integer instalationYear;
 
+
     @ManyToOne
     private Community community;
 
     public Elevator(){}
-
-
 
 }

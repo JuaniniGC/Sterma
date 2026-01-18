@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -88,5 +89,12 @@ public class ElevatorController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error inesperado: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/rae")
+    public ResponseEntity<List<String>> getRae(
+            @RequestParam(required = false) Long communityId) {
+        List<String> rae = elevatorService.getAllRae(communityId);
+        return ResponseEntity.ok(rae);
     }
 }

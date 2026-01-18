@@ -1,5 +1,8 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'package:front/pages/elevators_page.dart';
+import 'package:front/pages/next_maintenances_page.dart';
+import 'package:front/pages/report_type_selection_page.dart';
 import 'package:provider/provider.dart';
 import 'package:front/core/services/dio_service.dart';
 
@@ -98,7 +101,6 @@ class _MyHomePageState extends State<MyHomePage> {
   int selectedIndex = 0;
   final DioService _dioService = DioService();
 
-  // ✅ Lista de títulos para cada pantalla
   final List<String> _pageTitles = [
     'Comunidades',
     'Crear Informe',
@@ -115,31 +117,44 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  void _navigateToNextMaintenances() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const NextMaintenancesPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget page;
     switch (selectedIndex) {
       case 0:
         page = CommunitiesPage();
-        break;
       case 1:
-        page = GeneratorPage();
-        break;
+        page = ReportTypeSelectionPage();
       case 2:
-        page = const Placeholder();
-        break;
+        page = ElevatorsPage();
       default:
         throw UnimplementedError('No widget for $selectedIndex');
     }
 
     return Scaffold(
       appBar: AppBar(
-        // ✅ Solo muestra el nombre de la pantalla actual
-        title: Text(_pageTitles[selectedIndex]),
+        title: Text(
+          _pageTitles[selectedIndex],
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Color(0xFF2051E5),
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
+          // Botón de campana para próximos mantenimientos
           IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Cerrar sesión',
+            icon: const Icon(Icons.notifications, color: Colors.white),
+            onPressed: _navigateToNextMaintenances,
+            tooltip: 'Próximos mantenimientos',
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: _logout,
           ),
         ],
@@ -182,76 +197,6 @@ class _MyHomePageState extends State<MyHomePage> {
               label: 'Ascensores',
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class GeneratorPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var pair = appState.current;
-
-    IconData icon;
-    if (appState.favorites.contains(pair)) {
-      icon = Icons.favorite;
-    } else {
-      icon = Icons.favorite_border;
-    }
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          BigCard(pair: pair),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  appState.toggleFavorite();
-                },
-                icon: Icon(icon),
-                label: const Text('Like'),
-              ),
-              const SizedBox(width: 10),
-              ElevatedButton(
-                onPressed: () {
-                  appState.getNext();
-                },
-                child: const Text('Next'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class BigCard extends StatelessWidget {
-  const BigCard({super.key, required this.pair});
-
-  final WordPair pair;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = theme.textTheme.displayMedium!.copyWith(
-      color: theme.colorScheme.onPrimary,
-    );
-
-    return Card(
-      color: theme.colorScheme.primary,
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Text(
-          pair.asLowerCase,
-          style: style,
-          semanticsLabel: "${pair.first} ${pair.second}",
         ),
       ),
     );

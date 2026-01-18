@@ -13,7 +13,7 @@ import lombok.Setter;
 @Builder
 public class CommunityLeaderInfo {
     private String communityLeaderName;
-    private Integer communityLeaderTelephone;
+    private String communityLeaderTelephone;
     private String communityLeaderNote;
 
     public CommunityLeaderInfo(){}
