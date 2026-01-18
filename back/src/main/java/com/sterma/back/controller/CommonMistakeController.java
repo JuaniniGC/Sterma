@@ -26,7 +26,7 @@ public class CommonMistakeController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createCommunity(@RequestBody @Valid CommonMistakeCreateRequest request) {
+    public ResponseEntity<?> createCommonMistake(@RequestBody @Valid CommonMistakeCreateRequest request) {
         try {
             CommonMistake commonMistake = commonMistakeService.createCommonMistake(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(commonMistake);

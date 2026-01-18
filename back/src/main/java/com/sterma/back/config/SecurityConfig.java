@@ -4,6 +4,7 @@ import com.sterma.back.security.JwtAuthenticationFilter;
 import com.sterma.back.security.JwtAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -31,7 +32,15 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/h2-console/**").permitAll() // Endpoints públicos
+                        .requestMatchers("/auth/login**", "/h2-console/**").permitAll() // Endpoints públicos
+                        .requestMatchers("/mistake/**").hasAnyRole("MANAGEMENT", "TECHNICIAN")
+                        .requestMatchers(HttpMethod.DELETE, "/community/**").hasRole("MANAGEMENT")
+                        .requestMatchers(HttpMethod.POST, "/community/**").hasRole("MANAGEMENT")
+                        .requestMatchers("/community/**").hasAnyRole("MANAGEMENT", "TECHNICIAN")
+                        .requestMatchers(HttpMethod.DELETE, "/elevator/**").hasRole("MANAGEMENT")
+                        .requestMatchers(HttpMethod.POST, "/elevator/**").hasRole("MANAGEMENT")
+                        .requestMatchers("/elevator/**").hasAnyRole("MANAGEMENT", "TECHNICIAN")
+                        .requestMatchers("/report/**").hasAnyRole("MANAGEMENT", "TECHNICIAN")
                         .anyRequest().authenticated()
                 );
 
