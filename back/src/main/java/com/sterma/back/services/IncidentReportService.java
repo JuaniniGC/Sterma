@@ -51,9 +51,16 @@ public class IncidentReportService {
         return incidentReportRepository.save(report);
     }
 
+    @Transactional(readOnly = true)
     public List<IncidentReport> listAllIncidentReportForElevator(Long elevatorId){
         checkElevatorExists(elevatorId);
         return incidentReportRepository.findByElevator_Id(elevatorId);
+    }
+
+    @Transactional
+    public void deleteMaintenanceReport(Long id){
+        checkIncidentReportExists(id);
+        incidentReportRepository.deleteById(id);
     }
 
     private void checkElevatorExists(Long id) {
@@ -74,5 +81,13 @@ public class IncidentReportService {
         }
     }
 
+    private void checkIncidentReportExists(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("El ID no puede ser nulo");
+        }
+        if (!incidentReportRepository.existsById(id)) {
+            throw new NoSuchElementException("Informe no encontrado con ID: " + id);
+        }
+    }
 }
 
