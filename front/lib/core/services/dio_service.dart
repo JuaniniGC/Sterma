@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:front/data/models/elevator_next_maintenance_model.dart';
 import 'package:front/data/models/maintenance_rule_model.dart';
 import 'package:front/data/models/next_maintenance_model.dart';
+import 'package:front/data/models/report_model.dart';
 
 class DioService {
   final Dio _dio;
@@ -455,6 +456,66 @@ class DioService {
       throw Exception(
         'Error inesperado al obtener los próximos mantenimientos: $e',
       );
+    }
+  }
+
+  /// Obtiene todos los informes de mantenimiento de un ascensor
+  Future<List<Report>> getMaintenanceReports(String elevatorId) async {
+    try {
+      final response = await _dio.get('/report/maintenance/$elevatorId');
+
+      if (response.data is List) {
+        return (response.data as List)
+            .map((item) => Report.maintenanceFromJson(item))
+            .toList();
+      } else {
+        throw Exception('Formato de respuesta inesperado');
+      }
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener informes de mantenimiento: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception(
+        'Error inesperado al obtener informes de mantenimiento: $e',
+      );
+    }
+  }
+
+  /// Obtiene todos los informes de avería de un ascensor
+  Future<List<Report>> getIncidentReports(String elevatorId) async {
+    try {
+      final response = await _dio.get('/report/incident/$elevatorId');
+
+      if (response.data is List) {
+        return (response.data as List)
+            .map((item) => Report.incidentFromJson(item))
+            .toList();
+      } else {
+        throw Exception('Formato de respuesta inesperado');
+      }
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener informes de avería: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception('Error inesperado al obtener informes de avería: $e');
+    }
+  }
+
+  /// Obtiene todos los informes (mantenimiento y avería) de un ascensor
+  Future<List<Report>> getAllReports(String elevatorId) async {
+    try {
+      final maintenanceReports = await getMaintenanceReports(elevatorId);
+      final incidentReports = await getIncidentReports(elevatorId);
+
+      final allReports = [...maintenanceReports, ...incidentReports];
+
+      allReports.sort((a, b) => b.startDate.compareTo(a.startDate));
+
+      return allReports;
+    } catch (e) {
+      throw Exception('Error al obtener todos los informes: $e');
     }
   }
 

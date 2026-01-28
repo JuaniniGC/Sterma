@@ -1,10 +1,10 @@
 -- === TECHNICIANS ===
-INSERT INTO technician (id, username, password, name, surnames)
+INSERT INTO technician (id, username, password, name, surnames, role)
 VALUES
-    (101, 'tecnico1', '$2a$10$VsE1b6gM3V5zliIyWiGIm.sb/.5q7BdHpYXfamV1bZyNVgSUhwZ0i', 'Carlos', 'López García'),
-    (102, 'tecnico2', '$2a$10$VsE1b6gM3V5zliIyWiGIm.sb/.5q7BdHpYXfamV1bZyNVgSUhwZ0i', 'Laura', 'García Martínez'),
-    (103, 'tecnico3', '$2a$10$VsE1b6gM3V5zliIyWiGIm.sb/.5q7BdHpYXfamV1bZyNVgSUhwZ0i', 'Miguel', 'Fernández Ruiz'),
-    (104, 'tecnico4', '$2a$10$VsE1b6gM3V5zliIyWiGIm.sb/.5q7BdHpYXfamV1bZyNVgSUhwZ0i', 'Sofía', 'Rodríguez Pérez');
+    (101, 'tecnico1', '$2a$10$VsE1b6gM3V5zliIyWiGIm.sb/.5q7BdHpYXfamV1bZyNVgSUhwZ0i', 'Carlos', 'López García', 'TECHNICIAN'),
+    (102, 'tecnico2', '$2a$10$VsE1b6gM3V5zliIyWiGIm.sb/.5q7BdHpYXfamV1bZyNVgSUhwZ0i', 'Laura', 'García Martínez', 'TECHNICIAN'),
+    (103, 'tecnico3', '$2a$10$VsE1b6gM3V5zliIyWiGIm.sb/.5q7BdHpYXfamV1bZyNVgSUhwZ0i', 'Miguel', 'Fernández Ruiz', 'TECHNICIAN'),
+    (104, 'tecnico4', '$2a$10$VsE1b6gM3V5zliIyWiGIm.sb/.5q7BdHpYXfamV1bZyNVgSUhwZ0i', 'Sofía', 'Rodríguez Pérez', 'MANAGEMENT');
 
 -- === COMMUNITIES ===
 INSERT INTO community (

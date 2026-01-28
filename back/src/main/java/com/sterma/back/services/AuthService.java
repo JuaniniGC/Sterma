@@ -3,6 +3,7 @@ package com.sterma.back.services;
 import ch.qos.logback.core.CoreConstants;
 import com.sterma.back.dtos.auth.signup.SignUpResponse;
 import com.sterma.back.models.Technician;
+import com.sterma.back.models.TechnicianRole;
 import com.sterma.back.repositories.TechnicianRepository;
 import com.sterma.back.security.JwtUtil;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,11 +29,12 @@ public class AuthService {
             technician.setPassword(encodedPassword);
             technician.setName(name);
             technician.setSurnames(surname);
+            technician.setRole(TechnicianRole.TECHNICIAN);
 
             Technician createdTechnician = technicianRepository.save(technician);
             System.out.println("ID creada: " + createdTechnician.getId());
 
-            String jwt = jwtUtil.generateToken(username);
+            String jwt = jwtUtil.generateToken(username, TechnicianRole.TECHNICIAN);
             return new SignUpResponse(createdTechnician, jwt);
 
         } catch (Exception e) {
@@ -46,7 +48,7 @@ public class AuthService {
         Technician user = technicianRepository.findByUsername(username)
                 .orElseThrow(() -> new Exception("Usuario no encontrado"));
         if (passwordEncoder.matches(rawPassword, user.getPassword())) {
-            return jwtUtil.generateToken(username);
+            return jwtUtil.generateToken(username, user.getRole());
         } else {
             throw new Exception("Contraseña incorrecta");
         }

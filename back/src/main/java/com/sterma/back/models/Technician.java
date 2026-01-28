@@ -1,11 +1,9 @@
 package com.sterma.back.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Year;
 
 @Entity
 @Getter
@@ -28,6 +26,10 @@ public class Technician {
 
     @Column(nullable = false)
     private String surnames;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TechnicianRole role;
 
 
     public Technician() {
