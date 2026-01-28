@@ -147,7 +147,6 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Color(0xFF2051E5),
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
-          // Botón de campana para próximos mantenimientos
           IconButton(
             icon: const Icon(Icons.notifications, color: Colors.white),
             onPressed: _navigateToNextMaintenances,
