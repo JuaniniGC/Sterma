@@ -1,5 +1,6 @@
 package com.sterma.back.services.maintenance;
 
+import com.sterma.back.dtos.maintenanceReport.BasicMaintenanceReport;
 import com.sterma.back.dtos.maintenanceReport.CreateMaintenanceReportRequest;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NearMaintenanceTuple;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NextMaintenanceResponse;

@@ -1,5 +1,6 @@
 package com.sterma.back.services.maintenance;
 
+import com.sterma.back.dtos.maintenanceReport.BasicMaintenanceReport;
 import com.sterma.back.dtos.maintenanceReport.CreateMaintenanceReportRequest;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NearMaintenanceTuple;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NextMaintenanceResponse;
@@ -86,6 +87,12 @@ public class MaintenanceService {
     public List<MaintenanceReport> getMaintenanceReportsList(Long elevatorId){
         checkElevatorExists(elevatorId);
         return maintenanceReportRepository.findByElevator_Id(elevatorId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<BasicMaintenanceReport> getBasicMaintenanceReportsList(Long elevatorId){
+        List<MaintenanceReport> list = getMaintenanceReportsList(elevatorId);
+        return list.stream().map(BasicMaintenanceReport::new).toList();
     }
 
     @Transactional(readOnly = true)

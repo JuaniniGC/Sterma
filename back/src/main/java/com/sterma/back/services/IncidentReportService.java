@@ -1,5 +1,6 @@
 package com.sterma.back.services;
 
+import com.sterma.back.dtos.incidentReport.BasicIncidentReport;
 import com.sterma.back.dtos.incidentReport.CreateIncidentReportRequest;
 import com.sterma.back.models.Elevator;
 import com.sterma.back.models.Technician;
@@ -52,9 +53,10 @@ public class IncidentReportService {
     }
 
     @Transactional(readOnly = true)
-    public List<IncidentReport> listAllIncidentReportForElevator(Long elevatorId){
+    public List<BasicIncidentReport> listAllIncidentReportForElevator(Long elevatorId){
         checkElevatorExists(elevatorId);
-        return incidentReportRepository.findByElevator_Id(elevatorId);
+        List<IncidentReport> list =  incidentReportRepository.findByElevator_Id(elevatorId);
+        return list.stream().map(BasicIncidentReport::new).toList();
     }
 
     @Transactional

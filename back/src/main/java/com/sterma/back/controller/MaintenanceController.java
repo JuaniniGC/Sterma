@@ -1,5 +1,6 @@
 package com.sterma.back.controller;
 
+import com.sterma.back.dtos.maintenanceReport.BasicMaintenanceReport;
 import com.sterma.back.dtos.maintenanceReport.CreateMaintenanceReportRequest;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NearMaintenanceTuple;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NextMaintenanceResponse;
@@ -73,7 +74,7 @@ public class MaintenanceController {
     @GetMapping("{elevatorId}")
     public ResponseEntity<?> listAllMaintenanceReportsForElevatorId(@PathVariable Long elevatorId){
         try {
-            List<MaintenanceReport> response = maintenanceService.getMaintenanceReportsList(elevatorId);
+            List<BasicMaintenanceReport> response = maintenanceService.getBasicMaintenanceReportsList(elevatorId);
             return ResponseEntity.ok(response);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
