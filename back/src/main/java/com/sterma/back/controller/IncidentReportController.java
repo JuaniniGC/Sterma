@@ -51,9 +51,9 @@ public class IncidentReportController {
     }
 
     @DeleteMapping("{reportId}")
-    public ResponseEntity<?> deleteMaintenanceReport(@PathVariable Long reportId){
+    public ResponseEntity<?> deleteIncidentReport(@PathVariable Long reportId){
         try {
-            incidentReportService.deleteMaintenanceReport(reportId);
+            incidentReportService.deleteIncidentReport(reportId);
             return ResponseEntity.ok("Se ha borrado correctamente el informe");
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

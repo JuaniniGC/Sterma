@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:front/core/services/dio_service.dart';
+import 'package:front/pages/common_mistakes_page.dart';
 
 class IncidentReportPage extends StatefulWidget {
   final String rae;
@@ -95,13 +96,30 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
     }
   }
 
+  void _navigateToCommonMistakes() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CommonMistakesPage(
+          onMistakeSelected: (description) {
+            setState(() {
+              if (_commentaryController.text.isNotEmpty) {
+                _commentaryController.text += '\n\n$description';
+              } else {
+                _commentaryController.text = description;
+              }
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   Future<void> _submitReport() async {
     setState(() => _isSubmitting = true);
 
     try {
-      // Usar fecha y hora actual como endDate si no se especifica
-      final endDate = _endDate ?? DateTime.now();
-
+      final endDate = _endDate;
       await _dioService.createIncidentReport(
         startDate: _startDate,
         endDate: endDate,
@@ -131,7 +149,7 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
   void _showSuccess() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Informe de avería creado correctamente'),
+        content: const Text('Informe de avería creado correctamente'),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
     );
@@ -157,9 +175,10 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Card(
               elevation: 2,
@@ -182,9 +201,8 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-            // Fecha y hora de inicio
             _buildDateTimePicker(
               title: 'Fecha y Hora de Inicio *',
               date: _startDate,
@@ -194,7 +212,6 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
 
             const SizedBox(height: 16),
 
-            // Fecha y hora de fin (opcional)
             _buildDateTimePicker(
               title: 'Fecha y Hora de Fin (opcional)',
               date: _endDate,
@@ -204,34 +221,81 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
               onClear: _clearEndDate,
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-            // Comentario
-            TextField(
-              controller: _commentaryController,
-              maxLines: 5,
-              decoration: InputDecoration(
-                labelText: 'Descripción de la avería (opcional)',
-                border: OutlineInputBorder(),
-                alignLabelWithHint: true,
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: colorScheme.primary, width: 2),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _navigateToCommonMistakes,
+                icon: const Icon(Icons.list_alt, size: 20),
+                label: const Text('Ver fallos comunes'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: colorScheme.primary,
+                  side: BorderSide(color: colorScheme.primary),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
             ),
 
-            const SizedBox(height: 8),
-            Text(
-              'Describe el problema, síntomas y cualquier observación relevante',
-              style: TextStyle(
-                color: colorScheme.onSurface.withOpacity(0.6),
-                fontSize: 12,
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                'Selecciona un fallo común para agregarlo a la descripción',
+                style: TextStyle(
+                  color: colorScheme.onSurface.withOpacity(0.6),
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
 
-            const Spacer(),
+            const SizedBox(height: 16),
 
-            // Botón de envío
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Descripción de la avería',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '(opcional)',
+                  style: TextStyle(
+                    color: colorScheme.onSurface.withOpacity(0.6),
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _commentaryController,
+                  maxLines: 4,
+                  decoration: InputDecoration(
+                    hintText:
+                        'Describe el problema, síntomas y observaciones...',
+                    border: const OutlineInputBorder(),
+                    alignLabelWithHint: true,
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: colorScheme.primary,
+                        width: 2,
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.all(12),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -271,6 +335,7 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
                       ),
               ),
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -296,7 +361,7 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
             Text(
               title,
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
                 color: colorScheme.onSurface,
               ),
             ),
@@ -310,12 +375,11 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
         const SizedBox(height: 8),
         Row(
           children: [
-            // Selector de fecha
             Expanded(
               child: InkWell(
                 onTap: onDateTap,
                 child: Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: date == null
@@ -334,7 +398,7 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
                             : colorScheme.primary,
                         size: 20,
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           date == null
@@ -352,13 +416,12 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
-            // Selector de hora
+            const SizedBox(width: 10),
             Expanded(
               child: InkWell(
                 onTap: date == null ? null : onTimeTap,
                 child: Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: date == null
@@ -377,7 +440,7 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
                             : colorScheme.primary,
                         size: 20,
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           date == null ? '--:--' : _formatTime(date!),
@@ -394,9 +457,10 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
               ),
             ),
             if (isOptional && date != null) ...[
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               IconButton(
-                icon: Icon(Icons.clear, color: colorScheme.error, size: 20),
+                icon: Icon(Icons.clear, color: colorScheme.error, size: 18),
+                padding: const EdgeInsets.all(8),
                 onPressed: onClear,
               ),
             ],

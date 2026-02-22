@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:front/data/models/common_mistake_model.dart';
 import 'package:front/data/models/elevator_next_maintenance_model.dart';
 import 'package:front/data/models/maintenance_rule_model.dart';
 import 'package:front/data/models/next_maintenance_model.dart';
@@ -392,14 +393,14 @@ class DioService {
   /// Crea un nuevo informe de avería
   Future<Map<String, dynamic>> createIncidentReport({
     required DateTime startDate,
-    required DateTime endDate,
+    DateTime? endDate,
     String? commentary,
     required String elevatorRAE,
   }) async {
     try {
       final data = {
         'startDate': startDate.toUtc().toIso8601String(),
-        'endDate': endDate.toUtc().toIso8601String(),
+        'endDate': endDate?.toUtc().toIso8601String(),
         'elevatorRAE': elevatorRAE,
       };
 
@@ -516,6 +517,33 @@ class DioService {
       return allReports;
     } catch (e) {
       throw Exception('Error al obtener todos los informes: $e');
+    }
+  }
+
+  // ========== MÉTODOS ESPECÍFICOS PARA FALLOS COMUNES ==========
+
+  Future<List<CommonMistake>> getCommonMistakes() async {
+    try {
+      final response = await _dio.get('/mistake');
+
+      if (response.data is Map<String, dynamic> &&
+          response.data['content'] is List) {
+        return (response.data['content'] as List)
+            .map((item) => CommonMistake.fromJson(item))
+            .toList();
+      } else if (response.data is List) {
+        return (response.data as List)
+            .map((item) => CommonMistake.fromJson(item))
+            .toList();
+      } else {
+        throw Exception('Formato de respuesta inesperado');
+      }
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener fallos comunes: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception('Error inesperado al obtener fallos comunes: $e');
     }
   }
 

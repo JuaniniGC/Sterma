@@ -61,7 +61,7 @@ public class IncidentReportService {
     }
 
     @Transactional
-    public void deleteMaintenanceReport(Long id){
+    public void deleteIncidentReport(Long id){
         checkIncidentReportExists(id);
         incidentReportRepository.deleteById(id);
     }

@@ -6,12 +6,11 @@ import com.sterma.back.models.CommonMistake;
 import com.sterma.back.models.Community;
 import com.sterma.back.services.CommonMistakeService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.NoSuchElementException;
 
@@ -41,4 +40,12 @@ public class CommonMistakeController {
                     .body("Error inesperado: " + e.getMessage());
         }
     }
+
+    @GetMapping
+    public ResponseEntity<Page<CommonMistake>> getCommonMistakes(Pageable pageable) {
+        Page<CommonMistake> commonMistakes =
+                commonMistakeService.getAllCommonMistakes(pageable);
+        return ResponseEntity.ok(commonMistakes);
+    }
+
 }
