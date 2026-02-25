@@ -37,7 +37,8 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
   final TextEditingController _commentaryController = TextEditingController();
 
   MaintenanceFrequency _selectedFrequency = MaintenanceFrequency.ANNUAL;
-  DateTime _selectedDateTime = DateTime.now();
+  DateTime _startDateTime = DateTime.now();
+  DateTime? _endDateTime; // Ahora es opcional y puede ser null
 
   bool _isSubmitting = false;
   bool _showChecklist = false;
@@ -56,42 +57,116 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
     MaintenanceFrequency.MONTHLY,
   ];
 
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> _selectStartDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDateTime,
+      initialDate: _startDateTime,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    if (picked != null && picked != _selectedDateTime) {
+    if (picked != null && picked != _startDateTime) {
       setState(() {
-        _selectedDateTime = DateTime(
+        _startDateTime = DateTime(
           picked.year,
           picked.month,
           picked.day,
-          _selectedDateTime.hour,
-          _selectedDateTime.minute,
+          _startDateTime.hour,
+          _startDateTime.minute,
         );
       });
     }
   }
 
-  Future<void> _selectTime(BuildContext context) async {
+  Future<void> _selectStartTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
+      initialTime: TimeOfDay.fromDateTime(_startDateTime),
     );
     if (picked != null) {
       setState(() {
-        _selectedDateTime = DateTime(
-          _selectedDateTime.year,
-          _selectedDateTime.month,
-          _selectedDateTime.day,
+        _startDateTime = DateTime(
+          _startDateTime.year,
+          _startDateTime.month,
+          _startDateTime.day,
           picked.hour,
           picked.minute,
         );
       });
     }
+  }
+
+  Future<void> _selectEndDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate:
+          _endDateTime ??
+          _startDateTime, // Usar startDate como inicial si no hay endDate
+      firstDate: _startDateTime,
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() {
+        if (_endDateTime == null) {
+          // Si no había endDate, crear una nueva con la fecha seleccionada y la hora de startDate
+          _endDateTime = DateTime(
+            picked.year,
+            picked.month,
+            picked.day,
+            _startDateTime.hour,
+            _startDateTime.minute,
+          );
+        } else {
+          // Si ya existía, mantener la hora existente
+          _endDateTime = DateTime(
+            picked.year,
+            picked.month,
+            picked.day,
+            _endDateTime!.hour,
+            _endDateTime!.minute,
+          );
+        }
+      });
+    }
+  }
+
+  Future<void> _selectEndTime(BuildContext context) async {
+    // Si no hay fecha de fin, la inicializamos con la fecha de inicio
+    final DateTime tempDate = _endDateTime ?? _startDateTime;
+
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(tempDate),
+    );
+
+    if (picked != null) {
+      setState(() {
+        if (_endDateTime == null) {
+          // Si no había endDate, crear una nueva con la fecha de inicio y la hora seleccionada
+          _endDateTime = DateTime(
+            _startDateTime.year,
+            _startDateTime.month,
+            _startDateTime.day,
+            picked.hour,
+            picked.minute,
+          );
+        } else {
+          // Si ya existía, actualizar solo la hora
+          _endDateTime = DateTime(
+            _endDateTime!.year,
+            _endDateTime!.month,
+            _endDateTime!.day,
+            picked.hour,
+            picked.minute,
+          );
+        }
+      });
+    }
+  }
+
+  void _clearEndDateTime() {
+    setState(() {
+      _endDateTime = null;
+    });
   }
 
   Future<void> _loadMaintenanceRules() async {
@@ -151,14 +226,11 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
     });
 
     try {
-      // Hardcodeamos la endDate como 1 hora después de la startDate
-      final DateTime startDate = _selectedDateTime;
-      final DateTime endDate = startDate.add(const Duration(hours: 1));
-
+      // Pasar endDate como null si no se especificó
       await _dioService.createMaintenanceReport(
         maintenanceType: _selectedFrequency.apiValue,
-        startDate: startDate,
-        endDate: endDate, // Hardcodeada: 1 hora después
+        startDate: _startDateTime,
+        endDate: _endDateTime, // Puede ser null
         commentary: _commentaryController.text.isEmpty
             ? null
             : _commentaryController.text,
@@ -256,8 +328,13 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
 
             const SizedBox(height: 20),
 
-            // Fecha y hora del mantenimiento
-            _buildDateTimePicker(context),
+            // Fecha y hora de inicio
+            _buildStartDateTimePicker(context),
+
+            const SizedBox(height: 20),
+
+            // Fecha y hora de fin (opcional)
+            _buildEndDateTimePicker(context),
 
             const SizedBox(height: 24),
 
@@ -321,7 +398,7 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
 
         const SizedBox(height: 20),
 
-        // Comentario del mantenimiento (ahora aparece después del checklist y es opcional)
+        // Comentario del mantenimiento
         _buildCommentaryField(),
 
         const SizedBox(height: 20),
@@ -440,7 +517,7 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
     );
   }
 
-  Widget _buildDateTimePicker(BuildContext context) {
+  Widget _buildStartDateTimePicker(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -448,7 +525,7 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Fecha y Hora del Mantenimiento *',
+          'Fecha y Hora de Inicio *',
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
             color: colorScheme.onSurface,
@@ -460,7 +537,7 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
             // Selector de fecha
             Expanded(
               child: InkWell(
-                onTap: () => _selectDate(context),
+                onTap: () => _selectStartDate(context),
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
                   padding: const EdgeInsets.all(16),
@@ -481,7 +558,7 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          '${_selectedDateTime.day}/${_selectedDateTime.month}/${_selectedDateTime.year}',
+                          '${_startDateTime.day}/${_startDateTime.month}/${_startDateTime.year}',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurface,
                           ),
@@ -496,7 +573,7 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
             // Selector de hora
             Expanded(
               child: InkWell(
-                onTap: () => _selectTime(context),
+                onTap: () => _selectStartTime(context),
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
                   padding: const EdgeInsets.all(16),
@@ -517,7 +594,7 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          _formatTime(_selectedDateTime),
+                          _formatTime(_startDateTime),
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurface,
                           ),
@@ -530,9 +607,148 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
             ),
           ],
         ),
+      ],
+    );
+  }
+
+  Widget _buildEndDateTimePicker(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Fecha y Hora de Fin',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
+              ),
+              child: Text(
+                'opcional',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            // Selector de fecha
+            Expanded(
+              child: InkWell(
+                onTap: () => _selectEndDate(context),
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: _endDateTime == null
+                          ? colorScheme.outline.withOpacity(0.3)
+                          : colorScheme.primary.withOpacity(0.5),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.date_range,
+                        color: _endDateTime == null
+                            ? colorScheme.onSurface.withOpacity(0.5)
+                            : colorScheme.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _endDateTime == null
+                              ? 'No especificada'
+                              : '${_endDateTime!.day}/${_endDateTime!.month}/${_endDateTime!.year}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: _endDateTime == null
+                                ? colorScheme.onSurface.withOpacity(0.5)
+                                : colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Selector de hora
+            Expanded(
+              child: InkWell(
+                onTap: () => _selectEndTime(context),
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: _endDateTime == null
+                          ? colorScheme.outline.withOpacity(0.3)
+                          : colorScheme.primary.withOpacity(0.5),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.access_time,
+                        color: _endDateTime == null
+                            ? colorScheme.onSurface.withOpacity(0.5)
+                            : colorScheme.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _endDateTime == null
+                              ? '--:--'
+                              : _formatTime(_endDateTime!),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: _endDateTime == null
+                                ? colorScheme.onSurface.withOpacity(0.5)
+                                : colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            if (_endDateTime != null) ...[
+              const SizedBox(width: 8),
+              IconButton(
+                icon: Icon(Icons.clear, color: colorScheme.error, size: 20),
+                onPressed: _clearEndDateTime,
+                tooltip: 'Limpiar fecha de fin',
+              ),
+            ],
+          ],
+        ),
         const SizedBox(height: 4),
         Text(
-          'La hora de fin se establecerá automáticamente 1 hora después',
+          'Campo opcional. Si no se especifica, no se enviará fecha de finalización',
           style: theme.textTheme.bodySmall?.copyWith(
             color: colorScheme.onSurface.withOpacity(0.6),
           ),

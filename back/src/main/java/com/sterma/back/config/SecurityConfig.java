@@ -32,7 +32,8 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login**", "/h2-console/**").permitAll() // Endpoints públicos
+                        .requestMatchers("/auth/login**", "/h2-console/**").permitAll()
+                        .requestMatchers("/auth/signup**").hasRole("MANAGEMENT")
                         .requestMatchers("/mistake/**").hasAnyRole("MANAGEMENT", "TECHNICIAN")
                         .requestMatchers(HttpMethod.DELETE, "/community/**").hasRole("MANAGEMENT")
                         .requestMatchers(HttpMethod.POST, "/community/**").hasRole("MANAGEMENT")
@@ -44,7 +45,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 );
 
-        http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())); // Para consola H2
+        http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())); 
 
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

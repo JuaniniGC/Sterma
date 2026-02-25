@@ -19,29 +19,19 @@ public interface MaintenanceRuleRepository extends JpaRepository<MaintenanceRule
     @Query("SELECT mr FROM MaintenanceRule mr WHERE mr.maintenanceType IN :types ORDER BY mr.orderNum")
     List<MaintenanceRule> findByMaintenanceTypesInOrderByOrderNum(@Param("types") Set<MaintenanceType> types);
 
-
-    // Obtener todas las reglas mensuales
     default List<MaintenanceRule> findMonthlyRules() {
         return findByMaintenanceTypeOrderByOrderNum(MaintenanceType.MONTHLY);
     }
-
-    // Obtener reglas mensuales y bianuales
     default List<MaintenanceRule> findMonthlyAndBiannualRules() {
         Set<MaintenanceType> types = Set.of(MaintenanceType.MONTHLY, MaintenanceType.BIANNUAL);
         return findByMaintenanceTypesInOrderByOrderNum(types);
     }
-
-    // Obtener reglas mensuales, bianuales y anuales
     default List<MaintenanceRule> findMonthlyBiannualAndAnnualRules() {
         Set<MaintenanceType> types = Set.of(MaintenanceType.MONTHLY, MaintenanceType.BIANNUAL, MaintenanceType.ANNUAL);
         return findByMaintenanceTypesInOrderByOrderNum(types);
     }
-
-    // Método genérico para cualquier combinación de tipos
     default List<MaintenanceRule> findRulesByTypes(MaintenanceType... types) {
         return findByMaintenanceTypesInOrderByOrderNum(Set.of(types));
     }
-
-    // Método adicional: encontrar reglas por tipo ordenadas
     List<MaintenanceRule> findByMaintenanceTypeInOrderByMaintenanceTypeAscOrderNumAsc(List<MaintenanceType> maintenanceTypes);
 }

@@ -213,7 +213,7 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
             const SizedBox(height: 16),
 
             _buildDateTimePicker(
-              title: 'Fecha y Hora de Fin (opcional)',
+              title: 'Fecha y Hora de Fin',
               date: _endDate,
               onDateTap: () => _selectEndDate(context),
               onTimeTap: () => _selectEndTime(context),

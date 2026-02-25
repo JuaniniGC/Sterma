@@ -43,7 +43,6 @@ public class IncidentReportController {
     public ResponseEntity<?> listAllIncidentReportsForElevatorId(@PathVariable Long elevatorId){
         try {
             List<BasicIncidentReport> response = incidentReportService.listAllIncidentReportForElevator(elevatorId);
-
             return ResponseEntity.ok(response);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

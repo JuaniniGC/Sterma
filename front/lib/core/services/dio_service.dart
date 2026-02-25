@@ -333,7 +333,7 @@ class DioService {
   Future<Map<String, dynamic>> createMaintenanceReport({
     required String maintenanceType,
     required DateTime startDate,
-    required DateTime endDate,
+    DateTime? endDate,
     String? commentary,
     required String elevatorRAE,
   }) async {
@@ -341,7 +341,7 @@ class DioService {
       final data = {
         'maintenanceType': maintenanceType,
         'startDate': startDate.toUtc().toIso8601String(),
-        'endDate': endDate.toUtc().toIso8601String(),
+        'endDate': endDate?.toUtc().toIso8601String(),
         'elevatorRAE': elevatorRAE,
       };
 
