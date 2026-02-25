@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:front/core/services/dio_service.dart';
 import 'package:front/data/models/common_mistake_model.dart';
+import 'package:front/pages/create_common_mistake_page.dart';
 
 class CommonMistakesPage extends StatefulWidget {
   final Function(String)? onMistakeSelected;
@@ -43,6 +44,14 @@ class _CommonMistakesPageState extends State<CommonMistakesPage> {
     }
   }
 
+  void _navigateToCreateMistake() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const CreateCommonMistakePage()),
+    );
+    _loadCommonMistakes();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -55,8 +64,14 @@ class _CommonMistakesPageState extends State<CommonMistakesPage> {
         foregroundColor: colorScheme.onPrimary,
         actions: [
           IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: _navigateToCreateMistake,
+            tooltip: 'Crear nuevo fallo común',
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadCommonMistakes,
+            tooltip: 'Refrescar lista',
           ),
         ],
       ),
@@ -131,6 +146,8 @@ class _CommonMistakesPageState extends State<CommonMistakesPage> {
   }
 
   Widget _buildEmptyState() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -143,9 +160,20 @@ class _CommonMistakesPageState extends State<CommonMistakesPage> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Contacta con el administrador para agregar fallos comunes',
+            'Crea el primer fallo común usando el botón +',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: _navigateToCreateMistake,
+            icon: const Icon(Icons.add),
+            label: const Text('Crear primer fallo'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
           ),
         ],
       ),

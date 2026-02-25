@@ -547,6 +547,26 @@ class DioService {
     }
   }
 
+  /// Crea un nuevo fallo común
+  Future<CommonMistake> createCommonMistake({
+    required String identificator,
+    required String description,
+  }) async {
+    try {
+      final data = {'identificator': identificator, 'description': description};
+
+      final response = await _dio.post('/mistake', data: data);
+
+      return CommonMistake.fromJson(response.data);
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al crear el fallo común: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception('Error inesperado al crear el fallo común: $e');
+    }
+  }
+
   // ========== UTILIDADES ==========
 
   String _getDioErrorMessage(DioException e) {
