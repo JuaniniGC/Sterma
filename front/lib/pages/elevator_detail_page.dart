@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:front/data/models/elevator_model.dart';
 import 'package:front/data/models/next_maintenance_model.dart';
 import 'package:front/core/services/dio_service.dart';
+import 'package:front/pages/elevator_reports_page.dart';
 import 'package:front/pages/maintenance_report_page.dart';
 import 'package:front/pages/incident_report_page.dart';
 
@@ -68,19 +69,15 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Información principal del ascensor
             _buildElevatorInfoSection(context),
             const SizedBox(height: 24),
 
-            // Próximo mantenimiento
             _buildNextMaintenanceSection(),
             const SizedBox(height: 24),
 
-            // Información de la comunidad
             _buildCommunitySection(),
             const SizedBox(height: 24),
 
-            // Información de contacto
             _buildContactSection(),
           ],
         ),
@@ -120,19 +117,15 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
     );
   }
 
-  // NUEVO: Skeleton Loader
   Widget _buildSkeletonLoader() {
     return Column(
       children: [
-        // Skeleton para "Tipo"
         _buildSkeletonRow(),
         const SizedBox(height: 12),
 
-        // Skeleton para "Próxima fecha"
         _buildSkeletonRow(),
         const SizedBox(height: 12),
 
-        // Skeleton para "Estado"
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -212,19 +205,16 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Tipo de mantenimiento
         _buildMaintenanceInfoRow(
           'Tipo',
           nextMaintenance.maintenanceTypeDisplayName,
         ),
 
-        // Fecha del próximo mantenimiento
         _buildMaintenanceInfoRow(
           'Próxima fecha',
           '${nextMaintenance.nextDate.day}/${nextMaintenance.nextDate.month}/${nextMaintenance.nextDate.year}',
         ),
 
-        // Estado
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -287,8 +277,6 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
       ),
     );
   }
-
-  // ELIMINADO: _buildLoadingIndicator ya no se usa
 
   Widget _buildErrorWidget() {
     final colorScheme = Theme.of(context).colorScheme;
@@ -353,7 +341,6 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
     );
   }
 
-  // Resto del código permanece igual...
   Widget _buildElevatorInfoSection(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -388,12 +375,30 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
 
             const SizedBox(height: 16),
 
-            // Texto y botones para crear informes
+            ElevatedButton.icon(
+              onPressed: () => _navigateToReports(context),
+              icon: const Icon(Icons.history, size: 20),
+              label: const Text('Ver informes históricos'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey[800],
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Crear informe para este ascensor:',
+                  'Crear nuevo informe:',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -403,7 +408,6 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    // Botón para informe de mantenimiento
                     ElevatedButton.icon(
                       onPressed: () => _navigateToMaintenanceReport(context),
                       icon: const Icon(Icons.build, size: 16),
@@ -421,7 +425,6 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    // Botón para informe de avería
                     ElevatedButton.icon(
                       onPressed: () => _navigateToIncidentReport(context),
                       icon: const Icon(Icons.report_problem, size: 16),
@@ -443,6 +446,18 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _navigateToReports(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ElevatorReportsPage(
+          elevatorId: widget.elevator.id,
+          elevatorRAE: widget.elevator.rae,
         ),
       ),
     );
@@ -483,7 +498,6 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
             _buildInfoRow('Descripción', widget.elevator.community.description),
             _buildInfoRow('CIF', widget.elevator.community.cif),
             const SizedBox(height: 12),
-            // Ubicación
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

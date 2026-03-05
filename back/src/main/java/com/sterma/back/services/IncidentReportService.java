@@ -1,5 +1,7 @@
 package com.sterma.back.services;
 
+
+import com.sterma.back.dtos.incidentReport.BasicIncidentReport;
 import com.sterma.back.dtos.incidentReport.CreateIncidentReportRequest;
 import com.sterma.back.models.Elevator;
 import com.sterma.back.models.Technician;
@@ -51,9 +53,17 @@ public class IncidentReportService {
         return incidentReportRepository.save(report);
     }
 
-    public List<IncidentReport> listAllIncidentReportForElevator(Long elevatorId){
+    @Transactional(readOnly = true)
+    public List<BasicIncidentReport> listAllIncidentReportForElevator(Long elevatorId){
         checkElevatorExists(elevatorId);
-        return incidentReportRepository.findByElevator_Id(elevatorId);
+        List<IncidentReport> list =  incidentReportRepository.findByElevator_Id(elevatorId);
+        return list.stream().map(BasicIncidentReport::new).toList();
+    }
+
+    @Transactional
+    public void deleteIncidentReport(Long id){
+        checkIncidentReportExists(id);
+        incidentReportRepository.deleteById(id);
     }
 
     private void checkElevatorExists(Long id) {
@@ -71,6 +81,15 @@ public class IncidentReportService {
                     "La fecha pasada debe ser anterior a la fecha futura. Fecha pasada: "
                             + startDate + ", Fecha futura: " + endDate
             );
+        }
+    }
+
+    private void checkIncidentReportExists(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("El ID no puede ser nulo");
+        }
+        if (!incidentReportRepository.existsById(id)) {
+            throw new NoSuchElementException("Informe no encontrado con ID: " + id);
         }
     }
 

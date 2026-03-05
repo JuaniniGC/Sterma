@@ -1,5 +1,7 @@
 package com.sterma.back.services;
 
+
+import com.sterma.back.dtos.incidentReport.BasicIncidentReport;
 import com.sterma.back.dtos.incidentReport.CreateIncidentReportRequest;
 import com.sterma.back.models.Elevator;
 import com.sterma.back.models.Technician;
@@ -121,7 +123,7 @@ class IncidentReportServiceTest {
         when(elevatorRepository.existsById(1L)).thenReturn(true);
         when(incidentReportRepository.findByElevator_Id(1L)).thenReturn(List.of(sampleReport));
 
-        List<IncidentReport> result =
+        List<BasicIncidentReport> result =
                 incidentReportService.listAllIncidentReportForElevator(1L);
 
         assertFalse(result.isEmpty());
@@ -134,7 +136,7 @@ class IncidentReportServiceTest {
         when(elevatorRepository.existsById(1L)).thenReturn(true);
         when(incidentReportRepository.findByElevator_Id(1L)).thenReturn(List.of());
 
-        List<IncidentReport> result =
+        List<BasicIncidentReport> result =
                 incidentReportService.listAllIncidentReportForElevator(1L);
 
         assertTrue(result.isEmpty());

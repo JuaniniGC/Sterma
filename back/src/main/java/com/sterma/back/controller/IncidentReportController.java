@@ -1,5 +1,7 @@
 package com.sterma.back.controller;
 
+
+import com.sterma.back.dtos.incidentReport.BasicIncidentReport;
 import com.sterma.back.dtos.incidentReport.CreateIncidentReportRequest;
 import com.sterma.back.models.reports.IncidentReport;
 import com.sterma.back.models.reports.MaintenanceReport;
@@ -40,11 +42,22 @@ public class IncidentReportController {
     @GetMapping("{elevatorId}")
     public ResponseEntity<?> listAllIncidentReportsForElevatorId(@PathVariable Long elevatorId){
         try {
-            List<IncidentReport> response = incidentReportService.listAllIncidentReportForElevator(elevatorId);
+            List<BasicIncidentReport> response = incidentReportService.listAllIncidentReportForElevator(elevatorId);
             return ResponseEntity.ok(response);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
+    @DeleteMapping("{reportId}")
+    public ResponseEntity<?> deleteIncidentReport(@PathVariable Long reportId){
+        try {
+            incidentReportService.deleteIncidentReport(reportId);
+            return ResponseEntity.ok("Se ha borrado correctamente el informe");
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
 }
 

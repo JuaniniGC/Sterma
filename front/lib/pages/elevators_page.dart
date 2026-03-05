@@ -147,7 +147,6 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      // AppBar condicional - solo se muestra cuando hay initialCommunityName
       appBar: widget.initialCommunityName != null
           ? AppBar(
               title: Text(
@@ -157,17 +156,15 @@ class _ElevatorsPageState extends State<ElevatorsPage> {
               backgroundColor: colorScheme.primary,
               foregroundColor: Colors.white,
             )
-          : null, // Cuando es null, no se muestra AppBar
+          : null,
       body: Column(
         children: [
-          // Si no hay AppBar, añadimos un poco más de padding arriba
           Padding(
             padding: EdgeInsets.all(
               16.0,
             ).copyWith(top: widget.initialCommunityName == null ? 24.0 : 16.0),
             child: Column(
               children: [
-                // Si no hay AppBar, mostramos un título en el body
                 if (widget.initialCommunityName == null) ...[
                   Row(
                     children: [

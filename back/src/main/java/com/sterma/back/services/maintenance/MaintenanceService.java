@@ -1,5 +1,7 @@
 package com.sterma.back.services.maintenance;
 
+
+import com.sterma.back.dtos.maintenanceReport.BasicMaintenanceReport;
 import com.sterma.back.dtos.maintenanceReport.CreateMaintenanceReportRequest;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NearMaintenanceTuple;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NextMaintenanceResponse;
@@ -89,6 +91,12 @@ public class MaintenanceService {
     }
 
     @Transactional(readOnly = true)
+    public List<BasicMaintenanceReport> getBasicMaintenanceReportsList(Long elevatorId){
+        List<MaintenanceReport> list = getMaintenanceReportsList(elevatorId);
+        return list.stream().map(BasicMaintenanceReport::new).toList();
+    }
+
+    @Transactional(readOnly = true)
     public NextMaintenanceResponse getNextImportantMaintenance(Long elevatorId) {
         checkElevatorExists(elevatorId);
 
@@ -140,6 +148,17 @@ public class MaintenanceService {
         return maintenanceRuleRepository.save(maintenanceRule);
     }
 
+    @Transactional
+    public void deleteMaintenanceReport(Long id){
+        checkMaintenanceReportExists(id);
+        maintenanceReportRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteMaintenanceRule(Long id){
+        checkMaintenanceRuleExists(id);
+        maintenanceRuleRepository.deleteById(id);
+    }
     private NextMaintenanceStatus generateMaintenanceStatus(LocalDate nextDate){
         NextMaintenanceStatus status;
         if(nextDate == null){
@@ -179,4 +198,23 @@ public class MaintenanceService {
             );
         }
     }
+
+    private void checkMaintenanceReportExists(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("El ID no puede ser nulo");
+        }
+        if (!maintenanceReportRepository.existsById(id)) {
+            throw new NoSuchElementException("Informe no encontrado con ID: " + id);
+        }
+    }
+
+    private void checkMaintenanceRuleExists(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("El ID no puede ser nulo");
+        }
+        if (!maintenanceRuleRepository.existsById(id)) {
+            throw new NoSuchElementException("Regla no encontrado con ID: " + id);
+        }
+    }
+
 }
