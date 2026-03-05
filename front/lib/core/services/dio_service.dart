@@ -531,10 +531,6 @@ class DioService {
         return (response.data['content'] as List)
             .map((item) => CommonMistake.fromJson(item))
             .toList();
-      } else if (response.data is List) {
-        return (response.data as List)
-            .map((item) => CommonMistake.fromJson(item))
-            .toList();
       } else {
         throw Exception('Formato de respuesta inesperado');
       }

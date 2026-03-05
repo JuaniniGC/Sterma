@@ -29,10 +29,6 @@ public class CommonMistakeController {
         try {
             CommonMistake commonMistake = commonMistakeService.createCommonMistake(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(commonMistake);
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
