@@ -141,3 +141,11 @@ VALUES
     (104, '2025-03-10 16:45:00', '2025-03-10 18:00:00', 'Botones no funcionaban - Reemplazada placa de control', 104, 104),
     (105, '2025-03-15 09:30:00', NULL, 'Ascensor detenido entre plantas - Pendiente diagnóstico completo', 101, 105);
 
+
+INSERT INTO image (id, image_public_id, incident_report_id)
+VALUES
+    (101, 'main-sample', 101),
+    (102, 'cld-sample', 101),
+    (103, 'samples/chair', 102);
+
+
