@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:front/core/services/dio_service.dart';
 import 'package:front/pages/common_mistakes_page.dart';
+import 'dart:io';
 
 class IncidentReportPage extends StatefulWidget {
   final String rae;
@@ -14,11 +16,13 @@ class IncidentReportPage extends StatefulWidget {
 class _IncidentReportPageState extends State<IncidentReportPage> {
   final TextEditingController _commentaryController = TextEditingController();
   final DioService _dioService = DioService();
+  final ImagePicker _imagePicker = ImagePicker();
 
   DateTime _startDate = DateTime.now();
   DateTime? _endDate;
 
   bool _isSubmitting = false;
+  List<XFile> _selectedImages = []; // Lista de imágenes seleccionadas
 
   Future<void> _selectStartDate(BuildContext context) async {
     final picked = await showDatePicker(
@@ -115,12 +119,34 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
     );
   }
 
+  Future<void> _pickImages() async {
+    final List<XFile>? images = await _imagePicker.pickMultiImage(
+      imageQuality: 85,
+      maxWidth: 1024,
+      maxHeight: 1024,
+    );
+
+    if (images != null && images.isNotEmpty) {
+      setState(() {
+        _selectedImages.addAll(images);
+      });
+    }
+  }
+
+  Future<void> _removeImage(int index) async {
+    setState(() {
+      _selectedImages.removeAt(index);
+    });
+  }
+
   Future<void> _submitReport() async {
     setState(() => _isSubmitting = true);
 
     try {
       final endDate = _endDate;
-      await _dioService.createIncidentReport(
+
+      // 1. Crear el informe de avería
+      final response = await _dioService.createIncidentReport(
         startDate: _startDate,
         endDate: endDate,
         commentary: _commentaryController.text.isEmpty
@@ -128,6 +154,37 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
             : _commentaryController.text,
         elevatorRAE: widget.rae,
       );
+
+      // Obtener el ID del informe creado
+      final int reportId = response['id'];
+
+      // 2. Subir las imágenes si hay alguna
+      if (_selectedImages.isNotEmpty) {
+        int uploadedImages = 0;
+        int failedImages = 0;
+
+        for (var image in _selectedImages) {
+          try {
+            final bytes = await image.readAsBytes();
+            await _dioService.uploadIncidentImageFromBytes(
+              reportId,
+              bytes,
+              image.name,
+            );
+            uploadedImages++;
+          } catch (e) {
+            failedImages++;
+            print('Error al subir imagen ${image.name}: $e');
+          }
+        }
+
+        if (failedImages > 0) {
+          _showInfo(
+            'Informe creado con ${uploadedImages} imágenes subidas correctamente. '
+            '$failedImages imágenes no se pudieron subir.',
+          );
+        }
+      }
 
       _showSuccess();
     } catch (e) {
@@ -142,6 +199,15 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
       SnackBar(
         content: Text(message),
         backgroundColor: Theme.of(context).colorScheme.error,
+      ),
+    );
+  }
+
+  void _showInfo(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
     );
   }
@@ -174,6 +240,14 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
         title: Text('Avería - ${widget.rae}'),
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
+        actions: [
+          // Botón para añadir imágenes en el AppBar
+          IconButton(
+            icon: const Icon(Icons.add_photo_alternate),
+            onPressed: _pickImages,
+            tooltip: 'Añadir imágenes',
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -203,6 +277,12 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
 
             const SizedBox(height: 16),
 
+            // Sección de imágenes seleccionadas
+            if (_selectedImages.isNotEmpty) ...[
+              _buildSelectedImagesSection(),
+              const SizedBox(height: 16),
+            ],
+
             _buildDateTimePicker(
               title: 'Fecha y Hora de Inicio *',
               date: _startDate,
@@ -219,6 +299,41 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
               onTimeTap: () => _selectEndTime(context),
               isOptional: true,
               onClear: _clearEndDate,
+            ),
+
+            const SizedBox(height: 16),
+
+            // Botón para añadir imágenes (alternativo)
+            OutlinedButton.icon(
+              onPressed: _pickImages,
+              icon: const Icon(Icons.add_photo_alternate),
+              label: Text(
+                _selectedImages.isEmpty
+                    ? 'Añadir imágenes (opcional)'
+                    : 'Añadir más imágenes',
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: colorScheme.primary,
+                side: BorderSide(color: colorScheme.primary),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                minimumSize: const Size(double.infinity, 0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                'Puedes añadir varias fotos del incidente',
+                style: TextStyle(
+                  color: colorScheme.onSurface.withOpacity(0.6),
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
 
             const SizedBox(height: 16),
@@ -325,7 +440,9 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
                           Icon(Icons.report_problem, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            'Crear Informe de Avería',
+                            _selectedImages.isNotEmpty
+                                ? 'Crear Informe con ${_selectedImages.length} foto${_selectedImages.length > 1 ? 's' : ''}'
+                                : 'Crear Informe de Avería',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -336,6 +453,94 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
               ),
             ),
             const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSelectedImagesSection() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: colorScheme.outline.withOpacity(0.3)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.photo_library, size: 20, color: colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  'Imágenes seleccionadas (${_selectedImages.length})',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                const Spacer(),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedImages.clear();
+                    });
+                  },
+                  child: const Text('Limpiar todas'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 100,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _selectedImages.length,
+                itemBuilder: (context, index) {
+                  final image = _selectedImages[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                            File(image.path),
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: InkWell(
+                            onTap: () => _removeImage(index),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.6),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.close,
+                                size: 20,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),

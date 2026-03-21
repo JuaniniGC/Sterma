@@ -378,7 +378,7 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
             ElevatedButton.icon(
               onPressed: () => _navigateToReports(context),
               icon: const Icon(Icons.history, size: 20),
-              label: const Text('Ver informes históricos'),
+              label: const Text('Ver historial informes'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey[800],
                 foregroundColor: Colors.white,
