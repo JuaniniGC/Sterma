@@ -68,7 +68,6 @@ class MaintenanceChecklistWidget extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Progreso
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -92,8 +91,6 @@ class MaintenanceChecklistWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Lista de pasos
             ...maintenanceSteps.map(
               (step) => _buildChecklistItem(
                 step: step,
@@ -130,7 +127,6 @@ class MaintenanceChecklistWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Checkbox
           Checkbox(
             value: step.isCompleted,
             onChanged: (bool? value) {
@@ -141,7 +137,6 @@ class MaintenanceChecklistWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          // Descripción
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

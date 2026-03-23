@@ -274,8 +274,7 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
 
           return CommunityGeneralInfoCard(
             community: community,
-            onTap: () =>
-                _navigateToCommunityDetails(community), // ✅ Agregar navegación
+            onTap: () => _navigateToCommunityDetails(community),
           );
         },
       ),
@@ -310,7 +309,6 @@ class CommunityGeneralInfoCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header con nombre y CIF
               Row(
                 children: [
                   Icon(Icons.home, color: colorScheme.primary, size: 24),
@@ -347,14 +345,12 @@ class CommunityGeneralInfoCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
 
-              // Descripción
               Text(
                 community.description,
                 style: TextStyle(fontSize: 16, color: Colors.black87),
               ),
               const SizedBox(height: 12),
 
-              // Ubicación
               Row(
                 children: [
                   Icon(Icons.location_on, size: 18, color: Colors.grey[600]),
@@ -372,7 +368,6 @@ class CommunityGeneralInfoCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
 
-              // Responsable
               Row(
                 children: [
                   Icon(Icons.person, size: 18, color: Colors.grey[600]),
@@ -390,7 +385,6 @@ class CommunityGeneralInfoCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
 
-              // Teléfono
               Row(
                 children: [
                   Icon(Icons.phone, size: 16, color: Colors.grey[600]),
