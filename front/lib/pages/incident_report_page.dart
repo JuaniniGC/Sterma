@@ -22,7 +22,7 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
   DateTime? _endDate;
 
   bool _isSubmitting = false;
-  List<XFile> _selectedImages = []; // Lista de imágenes seleccionadas
+  List<XFile> _selectedImages = [];
 
   Future<void> _selectStartDate(BuildContext context) async {
     final picked = await showDatePicker(
@@ -145,7 +145,6 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
     try {
       final endDate = _endDate;
 
-      // 1. Crear el informe de avería
       final response = await _dioService.createIncidentReport(
         startDate: _startDate,
         endDate: endDate,
@@ -155,10 +154,8 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
         elevatorRAE: widget.rae,
       );
 
-      // Obtener el ID del informe creado
       final int reportId = response['id'];
 
-      // 2. Subir las imágenes si hay alguna
       if (_selectedImages.isNotEmpty) {
         int uploadedImages = 0;
         int failedImages = 0;
@@ -241,7 +238,6 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         actions: [
-          // Botón para añadir imágenes en el AppBar
           IconButton(
             icon: const Icon(Icons.add_photo_alternate),
             onPressed: _pickImages,
@@ -277,7 +273,6 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
 
             const SizedBox(height: 16),
 
-            // Sección de imágenes seleccionadas
             if (_selectedImages.isNotEmpty) ...[
               _buildSelectedImagesSection(),
               const SizedBox(height: 16),
@@ -303,7 +298,6 @@ class _IncidentReportPageState extends State<IncidentReportPage> {
 
             const SizedBox(height: 16),
 
-            // Botón para añadir imágenes (alternativo)
             OutlinedButton.icon(
               onPressed: _pickImages,
               icon: const Icon(Icons.add_photo_alternate),

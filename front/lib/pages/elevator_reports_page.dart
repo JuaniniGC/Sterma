@@ -22,11 +22,9 @@ class _ElevatorReportsPageState extends State<ElevatorReportsPage> {
   bool _isLoading = true;
   String? _errorMessage;
 
-  // Mapa para almacenar las imágenes cargadas de cada reporte de incidente
   Map<String, List<String>> _incidentImages = {};
   Map<String, bool> _loadingImages = {};
-  Map<String, bool> _showImages = {}; // Controla si mostrar las imágenes
-
+  Map<String, bool> _showImages = {};
   @override
   void initState() {
     super.initState();
@@ -68,7 +66,7 @@ class _ElevatorReportsPageState extends State<ElevatorReportsPage> {
       setState(() {
         _incidentImages[report.id!] = images;
         _loadingImages.remove(report.id!);
-        _showImages[report.id!] = true; // Mostrar imágenes automáticamente
+        _showImages[report.id!] = true;
       });
 
       if (images.isEmpty) {
@@ -323,9 +321,8 @@ class _ElevatorReportsPageState extends State<ElevatorReportsPage> {
           ],
         ),
         const SizedBox(height: 12),
-        // Galería con imágenes más grandes
         SizedBox(
-          height: 150, // Aumentado de 100 a 150
+          height: 150,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: images.length,
@@ -335,7 +332,7 @@ class _ElevatorReportsPageState extends State<ElevatorReportsPage> {
                 onTap: () => _showFullScreenImage(imageUrl),
                 child: Container(
                   margin: const EdgeInsets.only(right: 12),
-                  width: 150, // Aumentado de 100 a 150
+                  width: 150,
                   height: 150,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
@@ -395,7 +392,6 @@ class _ElevatorReportsPageState extends State<ElevatorReportsPage> {
                             );
                           },
                         ),
-                        // Overlay con icono de zoom
                         Positioned(
                           bottom: 8,
                           right: 8,
@@ -578,12 +574,10 @@ class _ElevatorReportsPageState extends State<ElevatorReportsPage> {
                 ),
               ],
 
-              // Botón para mostrar imágenes (solo para incidentes)
               if (isIncident && report.id != null) ...[
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    // Botón para cargar imágenes
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: isLoading ? null : () => _loadImages(report),
@@ -630,7 +624,6 @@ class _ElevatorReportsPageState extends State<ElevatorReportsPage> {
                   ],
                 ),
 
-                // Mostrar imágenes si están cargadas y se ha seleccionado mostrar
                 if (showImages && hasImages) ...[_buildImageGallery(report)],
               ],
 
