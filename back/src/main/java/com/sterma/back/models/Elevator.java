@@ -1,5 +1,7 @@
 package com.sterma.back.models;
 
+import com.sterma.back.models.reports.IncidentReport;
+import com.sterma.back.models.reports.MaintenanceReport;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -8,6 +10,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Year;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -26,7 +30,6 @@ public class Elevator {
 
     @NotNull
     private Integer instalationYear;
-
 
     @ManyToOne
     private Community community;

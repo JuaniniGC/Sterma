@@ -1,5 +1,6 @@
 package com.sterma.back.models.reports;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sterma.back.models.Elevator;
 import com.sterma.back.models.Technician;
 import jakarta.persistence.*;
@@ -31,8 +32,9 @@ public abstract class Report {
     @ManyToOne
     private Technician technician;
 
-    @NotNull
     @ManyToOne
+    @JoinColumn(name = "elevator_id", nullable = false)
+    @JsonIgnoreProperties({"incidentReports", "maintenanceReports"})
     private Elevator elevator;
 
 }

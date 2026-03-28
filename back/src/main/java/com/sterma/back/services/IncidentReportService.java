@@ -24,13 +24,16 @@ public class IncidentReportService {
     private final IncidentReportRepository incidentReportRepository;
     private final ElevatorRepository elevatorRepository;
     private final TechnicianRepository technicianRepository;
+    private final ImageService imageService;
 
     public IncidentReportService(IncidentReportRepository incidentReportRepository,
                                  ElevatorRepository elevatorRepository,
-                                 TechnicianRepository technicianRepository) {
+                                 TechnicianRepository technicianRepository,
+                                 ImageService imageService) {
         this.incidentReportRepository = incidentReportRepository;
         this.elevatorRepository = elevatorRepository;
         this.technicianRepository = technicianRepository;
+        this.imageService = imageService;
     }
 
     @Transactional
@@ -63,7 +66,18 @@ public class IncidentReportService {
     @Transactional
     public void deleteIncidentReport(Long id){
         checkIncidentReportExists(id);
+        IncidentReport incidentReport = incidentReportRepository.getReferenceById(id);
+        imageService.deleteAllImageForIncidentRepository(id);
         incidentReportRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteAllIncidentReportByElevator(Long elevatorId){
+        checkElevatorExists(elevatorId);
+        List<IncidentReport> reportList = incidentReportRepository.findByElevator_Id(elevatorId);
+        for(IncidentReport report: reportList){
+            deleteIncidentReport(report.getId());
+        }
     }
 
     private void checkElevatorExists(Long id) {

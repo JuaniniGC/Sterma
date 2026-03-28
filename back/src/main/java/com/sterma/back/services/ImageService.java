@@ -50,12 +50,38 @@ public class ImageService {
                 .toList();
     }
 
+    @Transactional
+    public void deleteImage(Long id){
+        checkImageExists(id);
+        Image image = imageRepository.getReferenceById(id);
+        cloudinaryService.deleteImage(image.getImagePublicId());
+        imageRepository.delete(image);
+    }
+
+    @Transactional
+    public void deleteAllImageForIncidentRepository(Long incidentReportId){
+        checkIncidentReportExists(incidentReportId);
+        List<Image> imageList = imageRepository.findByIncidentReportId(incidentReportId);
+        for(Image image : imageList){
+            deleteImage(image.getId());
+        }
+    }
+
     private void checkIncidentReportExists(Long id) {
         if (id == null) {
             throw new IllegalArgumentException("El ID no puede ser nulo");
         }
         if (!incidentReportRepository.existsById(id)) {
             throw new NoSuchElementException("Informe no encontrado con ID: " + id);
+        }
+    }
+
+    private void checkImageExists(Long id){
+        if (id == null) {
+            throw new IllegalArgumentException("El ID no puede ser nulo");
+        }
+        if (!imageRepository.existsById(id)) {
+            throw new NoSuchElementException("Imagen no encontrado con ID: " + id);
         }
     }
 

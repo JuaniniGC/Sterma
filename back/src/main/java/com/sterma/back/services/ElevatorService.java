@@ -5,6 +5,7 @@ import com.sterma.back.dtos.elevator.UpdateElevatorRequest;
 import com.sterma.back.models.Elevator;
 import com.sterma.back.repositories.CommunityRepository;
 import com.sterma.back.repositories.ElevatorRepository;
+import com.sterma.back.services.maintenance.MaintenanceService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,9 +22,15 @@ public class ElevatorService {
     private final ElevatorRepository elevatorRepository;
     private final CommunityRepository communityRepository;
 
-    public ElevatorService(ElevatorRepository elevatorRepository, CommunityRepository communityRepository) {
+    private final MaintenanceService maintenanceService;
+
+    private final IncidentReportService incidentReportService;
+
+    public ElevatorService(ElevatorRepository elevatorRepository, CommunityRepository communityRepository, MaintenanceService maintenanceService, IncidentReportService incidentReportService) {
         this.elevatorRepository = elevatorRepository;
         this.communityRepository = communityRepository;
+        this.maintenanceService = maintenanceService;
+        this.incidentReportService = incidentReportService;
     }
 
     @Transactional(readOnly = true)
@@ -75,7 +82,18 @@ public class ElevatorService {
     @Transactional
     public void delete(Long id) {
         checkElevatorExists(id);
+        incidentReportService.deleteAllIncidentReportByElevator(id);
+        maintenanceService.deleteAllMaintenanceReportByElevator(id);
         elevatorRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteAllElevatorByCommunityId(Long communityId){
+        checkCommunityExists(communityId);
+        List<Elevator> elevatorList = elevatorRepository.findByCommunityId(communityId);
+        for(Elevator elevator: elevatorList){
+            delete(elevator.getId());
+        }
     }
 
     public List<String> getAllRae(Long communityId) {
