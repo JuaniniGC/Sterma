@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class CommonMistakeService {
@@ -35,10 +36,25 @@ public class CommonMistakeService {
         return commonMistakeRepository.findAll(pageable);
     }
 
+    @Transactional
+    public void delete(Long id){
+        checkCommonMistakeExist(id);
+        commonMistakeRepository.deleteById(id);
+    }
 
+    private void checkCommonMistakeExist(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("El ID no puede ser nulo");
+        }
+        if (!commonMistakeRepository.existsById(id)) {
+            throw new NoSuchElementException("Regla de mantenimiento no encontrada con ID: " + id);
+        }
+    }
     private void checkIdentificatorNotUsed(String identificator) {
         if (commonMistakeRepository.existsByIdentificator(identificator)) {
             throw new IllegalStateException("Ese identificador ya esta en uso: " + identificator);
         }
     }
+
+
 }
