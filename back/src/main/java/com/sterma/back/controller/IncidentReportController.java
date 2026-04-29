@@ -2,6 +2,7 @@ package com.sterma.back.controller;
 
 import com.sterma.back.dtos.incidentReport.BasicIncidentReport;
 import com.sterma.back.dtos.incidentReport.CreateIncidentReportRequest;
+import com.sterma.back.dtos.incidentReport.UpdateEndDateRequest;
 import com.sterma.back.models.reports.IncidentReport;
 import com.sterma.back.services.IncidentReportService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -107,6 +109,33 @@ public class IncidentReportController {
             return ResponseEntity.ok("Se ha borrado correctamente el informe");
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @Operation(
+            summary = "Cerrar informe de incidencia",
+            description = "Actualiza la fecha de finalización de un informe de incidencia (solo si no está cerrado)",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Fecha de finalización actualizada correctamente"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o el informe ya está cerrado", content = @Content),
+            @ApiResponse(responseCode = "401", description = "No autorizado", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Informe no encontrado", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Error interno", content = @Content)
+    })
+    @PatchMapping("/{reportId}/enddate")
+    public ResponseEntity<?> updateEndDate(
+            @PathVariable Long reportId,
+            @RequestBody UpdateEndDateRequest request
+    ) {
+        try {
+            incidentReportService.updateEndDate(reportId, request.getEndDate());
+            return ResponseEntity.ok("");
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 }

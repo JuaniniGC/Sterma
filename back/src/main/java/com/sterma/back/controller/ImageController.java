@@ -44,7 +44,6 @@ public class ImageController {
     public ResponseEntity<?> uploadImage(
             @Parameter(description = "ID de la incidencia", example = "1")
             @PathVariable Long incidentId,
-
             @Parameter(
                     description = "Archivo de imagen a subir",
                     required = true,

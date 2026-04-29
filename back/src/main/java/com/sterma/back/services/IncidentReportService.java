@@ -80,6 +80,17 @@ public class IncidentReportService {
         }
     }
 
+    @Transactional
+    public void updateEndDate(Long incidentReportId, LocalDateTime endDate ){
+        checkIncidentReportExists(incidentReportId);
+        IncidentReport report = incidentReportRepository.getReferenceById(incidentReportId);
+        if (report.getEndDate() != null) {
+            throw new IllegalStateException("El informe ya tiene una fecha de finalización y no puede ser modificado");
+        }
+        checkEndDateIsAfterStartDate(report.getStartDate(), endDate);
+        report.setEndDate(endDate);
+    }
+
     private void checkElevatorExists(Long id) {
         if (id == null) {
             throw new IllegalArgumentException("El ID de ascensor no puede ser nulo");
