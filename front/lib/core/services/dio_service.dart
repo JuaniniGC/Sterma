@@ -520,6 +520,23 @@ class DioService {
     }
   }
 
+  /// Actualiza la fecha de fin de un informe de incidente
+  Future<void> updateIncidentEndDate(int reportId, DateTime endDate) async {
+    try {
+      final data = {'endDate': endDate.toUtc().toIso8601String()};
+
+      await _dio.patch('/report/incident/$reportId/enddate', data: data);
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al actualizar la fecha de fin del incidente: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception(
+        'Error inesperado al actualizar la fecha de fin del incidente: $e',
+      );
+    }
+  }
+
   // ========== MÉTODOS ESPECÍFICOS PARA FALLOS COMUNES ==========
 
   Future<List<CommonMistake>> getCommonMistakes() async {

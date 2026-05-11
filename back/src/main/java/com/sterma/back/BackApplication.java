@@ -3,7 +3,6 @@ package com.sterma.back;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
-import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
@@ -15,18 +14,16 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @OpenAPIDefinition(
 		info = @Info(
-				title = "Microservicio nameMS",
+				title = "Sterma Admin Panel",
 				version = "1.0.3",
-				description = "APIs Swagger Microservicio nameMS",
-				contact = @Contact(
-						name = "MS-nameMS",
-						url = "https://tudominio.com",
-						email = "email@tudominio.com"
-				),
+				description = "Panel de administración para la aplicación de gestión de ascensores y averías de Sterma",
 				license = @License(name = "Apache 2.0")
 		),
 		servers = {
-				@Server(description = "Ambiente local", url = "http://localhost:8080")
+				@Server(
+						description = "Ambiente local",
+						url = "http://localhost:8080"
+				)
 		},
 		security = {
 				@SecurityRequirement(name = "bearerAuth")
@@ -39,7 +36,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 		bearerFormat = "JWT",
 		in = SecuritySchemeIn.HEADER
 )
-
 @SpringBootApplication
 public class BackApplication {
 

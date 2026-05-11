@@ -37,7 +37,7 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
 
   MaintenanceFrequency _selectedFrequency = MaintenanceFrequency.ANNUAL;
   DateTime _startDateTime = DateTime.now();
-  DateTime? _endDateTime;
+  DateTime _endDateTime = DateTime.now().add(const Duration(hours: 1));
 
   bool _isSubmitting = false;
   bool _showChecklist = false;
@@ -70,6 +70,16 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
           _startDateTime.hour,
           _startDateTime.minute,
         );
+
+        if (_endDateTime.isBefore(_startDateTime)) {
+          _endDateTime = DateTime(
+            _startDateTime.year,
+            _startDateTime.month,
+            _startDateTime.day,
+            _startDateTime.hour + 1,
+            _startDateTime.minute,
+          );
+        }
       });
     }
   }
@@ -88,6 +98,16 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
           picked.hour,
           picked.minute,
         );
+
+        if (_endDateTime.isBefore(_startDateTime)) {
+          _endDateTime = DateTime(
+            _startDateTime.year,
+            _startDateTime.month,
+            _startDateTime.day,
+            _startDateTime.hour + 1,
+            _startDateTime.minute,
+          );
+        }
       });
     }
   }
@@ -95,68 +115,39 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
   Future<void> _selectEndDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _endDateTime ?? _startDateTime,
+      initialDate: _endDateTime,
       firstDate: _startDateTime,
       lastDate: DateTime(2100),
     );
     if (picked != null) {
       setState(() {
-        if (_endDateTime == null) {
-          _endDateTime = DateTime(
-            picked.year,
-            picked.month,
-            picked.day,
-            _startDateTime.hour,
-            _startDateTime.minute,
-          );
-        } else {
-          _endDateTime = DateTime(
-            picked.year,
-            picked.month,
-            picked.day,
-            _endDateTime!.hour,
-            _endDateTime!.minute,
-          );
-        }
+        _endDateTime = DateTime(
+          picked.year,
+          picked.month,
+          picked.day,
+          _endDateTime.hour,
+          _endDateTime.minute,
+        );
       });
     }
   }
 
   Future<void> _selectEndTime(BuildContext context) async {
-    final DateTime tempDate = _endDateTime ?? _startDateTime;
-
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(tempDate),
+      initialTime: TimeOfDay.fromDateTime(_endDateTime),
     );
-
     if (picked != null) {
       setState(() {
-        if (_endDateTime == null) {
-          _endDateTime = DateTime(
-            _startDateTime.year,
-            _startDateTime.month,
-            _startDateTime.day,
-            picked.hour,
-            picked.minute,
-          );
-        } else {
-          _endDateTime = DateTime(
-            _endDateTime!.year,
-            _endDateTime!.month,
-            _endDateTime!.day,
-            picked.hour,
-            picked.minute,
-          );
-        }
+        _endDateTime = DateTime(
+          _endDateTime.year,
+          _endDateTime.month,
+          _endDateTime.day,
+          picked.hour,
+          picked.minute,
+        );
       });
     }
-  }
-
-  void _clearEndDateTime() {
-    setState(() {
-      _endDateTime = null;
-    });
   }
 
   Future<void> _loadMaintenanceRules() async {
@@ -196,6 +187,13 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
   }
 
   Future<void> _submitReport() async {
+    if (_endDateTime.isBefore(_startDateTime)) {
+      _showErrorDialog(
+        'La fecha de finalización debe ser posterior a la fecha de inicio',
+      );
+      return;
+    }
+
     final allStepsCompleted = _maintenanceSteps.every(
       (step) => step.isCompleted,
     );
@@ -277,14 +275,6 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
     return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
-  int get _completedStepsCount {
-    return _maintenanceSteps.where((step) => step.isCompleted).length;
-  }
-
-  int get _totalStepsCount {
-    return _maintenanceSteps.length;
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -303,29 +293,17 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildRaeInfoCard(),
-
             const SizedBox(height: 24),
-
             _buildFrequencyDropdown(),
-
             const SizedBox(height: 20),
-
             _buildStartDateTimePicker(context),
-
             const SizedBox(height: 20),
-
             _buildEndDateTimePicker(context),
-
             const SizedBox(height: 24),
-
             if (!_showChecklist) _buildInitialSection(),
-
             if (_showChecklist) _buildChecklistSection(),
-
             if (_isLoadingRules) _buildLoadingIndicator(),
-
             if (_rulesError != null && !_showChecklist) _buildErrorWidget(),
-
             const SizedBox(height: 32),
           ],
         ),
@@ -368,13 +346,9 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
           selectedFrequency: _selectedFrequency,
           onStepCompleted: _onStepCompleted,
         ),
-
         const SizedBox(height: 20),
-
         _buildCommentaryField(),
-
         const SizedBox(height: 20),
-
         _buildSubmitButton(),
       ],
     );
@@ -445,7 +419,7 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
                     borderRadius: BorderRadius.circular(8),
                     items: _frequencyOptions
                         .map<DropdownMenuItem<MaintenanceFrequency>>((
-                          MaintenanceFrequency frequency,
+                          frequency,
                         ) {
                           return DropdownMenuItem<MaintenanceFrequency>(
                             value: frequency,
@@ -588,27 +562,10 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
         Row(
           children: [
             Text(
-              'Fecha y Hora de Fin',
+              'Fecha y Hora de Fin *',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
-              ),
-              child: Text(
-                'opcional',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w500,
-                ),
               ),
             ),
           ],
@@ -626,30 +583,22 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
                     color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: _endDateTime == null
-                          ? colorScheme.outline.withOpacity(0.3)
-                          : colorScheme.primary.withOpacity(0.5),
+                      color: colorScheme.outline.withOpacity(0.3),
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.date_range,
-                        color: _endDateTime == null
-                            ? colorScheme.onSurface.withOpacity(0.5)
-                            : colorScheme.primary,
+                        color: colorScheme.primary,
                         size: 20,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          _endDateTime == null
-                              ? 'No especificada'
-                              : '${_endDateTime!.day}/${_endDateTime!.month}/${_endDateTime!.year}',
+                          '${_endDateTime.day}/${_endDateTime.month}/${_endDateTime.year}',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: _endDateTime == null
-                                ? colorScheme.onSurface.withOpacity(0.5)
-                                : colorScheme.onSurface,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -669,30 +618,22 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
                     color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: _endDateTime == null
-                          ? colorScheme.outline.withOpacity(0.3)
-                          : colorScheme.primary.withOpacity(0.5),
+                      color: colorScheme.outline.withOpacity(0.3),
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.access_time,
-                        color: _endDateTime == null
-                            ? colorScheme.onSurface.withOpacity(0.5)
-                            : colorScheme.primary,
+                        color: colorScheme.primary,
                         size: 20,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          _endDateTime == null
-                              ? '--:--'
-                              : _formatTime(_endDateTime!),
+                          _formatTime(_endDateTime),
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: _endDateTime == null
-                                ? colorScheme.onSurface.withOpacity(0.5)
-                                : colorScheme.onSurface,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -701,22 +642,7 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
                 ),
               ),
             ),
-            if (_endDateTime != null) ...[
-              const SizedBox(width: 8),
-              IconButton(
-                icon: Icon(Icons.clear, color: colorScheme.error, size: 20),
-                onPressed: _clearEndDateTime,
-                tooltip: 'Limpiar fecha de fin',
-              ),
-            ],
           ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Campo opcional. Si no se especifica, no se enviará fecha de finalización',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurface.withOpacity(0.6),
-          ),
         ),
       ],
     );

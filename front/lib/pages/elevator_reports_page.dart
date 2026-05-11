@@ -25,6 +25,10 @@ class _ElevatorReportsPageState extends State<ElevatorReportsPage> {
   Map<String, List<String>> _incidentImages = {};
   Map<String, bool> _loadingImages = {};
   Map<String, bool> _showImages = {};
+
+  // Nuevo: Para controlar qué informe se está actualizando
+  String? _updatingReportId;
+
   @override
   void initState() {
     super.initState();
@@ -47,6 +51,80 @@ class _ElevatorReportsPageState extends State<ElevatorReportsPage> {
       setState(() {
         _errorMessage = e.toString().replaceFirst('Exception: ', '');
         _isLoading = false;
+      });
+    }
+  }
+
+  // Nuevo: Método para actualizar la fecha de fin de un incidente
+  Future<void> _updateIncidentEndDate(Report report) async {
+    if (report.id == null) {
+      _showSnackBar('El informe no tiene ID válido', isError: true);
+      return;
+    }
+
+    // Seleccionar nueva fecha
+    final DateTime? selectedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: report.startDate,
+      lastDate: DateTime.now(),
+      helpText: 'Seleccionar fecha de finalización',
+      cancelText: 'Cancelar',
+      confirmText: 'Aceptar',
+    );
+
+    if (selectedDate == null) return;
+
+    // Seleccionar hora
+    final TimeOfDay? selectedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+      helpText: 'Seleccionar hora de finalización',
+      cancelText: 'Cancelar',
+      confirmText: 'Aceptar',
+    );
+
+    if (selectedTime == null) return;
+
+    // Combinar fecha y hora
+    final endDate = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      selectedTime.hour,
+      selectedTime.minute,
+    );
+
+    // Validar que la fecha de fin no sea anterior a la fecha de inicio
+    if (endDate.isBefore(report.startDate)) {
+      _showSnackBar(
+        'La fecha de finalización no puede ser anterior a la fecha de inicio',
+        isError: true,
+      );
+      return;
+    }
+
+    // Marcar que estamos actualizando este informe
+    setState(() {
+      _updatingReportId = report.id;
+    });
+
+    try {
+      final reportId = int.parse(report.id!);
+      await _dioService.updateIncidentEndDate(reportId, endDate);
+
+      // Recargar los informes para obtener los datos actualizados
+      await _loadReports();
+
+      _showSnackBar(
+        'Fecha de finalización actualizada correctamente',
+        isError: false,
+      );
+    } catch (e) {
+      _showSnackBar('Error al actualizar: $e', isError: true);
+    } finally {
+      setState(() {
+        _updatingReportId = null;
       });
     }
   }
@@ -440,6 +518,12 @@ class _ElevatorReportsPageState extends State<ElevatorReportsPage> {
         report.id != null && _loadingImages.containsKey(report.id);
     final showImages = _showImages[report.id] ?? false;
 
+    // Verificar si este informe se está actualizando
+    final isUpdating = _updatingReportId == report.id;
+
+    // Mostrar botón de actualizar solo para incidentes no completados
+    final showUpdateButton = isIncident && !report.isCompleted;
+
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
@@ -528,27 +612,66 @@ class _ElevatorReportsPageState extends State<ElevatorReportsPage> {
 
               const SizedBox(height: 12),
 
-              Column(
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Inicio: ${_formatDateTime(report.startDate)}',
-                    style: const TextStyle(fontSize: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Inicio: ${_formatDateTime(report.startDate)}',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        const SizedBox(height: 4),
+                        if (report.endDate != null)
+                          Text(
+                            'Fin: ${_formatDateTime(report.endDate!)}',
+                            style: const TextStyle(fontSize: 14),
+                          )
+                        else
+                          Text(
+                            'Fin: Sin finalizar',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontStyle: FontStyle.italic,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 4),
-                  if (report.endDate != null)
-                    Text(
-                      'Fin: ${_formatDateTime(report.endDate!)}',
-                      style: const TextStyle(fontSize: 14),
-                    )
-                  else
-                    Text(
-                      'Fin: Sin finalizar',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontStyle: FontStyle.italic,
-                        color: Colors.grey[600],
-                      ),
+                  // Botón de actualizar fecha de fin
+                  if (showUpdateButton)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: isUpdating
+                          ? SizedBox(
+                              width: 36,
+                              height: 36,
+                              child: Center(
+                                child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      iconColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : IconButton(
+                              onPressed: () => _updateIncidentEndDate(report),
+                              icon: Icon(Icons.edit_calendar, size: 20),
+                              color: iconColor,
+                              tooltip: 'Actualizar fecha de finalización',
+                              style: IconButton.styleFrom(
+                                backgroundColor: iconColor.withOpacity(0.1),
+                                padding: const EdgeInsets.all(8),
+                              ),
+                            ),
                     ),
                 ],
               ),
