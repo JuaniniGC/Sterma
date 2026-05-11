@@ -24,13 +24,16 @@ public class IncidentReportService {
     private final IncidentReportRepository incidentReportRepository;
     private final ElevatorRepository elevatorRepository;
     private final TechnicianRepository technicianRepository;
+    private final ImageService imageService;
 
     public IncidentReportService(IncidentReportRepository incidentReportRepository,
                                  ElevatorRepository elevatorRepository,
-                                 TechnicianRepository technicianRepository) {
+                                 TechnicianRepository technicianRepository,
+                                 ImageService imageService) {
         this.incidentReportRepository = incidentReportRepository;
         this.elevatorRepository = elevatorRepository;
         this.technicianRepository = technicianRepository;
+        this.imageService = imageService;
     }
 
     @Transactional
@@ -63,7 +66,29 @@ public class IncidentReportService {
     @Transactional
     public void deleteIncidentReport(Long id){
         checkIncidentReportExists(id);
+        IncidentReport incidentReport = incidentReportRepository.getReferenceById(id);
+        imageService.deleteAllImageForIncidentRepository(id);
         incidentReportRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteAllIncidentReportByElevator(Long elevatorId){
+        checkElevatorExists(elevatorId);
+        List<IncidentReport> reportList = incidentReportRepository.findByElevator_Id(elevatorId);
+        for(IncidentReport report: reportList){
+            deleteIncidentReport(report.getId());
+        }
+    }
+
+    @Transactional
+    public void updateEndDate(Long incidentReportId, LocalDateTime endDate ){
+        checkIncidentReportExists(incidentReportId);
+        IncidentReport report = incidentReportRepository.getReferenceById(incidentReportId);
+        if (report.getEndDate() != null) {
+            throw new IllegalStateException("El informe ya tiene una fecha de finalización y no puede ser modificado");
+        }
+        checkEndDateIsAfterStartDate(report.getStartDate(), endDate);
+        report.setEndDate(endDate);
     }
 
     private void checkElevatorExists(Long id) {

@@ -11,6 +11,7 @@ import com.sterma.back.models.Elevator;
 import com.sterma.back.models.MaintenanceRule;
 import com.sterma.back.models.MaintenanceType;
 import com.sterma.back.models.Technician;
+import com.sterma.back.models.reports.IncidentReport;
 import com.sterma.back.models.reports.MaintenanceReport;
 import com.sterma.back.repositories.*;
 import com.sterma.back.services.maintenance.strategy.MaintenanceServiceStrategy;
@@ -152,6 +153,15 @@ public class MaintenanceService {
     public void deleteMaintenanceReport(Long id){
         checkMaintenanceReportExists(id);
         maintenanceReportRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteAllMaintenanceReportByElevator(Long elevatorId){
+        checkElevatorExists(elevatorId);
+        List<MaintenanceReport> reportList = maintenanceReportRepository.findByElevator_Id(elevatorId);
+        for(MaintenanceReport report: reportList){
+            deleteMaintenanceReport(report.getId());
+        }
     }
 
     @Transactional

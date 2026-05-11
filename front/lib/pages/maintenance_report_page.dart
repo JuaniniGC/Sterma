@@ -3,7 +3,6 @@ import 'package:front/core/services/dio_service.dart';
 import 'package:front/data/models/maintenance_rule_model.dart';
 import 'package:front/pages/maintenance_report_util/maintenance_checklist_widget.dart';
 
-// Enum para las frecuencias de mantenimiento
 enum MaintenanceFrequency {
   ANNUAL('ANNUAL'),
   BIANNUAL('BIANNUAL'),
@@ -38,7 +37,7 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
 
   MaintenanceFrequency _selectedFrequency = MaintenanceFrequency.ANNUAL;
   DateTime _startDateTime = DateTime.now();
-  DateTime? _endDateTime; // Ahora es opcional y puede ser null
+  DateTime _endDateTime = DateTime.now().add(const Duration(hours: 1));
 
   bool _isSubmitting = false;
   bool _showChecklist = false;
@@ -47,10 +46,8 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
 
   final DioService _dioService = DioService();
 
-  // Lista de pasos de mantenimiento (ahora se cargan desde la API)
   List<MaintenanceStep> _maintenanceSteps = [];
 
-  // Opciones para el dropdown de frecuencia
   final List<MaintenanceFrequency> _frequencyOptions = [
     MaintenanceFrequency.ANNUAL,
     MaintenanceFrequency.BIANNUAL,
@@ -73,6 +70,16 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
           _startDateTime.hour,
           _startDateTime.minute,
         );
+
+        if (_endDateTime.isBefore(_startDateTime)) {
+          _endDateTime = DateTime(
+            _startDateTime.year,
+            _startDateTime.month,
+            _startDateTime.day,
+            _startDateTime.hour + 1,
+            _startDateTime.minute,
+          );
+        }
       });
     }
   }
@@ -91,6 +98,16 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
           picked.hour,
           picked.minute,
         );
+
+        if (_endDateTime.isBefore(_startDateTime)) {
+          _endDateTime = DateTime(
+            _startDateTime.year,
+            _startDateTime.month,
+            _startDateTime.day,
+            _startDateTime.hour + 1,
+            _startDateTime.minute,
+          );
+        }
       });
     }
   }
@@ -98,75 +115,39 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
   Future<void> _selectEndDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate:
-          _endDateTime ??
-          _startDateTime, // Usar startDate como inicial si no hay endDate
+      initialDate: _endDateTime,
       firstDate: _startDateTime,
       lastDate: DateTime(2100),
     );
     if (picked != null) {
       setState(() {
-        if (_endDateTime == null) {
-          // Si no había endDate, crear una nueva con la fecha seleccionada y la hora de startDate
-          _endDateTime = DateTime(
-            picked.year,
-            picked.month,
-            picked.day,
-            _startDateTime.hour,
-            _startDateTime.minute,
-          );
-        } else {
-          // Si ya existía, mantener la hora existente
-          _endDateTime = DateTime(
-            picked.year,
-            picked.month,
-            picked.day,
-            _endDateTime!.hour,
-            _endDateTime!.minute,
-          );
-        }
+        _endDateTime = DateTime(
+          picked.year,
+          picked.month,
+          picked.day,
+          _endDateTime.hour,
+          _endDateTime.minute,
+        );
       });
     }
   }
 
   Future<void> _selectEndTime(BuildContext context) async {
-    // Si no hay fecha de fin, la inicializamos con la fecha de inicio
-    final DateTime tempDate = _endDateTime ?? _startDateTime;
-
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(tempDate),
+      initialTime: TimeOfDay.fromDateTime(_endDateTime),
     );
-
     if (picked != null) {
       setState(() {
-        if (_endDateTime == null) {
-          // Si no había endDate, crear una nueva con la fecha de inicio y la hora seleccionada
-          _endDateTime = DateTime(
-            _startDateTime.year,
-            _startDateTime.month,
-            _startDateTime.day,
-            picked.hour,
-            picked.minute,
-          );
-        } else {
-          // Si ya existía, actualizar solo la hora
-          _endDateTime = DateTime(
-            _endDateTime!.year,
-            _endDateTime!.month,
-            _endDateTime!.day,
-            picked.hour,
-            picked.minute,
-          );
-        }
+        _endDateTime = DateTime(
+          _endDateTime.year,
+          _endDateTime.month,
+          _endDateTime.day,
+          picked.hour,
+          picked.minute,
+        );
       });
     }
-  }
-
-  void _clearEndDateTime() {
-    setState(() {
-      _endDateTime = null;
-    });
   }
 
   Future<void> _loadMaintenanceRules() async {
@@ -177,15 +158,12 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
     });
 
     try {
-      // Obtener las reglas del endpoint según el tipo de mantenimiento seleccionado
       final rules = await _dioService.getMaintenanceRules(
         _selectedFrequency.apiValue.toLowerCase(),
       );
 
-      // Convertir las reglas a pasos de mantenimiento
       final steps = rules.map((rule) => MaintenanceStep(rule: rule)).toList();
 
-      // Ordenar por orderNum
       steps.sort((a, b) => a.rule.orderNum.compareTo(b.rule.orderNum));
 
       setState(() {
@@ -209,7 +187,13 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
   }
 
   Future<void> _submitReport() async {
-    // Verificar que todos los pasos estén completados
+    if (_endDateTime.isBefore(_startDateTime)) {
+      _showErrorDialog(
+        'La fecha de finalización debe ser posterior a la fecha de inicio',
+      );
+      return;
+    }
+
     final allStepsCompleted = _maintenanceSteps.every(
       (step) => step.isCompleted,
     );
@@ -226,18 +210,16 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
     });
 
     try {
-      // Pasar endDate como null si no se especificó
       await _dioService.createMaintenanceReport(
         maintenanceType: _selectedFrequency.apiValue,
         startDate: _startDateTime,
-        endDate: _endDateTime, // Puede ser null
+        endDate: _endDateTime,
         commentary: _commentaryController.text.isEmpty
             ? null
             : _commentaryController.text,
         elevatorRAE: widget.rae,
       );
 
-      // Mostrar confirmación de éxito
       _showSuccessDialog();
     } catch (e) {
       _showErrorDialog('Error al crear el informe: $e');
@@ -279,7 +261,7 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.of(context).pop(); // Volver a la pantalla anterior
+                Navigator.of(context).pop();
               },
               child: const Text('OK'),
             ),
@@ -291,14 +273,6 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
 
   String _formatTime(DateTime date) {
     return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
-  int get _completedStepsCount {
-    return _maintenanceSteps.where((step) => step.isCompleted).length;
-  }
-
-  int get _totalStepsCount {
-    return _maintenanceSteps.length;
   }
 
   @override
@@ -318,38 +292,18 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Información del RAE
             _buildRaeInfoCard(),
-
             const SizedBox(height: 24),
-
-            // Tipo de mantenimiento
             _buildFrequencyDropdown(),
-
             const SizedBox(height: 20),
-
-            // Fecha y hora de inicio
             _buildStartDateTimePicker(context),
-
             const SizedBox(height: 20),
-
-            // Fecha y hora de fin (opcional)
             _buildEndDateTimePicker(context),
-
             const SizedBox(height: 24),
-
-            // Primera parte: Solo mostrar el botón para cargar el checklist
             if (!_showChecklist) _buildInitialSection(),
-
-            // Segunda parte: Mostrar checklist y comentario
             if (_showChecklist) _buildChecklistSection(),
-
-            // Estado de carga de reglas
             if (_isLoadingRules) _buildLoadingIndicator(),
-
-            // Error al cargar reglas
             if (_rulesError != null && !_showChecklist) _buildErrorWidget(),
-
             const SizedBox(height: 32),
           ],
         ),
@@ -360,7 +314,6 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
   Widget _buildInitialSection() {
     return Column(
       children: [
-        // Información para el usuario
         Card(
           elevation: 2,
           child: Padding(
@@ -380,7 +333,6 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
           ),
         ),
         const SizedBox(height: 20),
-        // Botón para cargar el checklist
         _buildLoadChecklistButton(),
       ],
     );
@@ -389,21 +341,14 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
   Widget _buildChecklistSection() {
     return Column(
       children: [
-        // Checklist de mantenimiento
         MaintenanceChecklistWidget(
           maintenanceSteps: _maintenanceSteps,
           selectedFrequency: _selectedFrequency,
           onStepCompleted: _onStepCompleted,
         ),
-
         const SizedBox(height: 20),
-
-        // Comentario del mantenimiento
         _buildCommentaryField(),
-
         const SizedBox(height: 20),
-
-        // Botón de envío
         _buildSubmitButton(),
       ],
     );
@@ -474,7 +419,7 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
                     borderRadius: BorderRadius.circular(8),
                     items: _frequencyOptions
                         .map<DropdownMenuItem<MaintenanceFrequency>>((
-                          MaintenanceFrequency frequency,
+                          frequency,
                         ) {
                           return DropdownMenuItem<MaintenanceFrequency>(
                             value: frequency,
@@ -491,8 +436,6 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
                       if (newValue != null) {
                         setState(() {
                           _selectedFrequency = newValue;
-                          // Si ya se estaba mostrando el checklist, lo ocultamos
-                          // porque cambió el tipo de mantenimiento
                           if (_showChecklist) {
                             _showChecklist = false;
                             _maintenanceSteps = [];
@@ -534,7 +477,6 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
         const SizedBox(height: 8),
         Row(
           children: [
-            // Selector de fecha
             Expanded(
               child: InkWell(
                 onTap: () => _selectStartDate(context),
@@ -570,7 +512,6 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
               ),
             ),
             const SizedBox(width: 12),
-            // Selector de hora
             Expanded(
               child: InkWell(
                 onTap: () => _selectStartTime(context),
@@ -621,27 +562,10 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
         Row(
           children: [
             Text(
-              'Fecha y Hora de Fin',
+              'Fecha y Hora de Fin *',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
-              ),
-              child: Text(
-                'opcional',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w500,
-                ),
               ),
             ),
           ],
@@ -649,7 +573,6 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
         const SizedBox(height: 8),
         Row(
           children: [
-            // Selector de fecha
             Expanded(
               child: InkWell(
                 onTap: () => _selectEndDate(context),
@@ -660,30 +583,22 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
                     color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: _endDateTime == null
-                          ? colorScheme.outline.withOpacity(0.3)
-                          : colorScheme.primary.withOpacity(0.5),
+                      color: colorScheme.outline.withOpacity(0.3),
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.date_range,
-                        color: _endDateTime == null
-                            ? colorScheme.onSurface.withOpacity(0.5)
-                            : colorScheme.primary,
+                        color: colorScheme.primary,
                         size: 20,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          _endDateTime == null
-                              ? 'No especificada'
-                              : '${_endDateTime!.day}/${_endDateTime!.month}/${_endDateTime!.year}',
+                          '${_endDateTime.day}/${_endDateTime.month}/${_endDateTime.year}',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: _endDateTime == null
-                                ? colorScheme.onSurface.withOpacity(0.5)
-                                : colorScheme.onSurface,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -693,7 +608,6 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
               ),
             ),
             const SizedBox(width: 12),
-            // Selector de hora
             Expanded(
               child: InkWell(
                 onTap: () => _selectEndTime(context),
@@ -704,30 +618,22 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
                     color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: _endDateTime == null
-                          ? colorScheme.outline.withOpacity(0.3)
-                          : colorScheme.primary.withOpacity(0.5),
+                      color: colorScheme.outline.withOpacity(0.3),
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.access_time,
-                        color: _endDateTime == null
-                            ? colorScheme.onSurface.withOpacity(0.5)
-                            : colorScheme.primary,
+                        color: colorScheme.primary,
                         size: 20,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          _endDateTime == null
-                              ? '--:--'
-                              : _formatTime(_endDateTime!),
+                          _formatTime(_endDateTime),
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: _endDateTime == null
-                                ? colorScheme.onSurface.withOpacity(0.5)
-                                : colorScheme.onSurface,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -736,22 +642,7 @@ class _MaintenanceReportPageState extends State<MaintenanceReportPage> {
                 ),
               ),
             ),
-            if (_endDateTime != null) ...[
-              const SizedBox(width: 8),
-              IconButton(
-                icon: Icon(Icons.clear, color: colorScheme.error, size: 20),
-                onPressed: _clearEndDateTime,
-                tooltip: 'Limpiar fecha de fin',
-              ),
-            ],
           ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Campo opcional. Si no se especifica, no se enviará fecha de finalización',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurface.withOpacity(0.6),
-          ),
         ),
       ],
     );

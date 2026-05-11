@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:front/data/models/community_model.dart';
-import 'elevators_page.dart'; // Asegúrate de importar la página de ascensores
+import 'package:front/pages/elevators_page.dart';
+import 'package:front/utils/google_maps_button.dart';
 
 class CommunityDetailPage extends StatelessWidget {
   final Community community;
@@ -30,23 +31,18 @@ class CommunityDetailPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header con información principal
                   _buildHeaderSection(colorScheme),
                   const SizedBox(height: 24),
 
-                  // Descripción
                   _buildDescriptionSection(),
                   const SizedBox(height: 24),
 
-                  // Ubicación
                   _buildLocationSection(colorScheme),
                   const SizedBox(height: 24),
 
-                  // Información del responsable
                   _buildLeaderSection(colorScheme),
                   const SizedBox(height: 24),
 
-                  // Información adicional
                   _buildAdditionalInfoSection(colorScheme),
                   const SizedBox(height: 24),
                 ],
@@ -98,7 +94,6 @@ class CommunityDetailPage extends StatelessWidget {
     );
   }
 
-  // ... (el resto de los métodos _buildHeaderSection, _buildDescriptionSection, etc. se mantienen igual)
   Widget _buildHeaderSection(ColorScheme colorScheme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,6 +211,10 @@ class CommunityDetailPage extends StatelessWidget {
                       'Código Postal',
                       community.localization.postalCode,
                     ),
+                    const SizedBox(height: 8),
+                    GoogleMapsButton(
+                      address: community.localization.fullAddress,
+                    ),
                   ],
                 ),
               ),
@@ -247,7 +246,6 @@ class CommunityDetailPage extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // Nombre y cargo
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -288,7 +286,6 @@ class CommunityDetailPage extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // Teléfono
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

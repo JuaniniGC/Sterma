@@ -32,7 +32,6 @@ class _ReportTypeSelectionPageState extends State<ReportTypeSelectionPage> {
         _errorMessage = null;
       });
 
-      // Usar el método del DioService para obtener los RAE
       final raes = await _dioService.getAllRaes();
 
       setState(() {

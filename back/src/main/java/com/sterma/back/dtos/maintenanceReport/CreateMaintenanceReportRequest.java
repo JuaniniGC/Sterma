@@ -15,6 +15,7 @@ public class CreateMaintenanceReportRequest {
     @NotNull
     private LocalDateTime startDate = LocalDateTime.now();
 
+    @NotNull
     private LocalDateTime endDate;
 
     private String commentary;
