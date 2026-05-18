@@ -17,7 +17,7 @@ class Elevator {
     return Elevator(
       id: json['id']?.toString() ?? '',
       rae: json['rae'] ?? '',
-      installationYear: json['installationYear'] ?? 0, // Corregí el nombre
+      installationYear: json['instalationYear'] ?? 0,
       community: Community.fromJson(json['community'] ?? {}),
     );
   }

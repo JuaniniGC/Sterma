@@ -42,9 +42,6 @@ class CommunityDetailPage extends StatelessWidget {
 
                   _buildLeaderSection(colorScheme),
                   const SizedBox(height: 24),
-
-                  _buildAdditionalInfoSection(colorScheme),
-                  const SizedBox(height: 24),
                 ],
               ),
             ),
