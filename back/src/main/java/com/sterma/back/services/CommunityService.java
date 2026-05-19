@@ -21,10 +21,12 @@ public class CommunityService {
 
     private final CommunityRepository communityRepository;
     private final ElevatorRepository elevatorRepository;
+    private final ElevatorService elevatorService;
 
-    public CommunityService(CommunityRepository communityRepository, ElevatorRepository elevatorRepository) {
+    public CommunityService(CommunityRepository communityRepository, ElevatorRepository elevatorRepository, ElevatorService elevatorService) {
         this.communityRepository = communityRepository;
         this.elevatorRepository = elevatorRepository;
+        this.elevatorService = elevatorService;
     }
 
     @Transactional(readOnly = true)
@@ -102,12 +104,7 @@ public class CommunityService {
     @Transactional
     public void delete(Long id) {
         checkCommunityExists(id);
-
-        List<Elevator> elevators = elevatorRepository.findByCommunityId(id);
-        if (!elevators.isEmpty()) {
-            elevatorRepository.deleteAll(elevators);
-        }
-
+        elevatorService.deleteAllElevatorByCommunityId(id);
         communityRepository.deleteById(id);
     }
 

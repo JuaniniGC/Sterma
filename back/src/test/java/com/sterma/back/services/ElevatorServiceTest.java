@@ -5,6 +5,7 @@ import com.sterma.back.dtos.elevator.UpdateElevatorRequest;
 import com.sterma.back.models.Elevator;
 import com.sterma.back.repositories.CommunityRepository;
 import com.sterma.back.repositories.ElevatorRepository;
+import com.sterma.back.services.maintenance.MaintenanceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +38,13 @@ class ElevatorServiceTest {
 
     @Mock
     private CommunityRepository communityRepository;
+
+    @Mock
+    private MaintenanceService maintenanceService;
+
+    @Mock
+    private IncidentReportService incidentReportService;
+
 
     @InjectMocks
     private ElevatorService elevatorService;
@@ -226,25 +234,47 @@ class ElevatorServiceTest {
     }
 
     /* ------------------------ Tests para delete ------------------------ */
+
+    @Test
+    void delete_WithNullId_ShouldThrowIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> elevatorService.delete(null));
+
+        verify(elevatorRepository, never()).deleteById(any());
+        verifyNoInteractions(maintenanceService, incidentReportService);
+    }
+
     @Test
     void delete_WithNonExistingId_ShouldThrowNoSuchElementException() {
-        when(elevatorRepository.existsById(1L)).thenReturn(false);
+        Long id = 1L;
 
-        assertThrows(NoSuchElementException.class, () -> elevatorService.delete(1L));
+        when(elevatorRepository.existsById(id)).thenReturn(false);
+
+        assertThrows(NoSuchElementException.class,
+                () -> elevatorService.delete(id));
+
+        verify(elevatorRepository, never()).deleteById(any());
+        verifyNoInteractions(maintenanceService, incidentReportService);
     }
 
     @Test
-    void delete_WithExistingId_ShouldCallRepositoryDelete() {
-        when(elevatorRepository.existsById(1L)).thenReturn(true);
-        doNothing().when(elevatorRepository).deleteById(1L);
+    void delete_WithExistingId_ShouldCallAllDependencies() {
+        Long id = 1L;
 
-        assertDoesNotThrow(() -> elevatorService.delete(1L));
-        verify(elevatorRepository).deleteById(1L);
-    }
+        when(elevatorRepository.existsById(id)).thenReturn(true);
 
-    @Test
-    void delete_WithNullId_ShouldThrowException() {
-        assertThrows(IllegalArgumentException.class, () -> elevatorService.delete(null));
+        doNothing().when(incidentReportService)
+                .deleteAllIncidentReportByElevator(id);
+        doNothing().when(maintenanceService)
+                .deleteAllMaintenanceReportByElevator(id);
+        doNothing().when(elevatorRepository).deleteById(id);
+
+        assertDoesNotThrow(() -> elevatorService.delete(id));
+
+        verify(elevatorRepository).existsById(id);
+        verify(incidentReportService).deleteAllIncidentReportByElevator(id);
+        verify(maintenanceService).deleteAllMaintenanceReportByElevator(id);
+        verify(elevatorRepository).deleteById(id);
     }
 
     /* ------------------------ Métodos de ayuda ------------------------ */

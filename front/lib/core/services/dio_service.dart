@@ -520,6 +520,23 @@ class DioService {
     }
   }
 
+  /// Actualiza la fecha de fin de un informe de incidente
+  Future<void> updateIncidentEndDate(int reportId, DateTime endDate) async {
+    try {
+      final data = {'endDate': endDate.toUtc().toIso8601String()};
+
+      await _dio.patch('/report/incident/$reportId/enddate', data: data);
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al actualizar la fecha de fin del incidente: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception(
+        'Error inesperado al actualizar la fecha de fin del incidente: $e',
+      );
+    }
+  }
+
   // ========== MÉTODOS ESPECÍFICOS PARA FALLOS COMUNES ==========
 
   Future<List<CommonMistake>> getCommonMistakes() async {
@@ -560,6 +577,100 @@ class DioService {
       );
     } catch (e) {
       throw Exception('Error inesperado al crear el fallo común: $e');
+    }
+  }
+
+  // ========== IMAGENES ==========
+
+  /// Obtiene las imágenes asociadas a un informe de incidente
+  Future<List<String>> getIncidentImages(int reportId) async {
+    try {
+      final response = await _dio.get('/report/incident/$reportId/image');
+
+      if (response.data is List) {
+        return (response.data as List).map((item) => item.toString()).toList();
+      } else {
+        throw Exception('Formato de respuesta inesperado');
+      }
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener las imágenes del incidente: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception(
+        'Error inesperado al obtener las imágenes del incidente: $e',
+      );
+    }
+  }
+
+  /// Sube una imagen para un informe de incidente
+  Future<Map<String, dynamic>> uploadIncidentImage(
+    int reportId,
+    String filePath, // Ruta del archivo en el dispositivo
+  ) async {
+    try {
+      // Crear el FormData para enviar el archivo
+      FormData formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(filePath),
+      });
+
+      final response = await _dio.post(
+        '/report/incident/$reportId/image',
+        data: formData,
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
+      );
+
+      return response.data;
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al subir la imagen del incidente: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception('Error inesperado al subir la imagen del incidente: $e');
+    }
+  }
+
+  /// Sube una imagen para un informe de incidente usando bytes
+  Future<Map<String, dynamic>> uploadIncidentImageFromBytes(
+    int reportId,
+    List<int> imageBytes,
+    String fileName,
+  ) async {
+    try {
+      FormData formData = FormData.fromMap({
+        'file': MultipartFile.fromBytes(imageBytes, filename: fileName),
+      });
+
+      final response = await _dio.post(
+        '/report/incident/$reportId/image',
+        data: formData,
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al subir la imagen del incidente: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception('Error inesperado al subir la imagen del incidente: $e');
+    }
+  }
+
+  /// Elimina una imagen de un informe de incidente (opcional, si necesitas)
+  Future<void> deleteIncidentImage(int reportId, String imageUrl) async {
+    try {
+      final response = await _dio.delete(
+        '/report/incident/$reportId/image',
+        data: {'imageUrl': imageUrl},
+      );
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al eliminar la imagen del incidente: ${_getDioErrorMessage(e)}',
+      );
+    } catch (e) {
+      throw Exception(
+        'Error inesperado al eliminar la imagen del incidente: $e',
+      );
     }
   }
 

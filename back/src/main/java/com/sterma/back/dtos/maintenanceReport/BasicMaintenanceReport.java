@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Data
 
 public class BasicMaintenanceReport {
+    private Long id;
     private MaintenanceType maintenanceType;
     private LocalDateTime startDate;
     private LocalDateTime endDate;

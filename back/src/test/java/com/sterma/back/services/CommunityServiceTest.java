@@ -24,6 +24,9 @@ class CommunityServiceTest {
     @Mock
     private CommunityRepository communityRepository;
 
+    @Mock
+    private ElevatorService elevatorService;
+
     @InjectMocks
     private CommunityService communityService;
 
@@ -184,6 +187,45 @@ class CommunityServiceTest {
     void updateCommunity_WithNullId_ShouldThrowIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () ->
                 communityService.updateCommunity(null, updateRequest));
+    }
+
+    /* ------------------------ Tests para delete ------------------------ */
+
+    @Test
+    void delete_WithNullId() {
+        assertThrows(IllegalArgumentException.class,
+                () -> communityService.delete(null));
+
+        verify(communityRepository, never()).deleteById(any());
+        verifyNoInteractions(elevatorService);
+    }
+
+    @Test
+    void delete_WithNonExistingId() {
+        Long id = 1L;
+
+        when(communityRepository.existsById(id)).thenReturn(false);
+
+        assertThrows(NoSuchElementException.class,
+                () -> communityService.delete(id));
+
+        verify(communityRepository, never()).deleteById(any());
+        verifyNoInteractions(elevatorService);
+    }
+
+    @Test
+    void delete_WithExistingId() {
+        Long id = 1L;
+
+        when(communityRepository.existsById(id)).thenReturn(true);
+        doNothing().when(elevatorService).deleteAllElevatorByCommunityId(id);
+        doNothing().when(communityRepository).deleteById(id);
+
+        assertDoesNotThrow(() -> communityService.delete(id));
+
+        verify(communityRepository).existsById(id);
+        verify(elevatorService).deleteAllElevatorByCommunityId(id);
+        verify(communityRepository).deleteById(id);
     }
 
     /* ------------------------ Tests para checkCommunityExists ------------------------ */

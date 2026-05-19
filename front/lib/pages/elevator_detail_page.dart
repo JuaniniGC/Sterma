@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:front/data/models/elevator_model.dart';
 import 'package:front/data/models/next_maintenance_model.dart';
 import 'package:front/core/services/dio_service.dart';
-import 'package:front/pages/elevator_reports_page.dart';
 import 'package:front/pages/maintenance_report_page.dart';
 import 'package:front/pages/incident_report_page.dart';
+import 'package:front/pages/elevator_reports_page.dart';
+import 'package:front/utils/google_maps_button.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:android_intent_plus/android_intent.dart';
 
 class ElevatorDetailPage extends StatefulWidget {
   final Elevator elevator;
@@ -50,6 +54,141 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
     }
   }
 
+  Future<void> _openGoogleMaps() async {
+    final address = widget.elevator.community.localization.fullAddress;
+    final encodedAddress = Uri.encodeComponent(address);
+
+    try {
+      final intent = AndroidIntent(
+        action: 'android.intent.action.VIEW',
+        data: 'geo:0,0?q=$encodedAddress',
+        package: 'com.google.android.apps.maps',
+      );
+
+      await intent.launch();
+    } catch (e) {
+      await _openInBrowser(address);
+    }
+  }
+
+  Future<void> _openInBrowser(String address) async {
+    final encodedAddress = Uri.encodeComponent(address);
+    final url = Uri.parse('https://www.google.com/maps/search/$encodedAddress');
+
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        _showMapsOptions(address);
+      }
+    } catch (e) {
+      _showMapsOptions(address);
+    }
+  }
+
+  void _showMapsOptions(String address) {
+    final encodedAddress = Uri.encodeComponent(address);
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                'Abrir en Google Maps',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.map, color: Colors.green),
+              title: const Text('Abrir con Google Maps'),
+              subtitle: Text(
+                address,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              onTap: () async {
+                Navigator.pop(context);
+                final encodedAddr = Uri.encodeComponent(address);
+                final intent = AndroidIntent(
+                  action: 'android.intent.action.VIEW',
+                  data: 'geo:0,0?q=$encodedAddr',
+                  package: 'com.google.android.apps.maps',
+                );
+                try {
+                  await intent.launch();
+                } catch (e) {
+                  final webUrl = Uri.parse(
+                    'https://www.google.com/maps/search/$encodedAddress',
+                  );
+                  if (await canLaunchUrl(webUrl)) {
+                    await launchUrl(webUrl, mode: LaunchMode.platformDefault);
+                  }
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.web, color: Colors.blue),
+              title: const Text('Abrir en el navegador'),
+              subtitle: Text(
+                address,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              onTap: () async {
+                Navigator.pop(context);
+                final webUrl = Uri.parse(
+                  'https://www.google.com/maps/search/$encodedAddress',
+                );
+                if (await canLaunchUrl(webUrl)) {
+                  await launchUrl(webUrl, mode: LaunchMode.platformDefault);
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.copy, color: Colors.grey),
+              title: const Text('Copiar dirección'),
+              onTap: () {
+                Navigator.pop(context);
+                Clipboard.setData(ClipboardData(text: address));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Dirección copiada al portapapeles'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.link, color: Colors.grey),
+              title: const Text('Copiar enlace de Google Maps'),
+              onTap: () {
+                Navigator.pop(context);
+                final link =
+                    'https://www.google.com/maps/search/$encodedAddress';
+                Clipboard.setData(ClipboardData(text: link));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Enlace copiado al portapapeles'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -79,6 +218,56 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
             const SizedBox(height: 24),
 
             _buildContactSection(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCommunitySection() {
+    final address = widget.elevator.community.localization.fullAddress;
+
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Comunidad',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            _buildInfoRow('Nombre', widget.elevator.community.name),
+            _buildInfoRow('Descripción', widget.elevator.community.description),
+            _buildInfoRow('CIF', widget.elevator.community.cif),
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.location_on, size: 20, color: Colors.grey[600]),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Ubicación',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(address),
+                      const SizedBox(height: 8),
+                      GoogleMapsButton(address: address),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -122,10 +311,8 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
       children: [
         _buildSkeletonRow(),
         const SizedBox(height: 12),
-
         _buildSkeletonRow(),
         const SizedBox(height: 12),
-
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -199,7 +386,6 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
   }
 
   Widget _buildNextMaintenanceInfo() {
-    final theme = Theme.of(context);
     final nextMaintenance = _nextMaintenance!;
 
     return Column(
@@ -209,12 +395,10 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
           'Tipo',
           nextMaintenance.maintenanceTypeDisplayName,
         ),
-
         _buildMaintenanceInfoRow(
           'Próxima fecha',
           '${nextMaintenance.nextDate.day}/${nextMaintenance.nextDate.month}/${nextMaintenance.nextDate.year}',
         ),
-
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -451,18 +635,6 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
     );
   }
 
-  void _navigateToReports(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ElevatorReportsPage(
-          elevatorId: widget.elevator.id,
-          elevatorRAE: widget.elevator.rae,
-        ),
-      ),
-    );
-  }
-
   void _navigateToMaintenanceReport(BuildContext context) {
     Navigator.push(
       context,
@@ -481,47 +653,13 @@ class _ElevatorDetailPageState extends State<ElevatorDetailPage> {
     );
   }
 
-  Widget _buildCommunitySection() {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Comunidad',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            _buildInfoRow('Nombre', widget.elevator.community.name),
-            _buildInfoRow('Descripción', widget.elevator.community.description),
-            _buildInfoRow('CIF', widget.elevator.community.cif),
-            const SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.location_on, size: 20, color: Colors.grey[600]),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Ubicación',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(widget.elevator.community.localization.fullAddress),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
+  void _navigateToReports(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ElevatorReportsPage(
+          elevatorId: widget.elevator.id,
+          elevatorRAE: widget.elevator.rae,
         ),
       ),
     );

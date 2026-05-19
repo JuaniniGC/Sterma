@@ -35,6 +35,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Sterma App',
         navigatorKey: navigatorKey,
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: Colors.blue,
           primaryColor: Colors.blue.shade800,
