@@ -6,6 +6,8 @@ export const paths = {
   communityDetail: '/communities/:id',
   elevators: '/elevators',
   elevatorDetail: '/elevators/:id',
+  maintenanceRules: '/maintenance-rules',
+  newMaintenanceRule: '/maintenance-rules/new',
 } as const
 
 /** Construye la URL del detalle de una comunidad. */

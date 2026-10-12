@@ -8,6 +8,20 @@ export const MAINTENANCE_TYPE_LABELS: Record<MaintenanceType, string> = {
   ANNUAL: 'Mantenimiento anual',
 }
 
+/** Nombre corto de la periodicidad (títulos de grupo) */
+export const MAINTENANCE_FREQUENCY_LABELS: Record<MaintenanceType, string> = {
+  MONTHLY: 'Mensual',
+  BIANNUAL: 'Semestral',
+  ANNUAL: 'Anual',
+}
+
+/** Cada cuánto se realiza (según `MaintenanceReport.getNextDate` del backend) */
+export const MAINTENANCE_FREQUENCY_DESCRIPTIONS: Record<MaintenanceType, string> = {
+  MONTHLY: 'Cada mes',
+  BIANNUAL: 'Cada 6 meses',
+  ANNUAL: 'Cada año',
+}
+
 /** Fechas en formato `LocalDateTime` de Spring, sin zona: `2025-02-18T14:15:00` */
 type LocalDateTime = string
 

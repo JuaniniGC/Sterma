@@ -6,6 +6,8 @@ import { CommunityDetailPage } from '@/features/community/pages/CommunityDetailP
 import { CommunityListPage } from '@/features/community/pages/CommunityListPage'
 import { ElevatorDetailPage } from '@/features/elevator/pages/ElevatorDetailPage'
 import { ElevatorListPage } from '@/features/elevator/pages/ElevatorListPage'
+import { MaintenanceRulesPage } from '@/features/maintenanceRule/pages/MaintenanceRulesPage'
+import { NewMaintenanceRulePage } from '@/features/maintenanceRule/pages/NewMaintenanceRulePage'
 import { HomePage } from './HomePage'
 import { NotFoundPage } from './NotFoundPage'
 import { RouteErrorPage } from './RouteErrorPage'
@@ -29,6 +31,8 @@ export const router = createBrowserRouter([
               { path: paths.communityDetail, element: <CommunityDetailPage /> },
               { path: paths.elevators, element: <ElevatorListPage /> },
               { path: paths.elevatorDetail, element: <ElevatorDetailPage /> },
+              { path: paths.maintenanceRules, element: <MaintenanceRulesPage /> },
+              { path: paths.newMaintenanceRule, element: <NewMaintenanceRulePage /> },
               { path: '*', element: <NotFoundPage /> },
             ],
           },
