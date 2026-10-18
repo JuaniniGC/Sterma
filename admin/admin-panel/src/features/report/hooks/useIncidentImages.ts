@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { getIncidentImages, uploadIncidentImage } from '@/api/report.api'
+import { deleteIncidentImage, getIncidentImages, uploadIncidentImage } from '@/api/report.api'
 import { ApiError } from '@/api/errors'
 import { reportKeys } from './useElevatorReports'
 
@@ -9,6 +9,19 @@ export function useIncidentImages(incidentId: number) {
   return useQuery({
     queryKey: reportKeys.incidentImages(incidentId),
     queryFn: () => getIncidentImages(incidentId),
+  })
+}
+
+/** Borra una foto de una incidencia por su ID público. Los errores los notifica el toast global de mutaciones. */
+export function useDeleteIncidentImage(incidentId: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (imagePublicId: string) => deleteIncidentImage({ incidentId, imagePublicId }),
+    onSuccess: () => {
+      toast.success('Foto eliminada.')
+    },
+    // También tras un error: si era un 404 ya no existe y la galería debe reflejarlo
+    onSettled: () => queryClient.invalidateQueries({ queryKey: reportKeys.incidentImages(incidentId) }),
   })
 }
 

@@ -1,11 +1,15 @@
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { getErrorMessage } from '@/api/errors'
 import { DetailCard } from '@/components/data/DetailCard'
 import { ErrorState } from '@/components/data/ErrorState'
+import { Button } from '@/components/ui/Button'
 import { FileButton } from '@/components/ui/FileButton'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { imagePublicIdFromUrl } from '@/lib/cloudinary'
 import { useIncidentImages, useUploadIncidentImages } from '../hooks/useIncidentImages'
 import { INCIDENT_IMAGE_ACCEPT, INCIDENT_IMAGE_MAX_BYTES } from '../types'
+import { DeleteIncidentImageDialog } from './DeleteIncidentImageDialog'
 
 const GRID = 'grid grid-cols-2 gap-3 sm:grid-cols-3'
 
@@ -20,10 +24,14 @@ interface IncidentImagesSectionProps {
   incidentId: number
 }
 
-/** Tarjeta "Fotos" de una incidencia: galería de sus fotos y botón para añadir más (JPG de hasta 1 MB). */
+/**
+ * Tarjeta "Fotos" de una incidencia: galería de sus fotos (cada una con "Eliminar") y botón para añadir más
+ * (JPG de hasta 1 MB).
+ */
 export function IncidentImagesSection({ incidentId }: IncidentImagesSectionProps) {
   const { data: urls, isPending, isError, error, refetch } = useIncidentImages(incidentId)
   const upload = useUploadIncidentImages(incidentId)
+  const [imageToDelete, setImageToDelete] = useState<string | null>(null)
 
   const addFiles = (files: File[]) => {
     // Se valida aquí: un archivo demasiado grande no llegaría al controlador (el backend respondería 401)
@@ -55,7 +63,7 @@ export function IncidentImagesSection({ incidentId }: IncidentImagesSectionProps
     content = (
       <ul className={GRID}>
         {urls.map((url, index) => (
-          <li key={url}>
+          <li key={url} className="relative">
             <a
               href={url}
               target="_blank"
@@ -70,6 +78,18 @@ export function IncidentImagesSection({ incidentId }: IncidentImagesSectionProps
                 className="aspect-square w-full object-cover transition hover:opacity-90"
               />
             </a>
+            {/* Sin ID público reconocible en la URL no se puede pedir el borrado */}
+            {imagePublicIdFromUrl(url) !== null && (
+              <Button
+                variant="danger"
+                size="sm"
+                className="absolute top-2 right-2"
+                onClick={() => setImageToDelete(url)}
+                aria-label={`Eliminar la foto ${index + 1}`}
+              >
+                Eliminar
+              </Button>
+            )}
           </li>
         ))}
       </ul>
@@ -93,6 +113,12 @@ export function IncidentImagesSection({ incidentId }: IncidentImagesSectionProps
       }
     >
       {content}
+
+      <DeleteIncidentImageDialog
+        incidentId={incidentId}
+        imageUrl={imageToDelete}
+        onClose={() => setImageToDelete(null)}
+      />
     </DetailCard>
   )
 }

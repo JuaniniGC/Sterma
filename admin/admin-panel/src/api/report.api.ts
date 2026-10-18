@@ -86,6 +86,30 @@ export async function uploadIncidentImage({
 }
 
 /**
+ * DELETE /report/incident/{incidentId}/image/{imagePublicId} — borra la foto en Cloudinary y en la BD. 200 con texto
+ * ("Se ha borrado correctamente la imagen"); 404 (texto plano) si la incidencia no existe o la foto no es suya.
+ * Cualquier estado distinto de 200 se trata como error.
+ */
+export async function deleteIncidentImage({
+  incidentId,
+  imagePublicId,
+}: {
+  incidentId: number
+  imagePublicId: string
+}): Promise<void> {
+  const response = await httpClient.delete(
+    `/report/incident/${encodeURIComponent(incidentId)}/image/${encodeURIComponent(imagePublicId)}`,
+  )
+  if (response.status !== 200) {
+    throw new ApiError(
+      `No se pudo eliminar la foto (respuesta inesperada ${response.status}).`,
+      response.status,
+      response.data,
+    )
+  }
+}
+
+/**
  * PATCH /report/incident/{id}/enddate — 200 con cuerpo vacío. Errores en texto plano: 400 (ya estaba cerrada o
  * el cierre no es posterior al inicio), 404 (no existe). Cualquier estado distinto de 200 se trata como error.
  */
