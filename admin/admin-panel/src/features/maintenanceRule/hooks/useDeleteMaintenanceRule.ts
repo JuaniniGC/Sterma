@@ -10,7 +10,7 @@ export function useDeleteMaintenanceRule() {
   return useMutation({
     mutationFn: (rule: MaintenanceRule) => deleteMaintenanceRule(rule.id),
     onSuccess: (_data, rule) => {
-      toast.success(`Regla «${rule.name}» eliminada.`)
+      toast.success(`Paso «${rule.name}» eliminado.`)
     },
     // También tras un error: si era un 404 la regla ya no existe y la lista debe reflejarlo
     onSettled: () => queryClient.invalidateQueries({ queryKey: maintenanceRuleKeys.all }),

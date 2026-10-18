@@ -46,8 +46,8 @@ export function NewMaintenanceRulePage() {
 
   return (
     <>
-      <BackLink to={paths.maintenanceRules}>Volver a reglas de mantenimiento</BackLink>
-      <PageHeader title="Nueva regla de mantenimiento" />
+      <BackLink to={paths.maintenanceRules}>Volver a pasos de mantenimiento</BackLink>
+      <PageHeader title="Nuevo paso de mantenimiento" />
 
       <DetailCard className="max-w-2xl">
         <form onSubmit={onSubmit} noValidate className="space-y-5">
@@ -137,7 +137,7 @@ export function NewMaintenanceRulePage() {
               Cancelar
             </Button>
             <Button type="submit" loading={createRule.isPending}>
-              Crear regla
+              Crear paso
             </Button>
           </div>
         </form>

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link, useNavigate, type To } from 'react-router'
+import { hasAppHistory } from '@/lib/history'
 
 interface BackLinkProps {
   /** Destino del enlace (o destino de reserva si `preferHistory` y no hay pantalla anterior) */
@@ -7,18 +8,6 @@ interface BackLinkProps {
   children: ReactNode
   /** Vuelve a la pantalla anterior de la app (como "atrás" del navegador) si existe; si no, va a `to` */
   preferHistory?: boolean
-}
-
-/** true si hay una entrada anterior de la app en el historial de esta pestaña (React Router guarda `idx`). */
-function hasAppHistory(): boolean {
-  const state: unknown = window.history.state
-  return (
-    typeof state === 'object' &&
-    state !== null &&
-    'idx' in state &&
-    typeof state.idx === 'number' &&
-    state.idx > 0
-  )
 }
 
 /** Enlace "← Volver a ..." encima del título de una pantalla. */

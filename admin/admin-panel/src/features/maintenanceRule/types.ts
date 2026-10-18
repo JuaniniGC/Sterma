@@ -30,7 +30,7 @@ export const maintenanceRuleFormSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, 'Introduce el nombre de la regla')
+    .min(1, 'Introduce el nombre del paso')
     .max(255, 'El nombre no puede superar los 255 caracteres'),
   description: z.string().trim().max(255, 'La descripción no puede superar los 255 caracteres'),
   orderNum: z

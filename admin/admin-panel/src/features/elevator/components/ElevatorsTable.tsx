@@ -38,6 +38,8 @@ interface ElevatorsTableProps {
   error?: string | null
   onRetry?: () => void
   emptyMessage?: ReactNode
+  /** Botones por fila (p. ej. editar/eliminar en el listado general) */
+  rowActions?: (elevator: Elevator) => ReactNode
 }
 
 /**
@@ -53,6 +55,7 @@ export function ElevatorsTable({
   error,
   onRetry,
   emptyMessage = 'No hay ascensores.',
+  rowActions,
 }: ElevatorsTableProps) {
   const navigate = useNavigate()
 
@@ -68,6 +71,7 @@ export function ElevatorsTable({
       emptyMessage={emptyMessage}
       onRowClick={(e) => void navigate(elevatorDetailPath(e.id))}
       getRowLabel={(e) => `Ver ascensor ${e.rae}`}
+      rowActions={rowActions}
     />
   )
 }

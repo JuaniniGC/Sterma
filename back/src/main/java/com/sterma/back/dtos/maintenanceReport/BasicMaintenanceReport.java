@@ -16,6 +16,7 @@ public class BasicMaintenanceReport {
     private String commentary;
 
     public BasicMaintenanceReport(MaintenanceReport maintenanceReport){
+        this.id = maintenanceReport.getId();
         this.maintenanceType = maintenanceReport.getMaintenanceType();
         this.startDate = maintenanceReport.getStartDate();
         this.endDate = maintenanceReport.getEndDate();

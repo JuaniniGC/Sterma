@@ -34,7 +34,7 @@ const columns: DataTableColumn<MaintenanceRule>[] = [
 ]
 
 function ruleCount(count: number): string {
-  return `${count} ${count === 1 ? 'regla' : 'reglas'}`
+  return `${count} ${count === 1 ? 'paso' : 'pasos'}`
 }
 
 export function MaintenanceRulesPage() {
@@ -59,7 +59,7 @@ export function MaintenanceRulesPage() {
       variant="danger"
       size="sm"
       onClick={() => setRuleToDelete(rule)}
-      aria-label={`Eliminar la regla ${rule.name}`}
+      aria-label={`Eliminar el paso ${rule.name}`}
     >
       Eliminar
     </Button>
@@ -67,16 +67,16 @@ export function MaintenanceRulesPage() {
 
   const header = (
     <PageHeader
-      title="Reglas de mantenimiento"
+      title="Pasos de mantenimiento"
       description={
         data
-          ? `${ruleCount(data.total)}, agrupadas por tipo de mantenimiento.`
+          ? `${ruleCount(data.total)}, agrupados por tipo de mantenimiento.`
           : 'Tareas a realizar en cada tipo de mantenimiento.'
       }
       actions={
         <Button size="lg" onClick={() => void navigate(paths.newMaintenanceRule)}>
           <span aria-hidden="true" className="text-[22px] leading-none">+</span>
-          Nueva regla
+          Nuevo paso
         </Button>
       }
     />
@@ -96,7 +96,7 @@ export function MaintenanceRulesPage() {
       <>
         {header}
         <DetailCard>
-          <p className="py-8 text-center text-slate-500">No hay reglas de mantenimiento registradas.</p>
+          <p className="py-8 text-center text-slate-500">No hay pasos de mantenimiento registrados.</p>
         </DetailCard>
       </>
     )
@@ -125,7 +125,7 @@ export function MaintenanceRulesPage() {
                 isLoading={isPending}
                 skeletonRows={2}
                 isFetching={isFetching}
-                emptyMessage={`No hay reglas de mantenimiento ${MAINTENANCE_FREQUENCY_LABELS[type].toLowerCase()}.`}
+                emptyMessage={`No hay pasos de mantenimiento ${MAINTENANCE_FREQUENCY_LABELS[type].toLowerCase()}.`}
                 rowActions={renderRowActions}
               />
             </DetailCard>
@@ -135,11 +135,11 @@ export function MaintenanceRulesPage() {
 
       <ConfirmDialog
         open={ruleToDelete !== null}
-        title="Eliminar regla de mantenimiento"
+        title="Eliminar paso de mantenimiento"
         message={
           ruleToDelete && (
             <>
-              ¿Seguro que quieres eliminar la regla{' '}
+              ¿Seguro que quieres eliminar el paso{' '}
               <strong className="text-slate-900">«{ruleToDelete.name}»</strong> (#{ruleToDelete.orderNum},{' '}
               {MAINTENANCE_FREQUENCY_LABELS[ruleToDelete.maintenanceType].toLowerCase()})? Esta acción no se puede
               deshacer.

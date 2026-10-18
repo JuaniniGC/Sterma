@@ -11,6 +11,9 @@ interface SearchInputProps {
   /** Etiqueta accesible (por defecto usa el placeholder) */
   label?: string
   className?: string
+  /** id del input, para asociarlo a un `<label>` externo (p. ej. `FormField`); con él no se usa `aria-label` */
+  id?: string
+  autoFocus?: boolean
 }
 
 export function SearchInput({
@@ -20,6 +23,8 @@ export function SearchInput({
   debounceMs = 400,
   label,
   className = '',
+  id,
+  autoFocus,
 }: SearchInputProps) {
   const [text, setText] = useState(value)
   const [lastValue, setLastValue] = useState(value)
@@ -57,7 +62,9 @@ export function SearchInput({
         type="search"
         value={text}
         placeholder={placeholder}
-        aria-label={label ?? placeholder}
+        id={id}
+        autoFocus={autoFocus}
+        aria-label={id ? undefined : (label ?? placeholder)}
         className="pr-9 pl-9 [&::-webkit-search-cancel-button]:hidden"
         onChange={(event) => {
           setText(event.target.value)

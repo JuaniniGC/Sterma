@@ -10,7 +10,7 @@ export function useCreateMaintenanceRule() {
     // El error se muestra dentro del formulario
     meta: { skipErrorToast: true },
     onSuccess: async (rule) => {
-      toast.success(`Regla «${rule.name}» creada.`)
+      toast.success(`Paso «${rule.name}» creado.`)
       await queryClient.invalidateQueries({ queryKey: maintenanceRuleKeys.all })
     },
   })

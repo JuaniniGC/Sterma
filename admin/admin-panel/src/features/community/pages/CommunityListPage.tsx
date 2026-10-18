@@ -1,13 +1,16 @@
+import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { getErrorMessage } from '@/api/errors'
 import { DataTable, type DataTableColumn } from '@/components/data/DataTable'
 import { Pagination } from '@/components/data/Pagination'
 import { SearchInput } from '@/components/data/SearchInput'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { Button } from '@/components/ui/Button'
 import { useClampPage } from '@/hooks/useClampPage'
 import { useListSearchParams } from '@/hooks/useListSearchParams'
-import { communityDetailPath } from '@/routes/paths'
+import { communityDetailPath, editCommunityPath, paths } from '@/routes/paths'
 import type { SortState } from '@/types/pagination'
+import { DeleteCommunityDialog } from '../components/DeleteCommunityDialog'
 import { useCommunities } from '../hooks/useCommunities'
 import type { CommunityDetailLocationState } from './CommunityDetailPage'
 import type { Community } from '../types'
@@ -101,10 +104,20 @@ export function CommunityListPage() {
   }
 
   const hasFilter = name.trim() !== ''
+  const [communityToDelete, setCommunityToDelete] = useState<Community | null>(null)
 
   return (
     <>
-      <PageHeader title="Comunidades" description="Listado de comunidades registradas." />
+      <PageHeader
+        title="Comunidades"
+        description="Listado de comunidades registradas."
+        actions={
+          <Button size="lg" onClick={() => void navigate(paths.newCommunity)}>
+            <span aria-hidden="true" className="text-[22px] leading-none">+</span>
+            Nueva comunidad
+          </Button>
+        }
+      />
 
       <div className="mb-4 max-w-sm">
         <SearchInput
@@ -123,6 +136,26 @@ export function CommunityListPage() {
         allowUnsorted={false}
         onRowClick={openCommunity}
         getRowLabel={(c) => `Ver detalle de ${c.name}`}
+        rowActions={(c) => (
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="success"
+              size="sm"
+              onClick={() => void navigate(editCommunityPath(c.id))}
+              aria-label={`Editar la comunidad ${c.name}`}
+            >
+              Editar
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => setCommunityToDelete(c)}
+              aria-label={`Eliminar la comunidad ${c.name}`}
+            >
+              Eliminar
+            </Button>
+          </div>
+        )}
         isLoading={isPending}
         isFetching={isFetching}
         error={isError ? getErrorMessage(error) : null}
@@ -148,6 +181,11 @@ export function CommunityListPage() {
           />
         </div>
       )}
+
+      <DeleteCommunityDialog
+        community={communityToDelete}
+        onClose={() => setCommunityToDelete(null)}
+      />
     </>
   )
 }
