@@ -13,4 +13,5 @@ export const navigation: NavItem[] = [
   { label: 'Comunidades', to: paths.communities },
   { label: 'Ascensores', to: paths.elevators },
   { label: 'Pasos de mantenimiento', to: paths.maintenanceRules },
+  { label: 'Fallos comunes', to: paths.commonMistakes },
 ]

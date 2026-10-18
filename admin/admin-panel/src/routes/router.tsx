@@ -2,6 +2,8 @@ import { createBrowserRouter } from 'react-router'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
+import { CommonMistakeListPage } from '@/features/commonMistake/pages/CommonMistakeListPage'
+import { NewCommonMistakePage } from '@/features/commonMistake/pages/NewCommonMistakePage'
 import { CommunityDetailPage } from '@/features/community/pages/CommunityDetailPage'
 import { CommunityListPage } from '@/features/community/pages/CommunityListPage'
 import { EditCommunityPage } from '@/features/community/pages/EditCommunityPage'
@@ -48,6 +50,8 @@ export const router = createBrowserRouter([
               { path: paths.maintenanceReportDetail, element: <ReportDetailPage kind="maintenance" /> },
               { path: paths.maintenanceRules, element: <MaintenanceRulesPage /> },
               { path: paths.newMaintenanceRule, element: <NewMaintenanceRulePage /> },
+              { path: paths.commonMistakes, element: <CommonMistakeListPage /> },
+              { path: paths.newCommonMistake, element: <NewCommonMistakePage /> },
               { path: '*', element: <NotFoundPage /> },
             ],
           },

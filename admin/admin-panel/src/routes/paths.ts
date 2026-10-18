@@ -16,6 +16,8 @@ export const paths = {
   maintenanceReportDetail: '/elevators/:id/maintenance/:reportId',
   maintenanceRules: '/maintenance-rules',
   newMaintenanceRule: '/maintenance-rules/new',
+  commonMistakes: '/common-mistakes',
+  newCommonMistake: '/common-mistakes/new',
 } as const
 
 /** Construye la URL del detalle de una comunidad. */
