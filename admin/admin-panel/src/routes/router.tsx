@@ -17,6 +17,7 @@ import { NewMaintenanceRulePage } from '@/features/maintenanceRule/pages/NewMain
 import { NewIncidentReportPage } from '@/features/report/pages/NewIncidentReportPage'
 import { NewMaintenanceReportPage } from '@/features/report/pages/NewMaintenanceReportPage'
 import { ReportDetailPage } from '@/features/report/pages/ReportDetailPage'
+import { UrgentMaintenancePage } from '@/features/report/pages/UrgentMaintenancePage'
 import { HomePage } from './HomePage'
 import { NotFoundPage } from './NotFoundPage'
 import { RouteErrorPage } from './RouteErrorPage'
@@ -50,6 +51,7 @@ export const router = createBrowserRouter([
               { path: paths.maintenanceReportDetail, element: <ReportDetailPage kind="maintenance" /> },
               { path: paths.maintenanceRules, element: <MaintenanceRulesPage /> },
               { path: paths.newMaintenanceRule, element: <NewMaintenanceRulePage /> },
+              { path: paths.urgentMaintenance, element: <UrgentMaintenancePage /> },
               { path: paths.commonMistakes, element: <CommonMistakeListPage /> },
               { path: paths.newCommonMistake, element: <NewCommonMistakePage /> },
               { path: '*', element: <NotFoundPage /> },

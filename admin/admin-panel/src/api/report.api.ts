@@ -7,6 +7,7 @@ import type {
   IncidentReport,
   MaintenanceReport,
   MaintenanceType,
+  UrgentMaintenance,
 } from '@/features/report/types'
 import { httpClient } from './client'
 import { ApiError } from './errors'
@@ -158,6 +159,16 @@ export async function deleteMaintenanceReport(id: number): Promise<void> {
       response.data,
     )
   }
+}
+
+/**
+ * GET /report/maintenance/next — ascensores cuyo próximo mantenimiento es urgente (estado distinto de `GOOD`),
+ * calculado por el backend para todos los ascensores. Array completo (sin paginar), `[]` si no hay ninguno;
+ * ordenado por estado (`NEVER_PASS`, `DANGER`, `WARNING`).
+ */
+export async function getUrgentMaintenance(): Promise<UrgentMaintenance[]> {
+  const { data } = await httpClient.get<UrgentMaintenance[]>('/report/maintenance/next')
+  return data
 }
 
 /**

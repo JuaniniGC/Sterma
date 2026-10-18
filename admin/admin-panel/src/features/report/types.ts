@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { toLocalDateTime } from '@/lib/dateTime'
+import type { Elevator } from '@/features/elevator/types'
 
 export const MAINTENANCE_TYPES = ['MONTHLY', 'BIANNUAL', 'ANNUAL'] as const
 export type MaintenanceType = (typeof MAINTENANCE_TYPES)[number]
@@ -35,6 +36,39 @@ export interface IncidentReport {
   /** null si la incidencia sigue abierta */
   endDate: LocalDateTime | null
   commentary: string | null
+}
+
+/**
+ * Estado del próximo mantenimiento (enum `NextMaintenanceStatus` del backend), del más al menos urgente:
+ * `NEVER_PASS` = sin ningún mantenimiento anual registrado (no hay fecha); `DANGER` = la fecha ya ha pasado;
+ * `WARNING` = toca en el próximo mes; `GOOD` = más adelante (`/report/maintenance/next` no los devuelve).
+ */
+export type NextMaintenanceStatus = 'NEVER_PASS' | 'DANGER' | 'WARNING' | 'GOOD'
+
+/** Orden de urgencia (el `weight` del enum del backend) */
+export const NEXT_MAINTENANCE_STATUS_WEIGHT: Record<NextMaintenanceStatus, number> = {
+  NEVER_PASS: 1,
+  DANGER: 2,
+  WARNING: 3,
+  GOOD: 4,
+}
+
+export const NEXT_MAINTENANCE_STATUS_LABELS: Record<NextMaintenanceStatus, string> = {
+  NEVER_PASS: 'Nunca realizado',
+  DANGER: 'Vencido',
+  WARNING: 'Próximo',
+  GOOD: 'Al día',
+}
+
+/** Elemento de GET /report/maintenance/next */
+export interface UrgentMaintenance {
+  elevator: Elevator
+  nextMaintenanceResponse: {
+    maintenanceType: MaintenanceType
+    /** `LocalDate` (`2026-05-22`); null con `NEVER_PASS` */
+    nextDate: string | null
+    status: NextMaintenanceStatus
+  }
 }
 
 /** Respuesta de POST /report/incident/{id}/image */
