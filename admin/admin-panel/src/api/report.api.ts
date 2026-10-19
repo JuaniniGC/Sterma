@@ -6,6 +6,7 @@ import type {
   IncidentImage,
   IncidentReport,
   MaintenanceReport,
+  MaintenanceReportDetail,
   MaintenanceType,
   UrgentMaintenance,
 } from '@/features/report/types'
@@ -213,6 +214,17 @@ export async function deleteMaintenanceRule(id: number): Promise<void> {
 export async function getIncidentReportsByElevator(elevatorId: number): Promise<IncidentReport[]> {
   const { data } = await httpClient.get<IncidentReport[]>(
     `/report/incident/${encodeURIComponent(elevatorId)}`,
+  )
+  return data
+}
+
+/**
+ * GET /report/maintenance/detail/{reportId} — un mantenimiento con los pasos realizados (`maintenanceRules`,
+ * ordenados por `orderNum`). 404 (texto plano) si no existe.
+ */
+export async function getMaintenanceReportDetail(reportId: number): Promise<MaintenanceReportDetail> {
+  const { data } = await httpClient.get<MaintenanceReportDetail>(
+    `/report/maintenance/detail/${encodeURIComponent(reportId)}`,
   )
   return data
 }

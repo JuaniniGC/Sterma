@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { toLocalDateTime } from '@/lib/dateTime'
 import type { Elevator } from '@/features/elevator/types'
+import type { MaintenanceRule } from '@/features/maintenanceRule/types'
 
 export const MAINTENANCE_TYPES = ['MONTHLY', 'BIANNUAL', 'ANNUAL'] as const
 export type MaintenanceType = (typeof MAINTENANCE_TYPES)[number]
@@ -94,6 +95,13 @@ export interface MaintenanceReport {
   startDate: LocalDateTime
   endDate: LocalDateTime | null
   commentary: string | null
+}
+
+/** GET /report/maintenance/detail/{reportId}: los campos del listado más los pasos realizados */
+export interface MaintenanceReportDetail extends MaintenanceReport {
+  id: number
+  /** Pasos registrados en el informe, ordenados por `orderNum` (`[]` si no tiene) */
+  maintenanceRules: MaintenanceRule[]
 }
 
 /** Fila del historial unificado (incidencias + mantenimientos) */

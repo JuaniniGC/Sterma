@@ -14,6 +14,7 @@ import { useElevatorReport } from '../hooks/useElevatorReports'
 import { MAINTENANCE_TYPE_LABELS, type IncidentReport, type ReportKind } from '../types'
 import { CloseIncidentDialog } from './CloseIncidentDialog'
 import { IncidentImagesSection } from './IncidentImagesSection'
+import { MaintenanceStepsSection } from './MaintenanceStepsSection'
 
 interface ReportDetailProps {
   kind: ReportKind
@@ -22,7 +23,8 @@ interface ReportDetailProps {
 
 /**
  * Detalle de un informe (`:reportId` de la URL) de un ascensor: fechas de apertura y cierre y, si es una
- * incidencia en curso, botón para añadir la fecha de cierre. Común a incidencias y mantenimientos.
+ * incidencia en curso, botón para añadir la fecha de cierre. Común a incidencias y mantenimientos; debajo, las
+ * fotos (incidencias) o los pasos realizados (mantenimientos).
  */
 export function ReportDetail({ kind, elevatorId }: ReportDetailProps) {
   const { reportId: rawReportId } = useParams()
@@ -81,6 +83,9 @@ export function ReportDetail({ kind, elevatorId }: ReportDetailProps) {
       </DetailCard>
 
       {entry.kind === 'incident' && <IncidentImagesSection incidentId={entry.report.id} />}
+      {entry.kind === 'maintenance' && entry.report.id !== null && (
+        <MaintenanceStepsSection reportId={entry.report.id} />
+      )}
     </div>
   )
 }

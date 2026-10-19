@@ -10,6 +10,7 @@ export const reportKeys = {
     [...reportKeys.all, 'maintenance', 'elevator', elevatorId] as const,
   incidentImages: (incidentId: number) => [...reportKeys.all, 'incident', incidentId, 'images'] as const,
   urgentMaintenance: () => [...reportKeys.all, 'maintenance', 'next'] as const,
+  maintenanceDetail: (reportId: number) => [...reportKeys.all, 'maintenance', reportId, 'detail'] as const,
 }
 
 const incidentsQuery = (elevatorId: number) =>
