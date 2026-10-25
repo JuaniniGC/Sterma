@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Caches y artefactos de herramientas
+.npm
+.vite
+.eslintcache
+*.tsbuildinfo
+coverage
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
