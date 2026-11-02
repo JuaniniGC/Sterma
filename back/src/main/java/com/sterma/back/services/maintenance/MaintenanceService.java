@@ -3,6 +3,7 @@ package com.sterma.back.services.maintenance;
 
 import com.sterma.back.dtos.maintenanceReport.BasicMaintenanceReport;
 import com.sterma.back.dtos.maintenanceReport.CreateMaintenanceReportRequest;
+import com.sterma.back.dtos.maintenanceReport.MaintenanceReportDetail;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NearMaintenanceTuple;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NextMaintenanceResponse;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NextMaintenanceStatus;
@@ -13,6 +14,7 @@ import com.sterma.back.models.MaintenanceType;
 import com.sterma.back.models.Technician;
 import com.sterma.back.models.reports.IncidentReport;
 import com.sterma.back.models.reports.MaintenanceReport;
+import com.sterma.back.models.reports.MaintenanceReportRule;
 import com.sterma.back.repositories.*;
 import com.sterma.back.services.maintenance.strategy.MaintenanceServiceStrategy;
 import org.springframework.security.core.Authentication;
@@ -31,21 +33,24 @@ public class MaintenanceService {
 
     private final MaintenanceReportRepository maintenanceReportRepository;
     private final MaintenanceRuleRepository maintenanceRuleRepository;
-
+    private final MaintenanceReportRuleRepository maintenanceReportRuleRepository;
     private final ElevatorRepository elevatorRepository;
 
     private final TechnicianRepository technicianRepository;
 
 
 
+
     public MaintenanceService(List<MaintenanceServiceStrategy> strategies,
                               MaintenanceReportRepository maintenanceReportRepository,
                               MaintenanceRuleRepository maintenanceRuleRepository,
+                              MaintenanceReportRuleRepository maintenanceReportRuleRepository,
                               ElevatorRepository elevatorRepository,
                               TechnicianRepository technicianRepository
     ){
         this.maintenanceReportRepository = maintenanceReportRepository;
         this.maintenanceRuleRepository = maintenanceRuleRepository;
+        this.maintenanceReportRuleRepository = maintenanceReportRuleRepository;
         this.elevatorRepository = elevatorRepository;
         this.technicianRepository = technicianRepository;
         for (MaintenanceServiceStrategy strategy : strategies) {
@@ -81,8 +86,25 @@ public class MaintenanceService {
                 ));
         Technician technician = technicianRepository.findByUsername(auth.getName())
                 .orElseThrow(() -> new NoSuchElementException("Técnico incorrecto"));
-        MaintenanceReport createdReport = strategyMap.get(request.getMaintenanceType()).createReport(request, technician, elevator);
-        return maintenanceReportRepository.save(createdReport);
+        MaintenanceServiceStrategy strategy = strategyMap.get(request.getMaintenanceType());
+        List<MaintenanceRule> rules = strategy.getRules();
+        MaintenanceReport createdReport = strategy.createReport(request, technician, elevator);
+        MaintenanceReport savedReport = maintenanceReportRepository.save(createdReport);
+        maintenanceReportRuleRepository.saveAll(rules.stream()
+                .map(rule -> MaintenanceReportRule.builder().maintenanceReport(savedReport).maintenanceRule(rule).build())
+                .toList());
+        return savedReport;
+    }
+
+    @Transactional(readOnly = true)
+    public MaintenanceReportDetail getMaintenanceReportDetail(Long id) {
+        checkMaintenanceReportExists(id);
+        MaintenanceReport report = maintenanceReportRepository.getReferenceById(id);
+        List<MaintenanceRule> rules = maintenanceReportRuleRepository
+                .findByMaintenanceReport_IdOrderByMaintenanceRule_OrderNumAsc(id).stream()
+                .map(MaintenanceReportRule::getMaintenanceRule)
+                .toList();
+        return new MaintenanceReportDetail(report, rules);
     }
 
     @Transactional(readOnly = true)
@@ -152,6 +174,7 @@ public class MaintenanceService {
     @Transactional
     public void deleteMaintenanceReport(Long id){
         checkMaintenanceReportExists(id);
+        maintenanceReportRuleRepository.deleteByMaintenanceReport_Id(id);
         maintenanceReportRepository.deleteById(id);
     }
 
@@ -167,6 +190,11 @@ public class MaintenanceService {
     @Transactional
     public void deleteMaintenanceRule(Long id){
         checkMaintenanceRuleExists(id);
+        long reportCount = maintenanceReportRuleRepository.countByMaintenanceRule_Id(id);
+        if (reportCount > 0) {
+            throw new IllegalStateException(
+                    "No se puede eliminar el paso: está registrado en " + reportCount + " informe(s) de mantenimiento");
+        }
         maintenanceRuleRepository.deleteById(id);
     }
     private NextMaintenanceStatus generateMaintenanceStatus(LocalDate nextDate){

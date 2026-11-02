@@ -59,6 +59,17 @@ public class ImageService {
     }
 
     @Transactional
+    public void deleteImageFromIncidentReport(Long incidentReportId, String imagePublicId) throws NoSuchElementException, IllegalArgumentException {
+        checkIncidentReportExists(incidentReportId);
+        Image image = imageRepository.findByIncidentReportId(incidentReportId).stream()
+                .filter(i -> i.getImagePublicId().equals(imagePublicId))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Imagen no encontrada con ID público: " + imagePublicId + " en el informe con ID: " + incidentReportId));
+        deleteImage(image.getId());
+    }
+
+    @Transactional
     public void deleteAllImageForIncidentRepository(Long incidentReportId){
         checkIncidentReportExists(incidentReportId);
         List<Image> imageList = imageRepository.findByIncidentReportId(incidentReportId);

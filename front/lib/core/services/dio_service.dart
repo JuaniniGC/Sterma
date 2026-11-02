@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:front/config/constants.dart';
 import 'package:front/data/models/common_mistake_model.dart';
 import 'package:front/data/models/elevator_next_maintenance_model.dart';
 import 'package:front/data/models/maintenance_rule_model.dart';
@@ -21,7 +22,7 @@ class DioService {
 
   void _setupDio() {
     _dio.options = BaseOptions(
-      baseUrl: 'http://10.0.2.2:8080',
+      baseUrl: apiBaseUrl,
       connectTimeout: const Duration(seconds: 60),
       receiveTimeout: const Duration(seconds: 60),
       headers: {

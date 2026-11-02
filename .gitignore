@@ -23,5 +23,23 @@
 hs_err_pid*
 replay_pid*
 
-
+# Configuración local y secretos
 *.properties
+application.properties
+application-*.properties
+local.properties
+key.properties
+.env
+.env.*
+!.env.example
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.idea/
+*.iml
+
+CLAUDE.md

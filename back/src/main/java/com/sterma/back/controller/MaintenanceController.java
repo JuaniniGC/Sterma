@@ -2,6 +2,7 @@ package com.sterma.back.controller;
 
 import com.sterma.back.dtos.maintenanceReport.BasicMaintenanceReport;
 import com.sterma.back.dtos.maintenanceReport.CreateMaintenanceReportRequest;
+import com.sterma.back.dtos.maintenanceReport.MaintenanceReportDetail;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NearMaintenanceTuple;
 import com.sterma.back.dtos.maintenanceReport.nextMaintenance.NextMaintenanceResponse;
 import com.sterma.back.dtos.maintenanceRule.CreateMaintenanceRuleRequest;
@@ -142,6 +143,31 @@ public class MaintenanceController {
     }
 
     @Operation(
+            summary = "Obtener detalle de un reporte de mantenimiento",
+            description = "Devuelve el reporte con los pasos de mantenimiento realizados (maintenanceRules, ordenados por orderNum)",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Detalle obtenido correctamente",
+                    content = @Content(schema = @Schema(implementation = MaintenanceReportDetail.class))),
+            @ApiResponse(responseCode = "400", description = "ID inválido", content = @Content),
+            @ApiResponse(responseCode = "401", description = "No autorizado", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Reporte no encontrado", content = @Content)
+    })
+    @GetMapping("detail/{reportId}")
+    public ResponseEntity<?> getMaintenanceReportDetail(
+            @Parameter(description = "ID del reporte de mantenimiento", example = "1")
+            @PathVariable Long reportId){
+        try {
+            return ResponseEntity.ok(maintenanceService.getMaintenanceReportDetail(reportId));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @Operation(
             summary = "Crear regla de mantenimiento",
             security = @SecurityRequirement(name = "bearerAuth")
     )
@@ -195,7 +221,8 @@ public class MaintenanceController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Regla eliminada correctamente"),
             @ApiResponse(responseCode = "401", description = "No autorizado", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Regla no encontrada", content = @Content)
+            @ApiResponse(responseCode = "404", description = "Regla no encontrada", content = @Content),
+            @ApiResponse(responseCode = "409", description = "La regla está registrada en algún reporte de mantenimiento", content = @Content)
     })
     @DeleteMapping("rules/{reportId}")
     public ResponseEntity<?> deleteMaintenanceRule(
@@ -206,6 +233,8 @@ public class MaintenanceController {
             return ResponseEntity.ok("Se ha borrado correctamente la regla");
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }
 }
