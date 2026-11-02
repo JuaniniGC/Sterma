@@ -105,4 +105,35 @@ public class ImageController {
                     .body("Error inesperado: " + e.getMessage());
         }
     }
+
+    @Operation(summary = "Eliminar imagen de una incidencia", description = "Elimina una imagen de una incidencia (en Cloudinary y en la base de datos) a partir de su ID público")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Imagen eliminada correctamente"),
+            @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Incidencia no encontrada o la imagen no pertenece a la incidencia", content = @Content),
+            @ApiResponse(responseCode = "401", description = "No autorizado", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Error al eliminar la imagen", content = @Content)
+    })
+    @DeleteMapping("{imagePublicId}")
+    public ResponseEntity<?> deleteImageFromIncidentReport(
+            @Parameter(description = "ID de la incidencia", example = "1")
+            @PathVariable Long incidentId,
+            @Parameter(description = "ID público de la imagen en Cloudinary", example = "ah2mqo3kd7restgyhep0")
+            @PathVariable String imagePublicId) {
+
+        try {
+            imageService.deleteImageFromIncidentReport(incidentId, imagePublicId);
+            return ResponseEntity.ok("Se ha borrado correctamente la imagen");
+
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al eliminar la imagen: " + e.getMessage());
+        }
+    }
 }

@@ -139,6 +139,47 @@ VALUES
     (165, '2025-05-18 08:15:00', '2025-05-18 10:00:00', 'Revisión mensual - funcionamiento correcto', 101, 116, 'MONTHLY'),
     (166, '2025-04-21 09:00:00', '2025-04-21 12:00:00', 'Lubricación general y comprobación de cables', 102, 117, 'BIANNUAL');
 
+-- === PASOS REALIZADOS EN CADA MANTENIMIENTO ===
+-- Informes sin filas (p. ej. 107, 109, 112...) = mantenimiento sin pasos registrados
+INSERT INTO maintenance_report_rule (id, maintenance_report_id, maintenance_rule_id)
+VALUES
+    -- Informe 101: mensual: solo la revisión mensual
+    (101, 101, 101),
+    -- Informe 102: semestral incompleto (falta seguridad y limpieza)
+    (102, 102, 101),
+    (103, 102, 102),
+    -- Informe 103: anual: todos los pasos
+    (104, 103, 101),
+    (105, 103, 102),
+    (106, 103, 103),
+    (107, 103, 104),
+    (108, 103, 105),
+    (109, 104, 101),
+    (110, 105, 101),
+    (111, 105, 105),
+    -- Informe 106: semestral completo
+    (112, 106, 101),
+    (113, 106, 102),
+    (114, 106, 104),
+    (115, 106, 105),
+    (116, 108, 101),
+    (117, 108, 102),
+    (118, 108, 103),
+    (119, 108, 104),
+    (120, 108, 105),
+    (121, 110, 101),
+    (122, 110, 102),
+    -- Informe 111: anual incompleto
+    (123, 111, 101),
+    (124, 111, 103),
+    (125, 111, 104),
+    (126, 113, 102),
+    (127, 114, 101),
+    (128, 114, 102),
+    (129, 114, 103),
+    (130, 114, 104),
+    (131, 114, 105);
+
 -- === INCIDENT REPORTS ===
 INSERT INTO incident_report (id, start_date, end_date, commentary, technician_id, elevator_id)
 VALUES
