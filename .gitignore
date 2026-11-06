@@ -24,8 +24,7 @@ hs_err_pid*
 replay_pid*
 
 # Configuración local y secretos
-*.properties
-application.properties
+# (application.properties SÍ se sube: solo contiene ${VARIABLES})
 application-*.properties
 local.properties
 key.properties

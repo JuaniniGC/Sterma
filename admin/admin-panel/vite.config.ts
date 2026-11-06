@@ -4,8 +4,14 @@ import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
+
+  // En producción el panel llama directamente a VITE_API_URL: sin ella el build no sirve
+  if (command === 'build' && !env.VITE_API_URL) {
+    throw new Error('Falta VITE_API_URL: define la URL pública del backend antes de compilar.')
+  }
+
   const apiTarget = env.VITE_API_URL || 'http://localhost:8080'
 
   return {

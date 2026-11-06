@@ -1,0 +1,18 @@
+server {
+    listen ${PORT};
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Ficheros con hash generados por Vite: se pueden cachear indefinidamente
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # SPA: cualquier ruta desconocida la resuelve React Router desde index.html
+    location / {
+        add_header Cache-Control "no-cache";
+        try_files $uri $uri/ /index.html;
+    }
+}

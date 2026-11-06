@@ -1,32 +1,31 @@
-version: '3.8'
+# Entorno local: PostgreSQL + backend. Lee las variables de `.env`
+# (copia `.env.example` como `.env` y rellénalo). Railway no usa este archivo.
 services:
   db:
-    image: mysql:8.0
-    container_name: mysql-db
+    image: postgres:16
+    container_name: sterma-db
     restart: always
     environment:
-      MYSQL_DATABASE: mydb
-      MYSQL_USER: myuser
-      MYSQL_PASSWORD: mypassword
-      MYSQL_ROOT_PASSWORD: root
+      POSTGRES_DB: ${PGDATABASE}
+      POSTGRES_USER: ${PGUSER}
+      POSTGRES_PASSWORD: ${PGPASSWORD}
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - dbdata:/var/lib/mysql
+      - dbdata:/var/lib/postgresql/data
 
   app:
     build: .
-    container_name: spring-app
+    container_name: sterma-back
     ports:
       - "8080:8080"
     depends_on:
       - db
+    env_file: .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/mydb
-      SPRING_DATASOURCE_USERNAME: myuser
-      SPRING_DATASOURCE_PASSWORD: mypassword
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_JPA_DATABASE-PLATFORM: org.hibernate.dialect.MySQLDialect
+      # Dentro de la red de Docker la base de datos se llama "db"
+      PGHOST: db
+      PGPORT: 5432
 
 volumes:
   dbdata:

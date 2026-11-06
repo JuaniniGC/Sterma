@@ -10,6 +10,8 @@
 
 Para ejecutar el Backend tenemos varias opciones, podemos ejecutarlo con Docker o ejecutando mediante Java y Maven
 
+Toda la configuración (base de datos, JWT, Cloudinary, CORS, Swagger) se lee de variables de entorno. La lista completa está en `back/.env.example`.
+
 ---
 ### EJECUTAR LA APLICACIÓN EN DOCKER
 
@@ -17,30 +19,24 @@ Para ejecutar la aplicación mediantes Docker necesitaremos tener instalado Dock
 #### PASOS
 
 1. Acceder a la carpeta **back** y abrir una terminar
-2. Ejecutar el siguiente comando
+2. Copiar `.env.example` como `.env` y rellenar los valores (JWT y Cloudinary)
+3. Levantar la base de datos PostgreSQL y el backend
 
 ```
-docker build -t sterma-back .
-```
-
-3. Ejecutar el contenedor
-
-```
-docker run -d -p 8080:8080 --name sterma-back-app sterma-back
+docker compose up -d --build
 ```
 
 - La aplicación estará disponible en: http://localhost:8080
 
-4.  Comprobar que la aplicación funciona correctamente entrado al panel de administrado de Swagger: http://localhost:8080/swagger-ui/index.html#/Auth/login
+4.  Comprobar que la aplicación funciona correctamente entrado al panel de administrado de Swagger (requiere `SWAGGER_ENABLED=true` en `.env`): http://localhost:8080/swagger-ui/index.html#/Auth/login
 	* Te puedes autenficiar con las credenciales:
 		* Usuario: tecnico4
 		* Password: p4ssword
 
-5. Detener y eliminar contenedor (opcional)
+5. Detener y eliminar los contenedores (opcional)
 
 ```
-docker stop sterma-back-app
-docker rm sterma-back-app
+docker compose down
 ```
 
 ---
@@ -58,13 +54,13 @@ Para ejecutar la aplicación con java es necesario tener instalado:
 mvn clean package -DskipTests
 ```
 
-3. Ejecutar la aplicación
+3. Definir en la terminal las variables de `back/.env.example` (con una base de datos PostgreSQL accesible) y ejecutar la aplicación
 
 ```
 java -jar target/<nombre-del-jar-generado>.jar
 ```
 
-4.  Comprobar que la aplicación funciona correctamente entrado al panel de administrado de Swagger: http://localhost:8080/swagger-ui/index.html#/
+4.  Comprobar que la aplicación funciona correctamente entrado al panel de administrado de Swagger (requiere `SWAGGER_ENABLED=true`): http://localhost:8080/swagger-ui/index.html#/
 	* Te puedes autenficiar con las credenciales:
 		* Usuario: tecnico4
 		* Password: p4ssword
@@ -73,6 +69,43 @@ java -jar target/<nombre-del-jar-generado>.jar
 ###  **NOTAS** ⚠️
 
 - Asegúrate de que ningún otro servicio use el puerto 8080 en tu máquina antes de ejecutar la aplicación.
+
+---
+## DESPLIEGUE EN RAILWAY
+
+El proyecto se despliega como tres servicios dentro del mismo proyecto de Railway. Ninguna URL está escrita en el código: todas se definen como variables.
+
+| Servicio | Root Directory | Build |
+|---|---|---|
+| `Postgres` | — | Plantilla PostgreSQL de Railway |
+| `back` | `back` | `back/Dockerfile` |
+| `admin` | `admin/admin-panel` | `admin/admin-panel/Dockerfile` |
+
+Genera un dominio público (*Settings → Networking → Generate Domain*) para `back` y para `admin`.
+
+### Variables de `back`
+
+| Variable | Valor |
+|---|---|
+| `PGHOST` | `${{Postgres.PGHOST}}` |
+| `PGPORT` | `${{Postgres.PGPORT}}` |
+| `PGDATABASE` | `${{Postgres.PGDATABASE}}` |
+| `PGUSER` | `${{Postgres.PGUSER}}` |
+| `PGPASSWORD` | `${{Postgres.PGPASSWORD}}` |
+| `JWT_SECRET` | Secreto aleatorio de al menos 32 caracteres |
+| `JWT_EXPIRATION_MS` | p. ej. `86400000` |
+| `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` | Credenciales de Cloudinary |
+| `CORS_ALLOWED_ORIGINS` | `https://${{admin.RAILWAY_PUBLIC_DOMAIN}}` |
+
+`PORT` lo asigna Railway. Swagger queda desactivado en producción (`SWAGGER_ENABLED` no se define).
+
+### Variables de `admin`
+
+| Variable | Valor |
+|---|---|
+| `VITE_API_URL` | `https://${{back.RAILWAY_PUBLIC_DOMAIN}}` |
+
+`VITE_API_URL` se incrusta al compilar: si cambia, hay que volver a desplegar el panel.
 
 ---
 ## FRONTEND 
