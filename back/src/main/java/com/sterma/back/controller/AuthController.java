@@ -43,6 +43,7 @@ public class AuthController {
             )
             @RequestBody @Valid LoginRequest request) {
         try {
+            System.out.println(">>> LOGIN CONTROLLER EJECUTADO");
             String token = authService.login(request.getUsername(), request.getPassword());
             return ResponseEntity.ok(new JwtResponse(token));
         } catch (Exception e) {
